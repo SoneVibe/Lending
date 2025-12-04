@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>VIBE Protocol | Governance Vault</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="icon" type="image/svg+xml" href="icons/vibe.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-dark: #0b0c15;
+      --card-bg: rgba(30, 34, 48, 0.6);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --accent: #2d6cdf;
+      --accent-glow: rgba(45, 108, 223, 0.4);
+      --success: #00e0ff;
+      --warning: #f9e061;
+      --danger: #ff5555;
+      --text-main: #ffffff;
+      --text-muted: #8fa2b7;
+      --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    }
+
+    * { box-sizing: border-box; outline: none; }
+    
+    body {
+      background: radial-gradient(circle at top right, #1a1f35 0%, var(--bg-dark) 60%);
+      color: var(--text-main);
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+    }
+
+    .app-container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 20px;
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 30px;
+    }
+
+    /* Sidebar (Mismo estilo que dashboard) */
+    .sidebar {
+      position: sticky;
+      top: 20px;
+      height: calc(100vh - 40px);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .glass-panel {
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: var(--glass-shadow);
+    }
+
+    .logo-area {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: var(--success);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      padding: 12px 16px;
+      color: var(--text-muted);
+      text-decoration: none;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+      font-weight: 500;
+    }
+
+    .nav-link:hover, .nav-link.active {
+      background: rgba(255,255,255,0.05);
+      color: #fff;
+      transform: translateX(5px);
+    }
+    
+    .nav-link.active { border-left: 3px solid var(--success); }
+
+    /* Main Content */
+    .main-content { display: flex; flex-direction: column; gap: 30px; }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    /* Vault Specific Styles */
+    .vault-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .vault-stat-card {
+      background: linear-gradient(180deg, rgba(30,34,48,0.8) 0%, rgba(249, 224, 97, 0.05) 100%);
+      border: 1px solid rgba(249, 224, 97, 0.2);
+      border-radius: 24px;
+      padding: 30px;
+      text-align: center;
+    }
+
+    .vault-value {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--warning);
+      margin: 10px 0;
+      text-shadow: 0 0 20px rgba(249, 224, 97, 0.3);
+    }
+
+    .btn-claim {
+      background: var(--warning);
+      color: #000;
+      border: none;
+      padding: 14px 32px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(249, 224, 97, 0.4);
+      transition: transform 0.2s, box-shadow 0.2s;
+      width: 100%;
+      margin-top: 15px;
+    }
+    .btn-claim:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(249, 224, 97, 0.6); }
+    .btn-claim:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; background: #444; color: #888; }
+
+    .apy-list {
+      margin-top: 20px;
+      text-align: left;
+    }
+    .apy-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .apy-item:last-child { border-bottom: none; }
+    .apy-val { color: var(--warning); font-weight: 600; }
+
+    .btn-connect {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .btn-connect:hover { background: #1f5fb4; }
+
+    @media (max-width: 900px) {
+      .app-container { grid-template-columns: 1fr; }
+      .sidebar { height: auto; position: relative; flex-direction: row; overflow-x: auto; padding-bottom: 10px;}
+      .vault-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- Sidebar -->
+    <nav class="sidebar glass-panel">
+      <div class="logo-area">
+        <svg width="28" height="28" viewBox="0 0 64 64"><circle cx="32" cy="32" r="32" fill="#1a1f35"/><path d="M18 42 L32 18 L46 42 Z" fill="#00e0ff"/></svg>
+        VIBE Finance
+      </div>
+      <a href="index.html" class="nav-link">Dashboard Home</a>
+      <a href="dashboard.html" class="nav-link">Analytics & Pro</a>
+      <a href="markets.html" class="nav-link">Markets Overview</a>
+      <a href="#" class="nav-link active">Governance Vault</a>
+      <a href="liquidator.html" class="nav-link" style="color:var(--danger);">Liquidator Console</a>
+      
+      <div style="flex-grow:1"></div>
+      <div style="padding: 10px; font-size: 0.8rem; color: var(--text-muted);">
+        Connection Status:<br>
+        <span id="statusDot" style="color: var(--danger)">●</span> <span id="connStatus">Disconnected</span>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      
+      <header>
+        <div>
+          <h1 style="margin:0; font-size:1.8rem;">Governance Vault</h1>
+          <p style="margin:4px 0 0 0; color:var(--text-muted);">Stake & Earn VIBE Rewards</p>
+        </div>
+        <button id="btnConnect" class="btn-connect">Connect Wallet</button>
+      </header>
+
+      <div class="vault-grid">
+        <!-- Claim Card -->
+        <div class="vault-stat-card">
+          <div style="text-transform:uppercase; letter-spacing:1px; font-size:0.85rem; color:rgba(255,255,255,0.6);">Unclaimed Rewards</div>
+          <div class="vault-value"><span id="vaultVibeRewards">0.00</span> <span style="font-size:1rem;">VIBE</span></div>
+          <div style="font-size:0.9rem; color:var(--text-muted); margin-bottom:10px;">
+            Wallet Balance: <span id="vaultVibeWallet" style="color:#fff;">--</span> VIBE
+          </div>
+          <button id="btnVaultClaimVibe" class="btn-claim" disabled>Claim Rewards</button>
+          <div id="vaultVibeStatus" style="margin-top:10px; font-size:0.85rem; min-height:1.2em; color:var(--success);"></div>
+        </div>
+
+        <!-- APY Info Card -->
+        <div class="glass-panel">
+          <h3 style="margin:0 0 15px 0; color:var(--warning); display:flex; align-items:center; gap:10px;">
+            <span>🔥</span> Current Incentive Rates
+          </h3>
+          <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:20px;">
+            Extra APY paid in VIBE tokens on top of normal lending interest.
+          </p>
+          
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+            <div>
+              <h4 style="margin:0 0 10px 0; font-size:0.8rem; text-transform:uppercase; color:var(--text-muted);">Supply APY</h4>
+              <div id="supplyApyList" class="apy-list">Loading...</div>
+            </div>
+            <div>
+              <h4 style="margin:0 0 10px 0; font-size:0.8rem; text-transform:uppercase; color:var(--text-muted);">Borrow APY</h4>
+              <div id="borrowApyList" class="apy-list">Loading...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Info Section -->
+      <div class="glass-panel">
+        <h3 style="margin:0 0 15px 0;">How it works</h3>
+        <ul style="color:var(--text-muted); line-height:1.6; padding-left:20px;">
+          <li>VIBE tokens are distributed every block to suppliers and borrowers.</li>
+          <li>Claiming transfers your accrued VIBE tokens directly to your wallet.</li>
+          <li>Use VIBE tokens to vote on protocol proposals or stake for more rewards.</li>
+        </ul>
+      </div>
+
+    </div> 
+  </div>
+
+  <!-- SCRIPTS -->
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.10.0/dist/ethers.umd.min.js"></script>
+  <script src="abis.js"></script>
+  <script src="config.js"></script>
+  <script src="main-vault.js"></script>
+</body>
+</html>
