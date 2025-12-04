@@ -1,0 +1,34 @@
+{
+  "Soneium Mainnet": {
+    "slug": "Soneium Mainnet",
+    "label": "Soneium Mainnet",
+    "chainId": "1868",
+    "rpcUrls": ["https://rpc.soneium.org"],
+    "blockExplorerUrls": ["https://soneium.blockscout.com/"],
+    "nativeCurrency": { "name": "Ether", "symbol": "ETH", "decimals": 18 },
+    "master": "0x2F38ecB638DC4fB636A85167C203d791f2809E60",
+    "cTokens": [
+      {
+        "symbol": "cASTR",
+        "underlyingSymbol": "ASTR",
+        "icon": "icons/astr.svg",
+        "address": "0xA5e4C8C6E15F3dc844F000f1c8AB17dEe278Cc69",
+        "underlying": "0x2CAE934a1e84F693fbb78CA5ED3B0A6893259441",
+        "underlyingDecimals": 18,
+        "skipAllowance": false
+      },
+
+      {
+        "symbol": "cUSDC",
+        "underlyingSymbol": "USDC",
+        "icon": "icons/usdc.svg",
+        "address": "0x4E6Ef632644BF8179B11a46fb800d79C5bF67592",
+        "underlying": "0xbA9986D2381edf1DA03B0B9c1f8b00dc4AacC369",
+        "underlyingDecimals": 6,
+        "skipAllowance": false
+      }
+    ],
+    "blocksPerYear": 15768000,
+    "enabled": true
+  }
+}

@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>VIBE Protocol | Pro Dashboard</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="icon" type="image/svg+xml" href="icons/vibe.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root { --bg-dark: #0b0c15; --card-bg: rgba(30, 34, 48, 0.6); --card-border: rgba(255, 255, 255, 0.08); --accent: #2d6cdf; --accent-glow: rgba(45, 108, 223, 0.4); --success: #00e0ff; --warning: #f9e061; --danger: #ff5555; --text-main: #ffffff; --text-muted: #8fa2b7; --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); }
+    * { box-sizing: border-box; outline: none; }
+    body { background: radial-gradient(circle at top right, #1a1f35 0%, var(--bg-dark) 60%); color: var(--text-main); font-family: 'Inter', sans-serif; margin: 0; padding: 0; min-height: 100vh; }
+    .app-container { max-width: 1280px; margin: 0 auto; padding: 20px; display: grid; grid-template-columns: 260px 1fr; gap: 30px; }
+    .sidebar { position: sticky; top: 20px; height: calc(100vh - 40px); display: flex; flex-direction: column; gap: 20px; }
+    .logo-area { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.03em; color: var(--success); display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+    .nav-link { display: flex; align-items: center; padding: 12px 16px; color: var(--text-muted); text-decoration: none; border-radius: 12px; transition: all 0.3s ease; font-weight: 500; }
+    .nav-link:hover, .nav-link.active { background: rgba(255,255,255,0.05); color: #fff; transform: translateX(5px); }
+    .nav-link.active { border-left: 3px solid var(--success); }
+    .main-content { display: flex; flex-direction: column; gap: 30px; }
+    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .glass-panel { background: var(--card-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--card-border); border-radius: 24px; padding: 24px; box-shadow: var(--glass-shadow); }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+    .stat-card h3 { color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; margin: 0 0 10px 0; letter-spacing: 0.5px; }
+    .stat-value { font-size: 1.8rem; font-weight: 700; background: linear-gradient(90deg, #fff, #ccc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .health-wrap { margin-top: 10px; }
+    .bar-container { background: rgba(255,255,255,0.05); height: 10px; border-radius: 5px; overflow: hidden; margin-top: 12px; position: relative; }
+    .bar-fill { height: 100%; background: linear-gradient(90deg, var(--warning), #ffb347); width: 0%; transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1); border-radius: 5px; box-shadow: 0 0 10px rgba(249, 224, 97, 0.4); }
+    .bar-fill.simulated { background: rgba(249, 224, 97, 0.3); position: absolute; top: 0; left: 0; z-index: 0; }
+    .bar-label { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); margin-top: 6px; }
+    .sim-panel { background: linear-gradient(145deg, rgba(30,34,48,0.6), rgba(20,22,30,0.8)); }
+    .sim-controls { display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-end; margin-top: 15px; }
+    .input-group { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 140px;}
+    .input-group label { font-size: 0.8rem; color: var(--text-muted); font-weight: 600; }
+    select, input { background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); color: #fff; padding: 12px; border-radius: 12px; font-family: 'Inter'; font-size: 0.95rem; transition: border-color 0.2s; }
+    select:focus, input:focus { border-color: var(--accent); }
+    .btn-primary { background: var(--accent); color: white; border: none; padding: 12px 24px; border-radius: 12px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 15px var(--accent-glow); transition: transform 0.2s, box-shadow 0.2s; display: inline-flex; align-items: center; gap: 8px; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px var(--accent-glow); }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .btn-ghost { background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 12px; cursor: pointer; font-weight: 600; }
+    .btn-ghost:hover { background: rgba(255,255,255,0.1); }
+    .table-container { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; padding: 16px; border-bottom: 1px solid var(--card-border); }
+    td { padding: 16px; border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: middle;}
+    tr:last-child td { border-bottom: none; }
+    .asset-flex { display: flex; align-items: center; gap: 12px; font-weight: 600; }
+    .asset-icon { width: 32px; height: 32px; border-radius: 50%; box-shadow: 0 2px 8px rgba(0,0,0,0.3); object-fit: cover;}
+    .apy-badge { background: rgba(45, 108, 223, 0.15); color: #6495ed; padding: 4px 8px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; }
+    .apy-badge.borrow { background: rgba(255, 179, 71, 0.15); color: #ffb347; }
+    .vibe-card { border: 1px solid rgba(249, 224, 97, 0.2); background: linear-gradient(180deg, rgba(30,34,48,0.8) 0%, rgba(249, 224, 97, 0.05) 100%); }
+    .vibe-title { color: var(--warning); display: flex; align-items: center; gap: 8px;}
+    @media (max-width: 900px) { .app-container { grid-template-columns: 1fr; } .sidebar { height: auto; position: relative; flex-direction: row; overflow-x: auto; padding-bottom: 10px;} .nav-link { white-space: nowrap; } }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- Sidebar -->
+    <nav class="sidebar glass-panel">
+      <div class="logo-area">
+        <svg width="28" height="28" viewBox="0 0 64 64"><circle cx="32" cy="32" r="32" fill="#1a1f35"/><path d="M18 42 L32 18 L46 42 Z" fill="#00e0ff"/></svg>
+        VIBE Finance
+      </div>
+      <a href="index.html" class="nav-link">Dashboard Home</a>
+      <a href="#" class="nav-link active">Analytics & Pro</a>
+      <a href="vibe-vault.html" class="nav-link">Governance Vault</a>
+      <div style="flex-grow:1"></div>
+      <div style="padding: 10px; font-size: 0.8rem; color: var(--text-muted);">
+        Connection Status:<br>
+        <span id="statusDot" style="color: var(--danger)">●</span> <span id="connStatus">Disconnected</span>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      
+      <header>
+        <div>
+          <h1 style="margin:0; font-size:1.8rem;">Overview</h1>
+          <p style="margin:4px 0 0 0; color:var(--text-muted);">Manage your positions and health factor</p>
+        </div>
+        <button id="btnConnect" class="btn-primary">Connect Wallet</button>
+      </header>
+
+      <div class="stats-grid">
+        <div class="glass-panel stat-card">
+          <h3>Net APY</h3>
+          <div class="stat-value" id="netApyDisplay">--%</div>
+          <div style="font-size:0.8rem; color:var(--success); margin-top:4px;">Optimization Active</div>
+        </div>
+        <div class="glass-panel stat-card">
+          <h3>Health Factor</h3>
+          <div class="stat-value" id="healthFactor" style="color:var(--success)">—</div>
+          <div style="font-size:0.8rem; color:var(--text-muted); margin-top:4px;">Liquidation at < 1.0</div>
+        </div>
+        <div class="glass-panel stat-card vibe-card">
+          <h3>Unclaimed Rewards</h3>
+          <div class="stat-value" id="vibeRewards" style="color:var(--warning)">—</div>
+          <button id="claimVibe" class="btn-ghost" style="width:100%; margin-top:8px; font-size:0.85rem; padding:8px;">Claim VIBE</button>
+        </div>
+      </div>
+
+      <div class="glass-panel sim-panel">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <h2 style="margin:0; font-size:1.2rem;">Liquidity & Simulation</h2>
+          <span class="apy-badge borrow" style="font-size:0.7rem;">PRO FEATURE</span>
+        </div>
+        
+        <div class="health-wrap">
+          <div class="bar-label">
+            <span>Current Collateral Usage</span>
+            <span id="collateralBarText" style="font-weight:bold; color:#fff;">0%</span>
+          </div>
+          <div class="bar-container">
+            <div class="bar-fill" id="collateralBar" style="width:0%; z-index:2; position:relative;"></div>
+            <div class="bar-fill simulated" id="hypotheticalCollateralBar" style="width:0%;"></div>
+          </div>
+          <div class="bar-label" style="justify-content: flex-end;">
+            <span id="hypotheticalCollateralBarText" style="color:var(--warning); opacity:0;">0% (Simulated)</span>
+          </div>
+        </div>
+
+        <form id="hypotheticalForm" class="sim-controls" autocomplete="off">
+          <div class="input-group">
+            <label>Asset</label>
+            <select id="hypAssetSelect"><option>Loading...</option></select>
+          </div>
+          <div class="input-group">
+            <label>Action</label>
+            <select id="hypActionType">
+              <option value="borrow">Borrow (+Debt)</option>
+              <option value="redeem">Redeem (-Collateral)</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label>Amount</label>
+            <input id="hypAmount" type="number" placeholder="0.00" step="0.000001" />
+          </div>
+          <button type="submit" class="btn-ghost" style="border-color:var(--warning); color:var(--warning);">
+            Simulate Impact
+          </button>
+        </form>
+      </div>
+
+      <div class="glass-panel">
+        <h2 style="margin:0 0 20px 0; font-size:1.2rem;">Market Positions</h2>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Asset</th>
+                <th>Supply Balance</th>
+                <th>Supply APY</th>
+                <th>Borrow Balance</th>
+                <th>Borrow APY</th>
+                <th>Governance APY</th>
+              </tr>
+            </thead>
+            <tbody id="marketsBody">
+              <tr><td colspan="6" style="text-align:center; padding:30px; color:var(--text-muted);">Connect wallet to view markets</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="glass-panel" style="border-top: 4px solid var(--warning);">
+        <h3 class="vibe-title">
+          <img src="icons/vibe.svg" width="20" /> Vault Rewards APY
+        </h3>
+        <div style="display:flex; gap:20px; flex-wrap:wrap; margin-top:15px;" id="vaultApyContainer">
+          <span class="text-muted">Loading incentives...</span>
+        </div>
+      </div>
+
+    </div> 
+  </div>
+
+  <!-- SCRIPTS -->
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.10.0/dist/ethers.umd.min.js"></script>
+  <script src="abis.js"></script>
+  <script src="config.js"></script>
+  <script>
+    let provider, signer, userAddress, NETWORKS_DATA, ACTIVE;
+    let currentRealLiquidityUSD = 0; 
+
+    const getEl = (id) => document.getElementById(id);
+    const updateStatus = (connected) => {
+      const dot = getEl('statusDot');
+      const txt = getEl('connStatus');
+      const btn = getEl('btnConnect');
+      if(connected) {
+        dot.style.color = "var(--success)";
+        txt.textContent = "Connected";
+        btn.textContent = userAddress.substring(0,6) + "..." + userAddress.substring(38);
+        btn.style.background = "rgba(255,255,255,0.1)";
+      } else {
+        dot.style.color = "var(--danger)";
+        txt.textContent = "Disconnected";
+        btn.textContent = "Connect Wallet";
+        btn.style.background = "var(--accent)";
+      }
+    };
+
+    async function connectWallet() {
+      if (!window.ethereum) { alert("Please install MetaMask."); return; }
+      getEl("btnConnect").textContent = "Connecting...";
+      try {
+        provider = new ethers.BrowserProvider(window.ethereum);
+        NETWORKS_DATA = await window.loadNetworks();
+        await provider.send("eth_requestAccounts", []);
+        signer = await provider.getSigner();
+        userAddress = await signer.getAddress();
+        
+        const chainIdHex = await provider.send("eth_chainId", []);
+        ACTIVE = Object.values(NETWORKS_DATA).find(n => n.chainId == chainIdHex || parseInt(n.chainId) == parseInt(chainIdHex));
+        
+        if(!ACTIVE) {
+            alert("Unsupported Network. Please switch to Minato.");
+            updateStatus(false);
+            return;
+        }
+        
+        updateStatus(true);
+        fillHypotheticalAssetSelect();
+        await refreshDashboard();
+      } catch (e) {
+        console.error(e);
+        updateStatus(false);
+      }
+    }
+
+    getEl("btnConnect").onclick = connectWallet;
+
+    async function refreshDashboard() {
+      await Promise.all([
+        renderMarkets(),
+        renderAccountStats(),
+        renderVibeVault()
+      ]);
+    }
+
+    // ------------------------------------------------------------------
+    // RENDERING LOGIC
+    // ------------------------------------------------------------------
+    async function renderMarkets() {
+      if(!ACTIVE || !userAddress) return;
+      
+      const ICON_MAP = { ASTR:"icons/astr.svg", WBTC:"icons/bitcoin.svg", DOT:"icons/dot.svg", WETH:"icons/weth.svg", USDC:"icons/usdc.svg" };
+      const tbody = getEl("marketsBody");
+      tbody.innerHTML = "";
+      const blocksPerYear = ACTIVE.blocksPerYear || 15768000;
+      let vault = window.REWARDS_ADDRESS ? new ethers.Contract(window.REWARDS_ADDRESS, window.REWARDS_ABI, provider) : null;
+      let vaultApyHTML = "";
+
+      let totalAnnualIncome = 0, totalAnnualCost = 0, totalSuppliedUSD = 0, totalBorrowedUSD = 0;
+
+      for(const m of ACTIVE.cTokens){
+        try {
+          const c = new ethers.Contract(m.address, window.C_TOKEN_ABI, provider);
+          const cTokenDecimals = 18;
+          const underlyingDecimals = m.underlyingDecimals || 18;
+
+          const [
+            totalSupplyBig, totalBorrowsBig,
+            userCTokensBig, userBorrowsBig,
+            rates, exchRateRaw
+          ] = await Promise.all([
+            c.totalSupply(), c.totalBorrows(),
+            c.balanceOf(userAddress), c.borrowBalance(userAddress),
+            c.peekRates(), c.exchangeRateStored()
+          ]);
+
+          const userCTokens = Number(userCTokensBig.toString());
+          const exchangeRate = Number(exchRateRaw.toString());
+          
+          // Supply Calc
+          const userSupplyUnderlying = userCTokens * exchangeRate / (Math.pow(10, cTokenDecimals) * 1e18);
+          // Borrow Calc
+          const userBorrows = Number(userBorrowsBig.toString());
+          const userBorrowsUnderlying = userBorrows / Math.pow(10, underlyingDecimals);
+
+          // APYs
+          const supplyAPY = rates && rates[1] ? ratePerBlockToAPY(rates[1], blocksPerYear) : 0;
+          const borrowAPY = rates && rates[0] ? ratePerBlockToAPY(rates[0], blocksPerYear) : 0;
+
+          let vibeSupplyAPY = 0, vibeBorrowAPY = 0;
+          if (vault) {
+             const [sSpeed, bSpeed] = await Promise.all([vault.vibeSupplySpeed(m.address), vault.vibeBorrowSpeed(m.address)]);
+             
+             const totalSupplyNum = Number(totalSupplyBig.toString());
+             const totalSupUnderlying = totalSupplyNum * exchangeRate / (Math.pow(10, cTokenDecimals) * 1e18);
+             const totalBorrowsNum = Number(totalBorrowsBig.toString());
+             const totalBorUnderlying = totalBorrowsNum / Math.pow(10, underlyingDecimals);
+
+             const vibePerSupplyYear = Number(sSpeed.toString()) * blocksPerYear / 1e18;
+             const vibePerBorrowYear = Number(bSpeed.toString()) * blocksPerYear / 1e18;
+             
+             if(totalSupUnderlying > 0.1) vibeSupplyAPY = (vibePerSupplyYear / totalSupUnderlying) * 100;
+             if(totalBorUnderlying > 0.1) vibeBorrowAPY = (vibePerBorrowYear / totalBorUnderlying) * 100;
+             
+             if(vibeSupplyAPY > 0.01 || vibeBorrowAPY > 0.01) {
+                vaultApyHTML += `<div style="background:rgba(255,255,255,0.05); padding:8px 12px; border-radius:8px; font-size:0.85rem;"><strong style="color:var(--warning)">${m.symbol}</strong><br>Sup: ${vibeSupplyAPY.toFixed(2)}% | Bor: ${vibeBorrowAPY.toFixed(2)}%</div>`;
+             }
+          }
+
+          totalSuppliedUSD += userSupplyUnderlying; 
+          totalBorrowedUSD += userBorrowsUnderlying;
+          totalAnnualIncome += userSupplyUnderlying * ((supplyAPY + vibeSupplyAPY) / 100);
+          totalAnnualCost += userBorrowsUnderlying * ((borrowAPY - vibeBorrowAPY) / 100);
+
+          const uSym = m.underlyingSymbol || m.symbol.replace(/^c/,"");
+          const icon = m.icon || ICON_MAP[uSym] || "icons/unknown.svg";
+          const totalGovAPY = vibeSupplyAPY + vibeBorrowAPY;
+          const displayDecimals = (uSym === 'WBTC' || uSym === 'BTC') ? 6 : 2;
+
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td><div class="asset-flex"><img src="${icon}" class="asset-icon"><div><div>${uSym}</div><div style="font-size:0.7em; color:var(--text-muted); font-weight:400;">${m.symbol}</div></div></div></td>
+            <td>${formatNumber(userSupplyUnderlying, displayDecimals)} <span style="font-size:0.75em; opacity:0.7">${uSym}</span></td>
+            <td><span class="apy-badge">${supplyAPY.toFixed(2)}%</span></td>
+            <td>${formatNumber(userBorrowsUnderlying, displayDecimals)} <span style="font-size:0.75em; opacity:0.7">${uSym}</span></td>
+            <td><span class="apy-badge borrow">${borrowAPY.toFixed(2)}%</span></td>
+            <td><span style="color:var(--warning); font-weight:600; font-size:0.9em;">${totalGovAPY > 0 ? totalGovAPY.toFixed(2) + "%" : "-"}</span></td>
+          `;
+          tbody.appendChild(tr);
+        } catch(e) { console.error(e); }
+      }
+      
+      const totalEquity = totalSuppliedUSD - totalBorrowedUSD;
+      let netAPY = 0;
+      if (totalEquity > 0) netAPY = ((totalAnnualIncome - totalAnnualCost) / totalEquity) * 100;
+      
+      const netApyEl = getEl("netApyDisplay");
+      netApyEl.textContent = netAPY.toFixed(2) + "%";
+      netApyEl.style.color = netAPY >= 0 ? "var(--success)" : "var(--danger)";
+      if(vaultApyHTML) getEl("vaultApyContainer").innerHTML = vaultApyHTML;
+    }
+
+    async function renderAccountStats() {
+      if (!userAddress || !ACTIVE) return;
+      try {
+        const master = new ethers.Contract(ACTIVE.master, window.MASTER_ABI, provider);
+        const res = await master.getAccountLiquidity(userAddress);
+        const ld = res.ld ? res.ld : res;
+        const liquidationUSD = Number(ld.liquidationUSD.toString())/1e18;
+        const borrowUSD = Number(ld.borrowUSD.toString())/1e18;
+        
+        currentRealLiquidityUSD = liquidationUSD;
+
+        const hf = borrowUSD === 0 ? Infinity : liquidationUSD / borrowUSD;
+        const hfEl = getEl("healthFactor");
+        if(hf === Infinity) { hfEl.textContent = "∞"; hfEl.style.color = "var(--success)"; }
+        else { 
+            hfEl.textContent = hf.toFixed(2); 
+            hfEl.style.color = hf < 1.1 ? "var(--danger)" : (hf < 1.5 ? "var(--warning)" : "var(--success)");
+        }
+        let percent = liquidationUSD === 0 ? 0 : Math.min(100, (borrowUSD / liquidationUSD) * 100);
+        getEl("collateralBar").style.width = percent + "%";
+        getEl("collateralBarText").textContent = percent.toFixed(1) + "% Used";
+      } catch (e) { console.error(e); }
+    }
+
+    async function renderVibeVault() {
+      if (!window.REWARDS_ADDRESS || !userAddress) return;
+      try {
+        const vault = new ethers.Contract(window.REWARDS_ADDRESS, window.REWARDS_ABI, provider);
+        const pending = await vault.vibeAccrued(userAddress);
+        const pendingFmt = Number(pending.toString())/1e18;
+        getEl("vibeRewards").textContent = pendingFmt.toLocaleString('en-US', {maximumFractionDigits:4});
+        getEl("claimVibe").disabled = pendingFmt < 0.0001;
+        
+        getEl("claimVibe").onclick = async () => {
+           if(!signer) return;
+           const vS = new ethers.Contract(window.REWARDS_ADDRESS, window.REWARDS_ABI, signer);
+           try { 
+             getEl("claimVibe").textContent = "Claiming..."; 
+             await (await vS.claimVIBE(userAddress)).wait(); 
+             getEl("claimVibe").textContent = "Claim VIBE"; 
+             renderVibeVault(); 
+           } catch(e) { alert("Error claiming"); getEl("claimVibe").textContent = "Claim VIBE"; }
+        };
+      } catch {}
+    }
+
+    // ------------------------------------------------------------------
+    // SIMULATION LOGIC (NORMALIZATION FIX)
+    // ------------------------------------------------------------------
+    function fillHypotheticalAssetSelect() {
+      if(!ACTIVE) return;
+      const sel = getEl("hypAssetSelect");
+      sel.innerHTML = "";
+      ACTIVE.cTokens.forEach(x => {
+        const opt = document.createElement("option");
+        opt.value = x.address;
+        opt.dataset.decimals = x.underlyingDecimals || 18; 
+        opt.textContent = x.symbol;
+        sel.appendChild(opt);
+      });
+    }
+
+    getEl("hypotheticalForm").onsubmit = async (e) => {
+      e.preventDefault();
+      if (!userAddress) { alert("Connect wallet first"); return; }
+      
+      const sel = getEl("hypAssetSelect");
+      const assetAddr = sel.value;
+      const underlyingDecimals = parseInt(sel.selectedOptions[0].dataset.decimals || 18);
+      const action = getEl("hypActionType").value; 
+      const amountVal = getEl("hypAmount").value;
+
+      if(!amountVal || parseFloat(amountVal) <= 0) { alert("Enter valid amount"); return; }
+
+      // 1. Raw Amount (e.g. 0.6 WBTC -> 60,000,000)
+      const rawAmount = ethers.parseUnits(amountVal, underlyingDecimals); 
+
+      let redeem = 0n, borrow = 0n;
+      
+      if (action === "borrow") {
+          borrow = rawAmount;
+      } else {
+        // 2. REDEEM: NORMALIZE + FORMULA
+        try {
+            const c = new ethers.Contract(assetAddr, window.C_TOKEN_ABI, provider);
+            const exchRate = await c.exchangeRateStored();
+            
+            // Step A: Normalize to 18 decimals (like _toNormalized in contract)
+            let normalizedAmount = rawAmount;
+            if (underlyingDecimals < 18) {
+                const diff = 18 - underlyingDecimals;
+                normalizedAmount = rawAmount * (10n ** BigInt(diff));
+            } else if (underlyingDecimals > 18) {
+                // Just in case (uncommon for standard tokens)
+                const diff = underlyingDecimals - 18;
+                normalizedAmount = rawAmount / (10n ** BigInt(diff));
+            }
+
+            // Step B: Calculate cTokens using the contract formula
+            // cTokens = (Normalized * 1e18) / ExchangeRate
+            redeem = (normalizedAmount * 1000000000000000000n) / exchRate;
+            
+            console.log("Simulated Redeem cTokens (Corrected):", redeem.toString());
+        } catch(e) { console.error(e); return; }
+      }
+
+      try {
+        const btn = e.target.querySelector("button");
+        const oldTxt = btn.textContent;
+        btn.textContent = "Simulating...";
+
+        const master = new ethers.Contract(ACTIVE.master, window.MASTER_ABI, provider);
+        
+        // Check Function
+        if (typeof master.getHypotheticalAccountLiquidity !== 'function') {
+            alert("Error: ABI missing function.");
+            btn.textContent = oldTxt;
+            return;
+        }
+
+        const res = await master.getHypotheticalAccountLiquidity(userAddress, assetAddr, redeem, borrow);
+        const ldNew = res.ldNew ? res.ldNew : (res[0] ? res[0] : res); 
+        
+        const lUSD = Number(ldNew.liquidationUSD.toString()) / 1e18;
+        const bUSD = Number(ldNew.borrowUSD.toString()) / 1e18;
+        
+        console.log("Hypothetical Liquidity USD:", lUSD);
+
+        // Logic
+        let percent = 0;
+        if (lUSD > 0) {
+            percent = (bUSD / lUSD) * 100;
+        } else if (bUSD > 0) {
+            percent = 100; 
+        }
+        
+        const bar = getEl("hypotheticalCollateralBar");
+        const txt = getEl("hypotheticalCollateralBarText");
+        
+        // Force visual update
+        if (action === "redeem" && Math.abs(lUSD - currentRealLiquidityUSD) < 0.01) {
+             txt.textContent = "No Change (Check logs)";
+             txt.style.color = "var(--text-muted)";
+             bar.style.width = "0%";
+             bar.style.background = "transparent";
+        } else {
+             const visualPercent = Math.min(100, percent);
+             bar.style.width = visualPercent + "%";
+             txt.style.opacity = "1";
+             txt.textContent = percent.toFixed(2) + "% (Simulated)";
+             
+             if(percent >= 100) {
+                  bar.style.background = "var(--danger)"; 
+                  txt.style.color = "var(--danger)";
+                  txt.textContent = "RISK! " + percent.toFixed(1) + "%";
+             } else if(percent > 90) { 
+                  bar.style.background = "rgba(255, 85, 85, 0.6)"; 
+                  txt.style.color = "var(--danger)"; 
+             } else { 
+                  bar.style.background = "rgba(249, 224, 97, 0.5)"; 
+                  txt.style.color = "var(--warning)"; 
+             }
+        }
+        
+        btn.textContent = oldTxt;
+
+      } catch(e) { 
+        console.error("Sim Error:", e);
+        alert("Simulation failed. Check console.");
+        e.target.querySelector("button").textContent = "Simulate Impact";
+      }
+    };
+
+    function formatNumber(n, dp=2) { return Number(n).toLocaleString('en-US', {minimumFractionDigits:dp, maximumFractionDigits:dp}); }
+    function ratePerBlockToAPY(rate, blocks) { const r = Number(rate)/1e18; return r <= 0 ? 0 : ((Math.pow(1+r, blocks)-1)*100); }
+  </script>
+</body>
+</html>
