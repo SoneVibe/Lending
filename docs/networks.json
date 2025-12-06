@@ -1,6 +1,6 @@
 {
   "Soneium Mainnet": {
-    "slug": "Soneium Mainnet",
+    "slug": "soneium",
     "label": "Soneium Mainnet",
     "chainId": "1868",
     "rpcUrls": ["https://rpc.soneium.org"],
@@ -17,13 +17,70 @@
         "underlyingDecimals": 18,
         "skipAllowance": false
       },
-
       {
         "symbol": "cUSDC",
         "underlyingSymbol": "USDC",
         "icon": "icons/usdc.svg",
         "address": "0x4E6Ef632644BF8179B11a46fb800d79C5bF67592",
         "underlying": "0xbA9986D2381edf1DA03B0B9c1f8b00dc4AacC369",
+        "underlyingDecimals": 6,
+        "skipAllowance": false
+      }
+    ],
+    "blocksPerYear": 15768000,
+    "enabled": true
+  },
+  "Minato Testnet": {
+    "slug": "minato",
+    "label": "Minato Testnet",
+    "chainId": "1946",
+    "rpcUrls": ["https://rpc.minato.soneium.org"],
+    "blockExplorerUrls": ["https://soneium-minato.blockscout.com/"],
+    "nativeCurrency": { "name": "Ether", "symbol": "ETH", "decimals": 18 },
+    "master": "0x8183764EB2f95AA2E8ee4F72A0C6AB3808d51b24",
+    "cTokens": [
+      {
+        "symbol": "cASTR",
+        "underlyingSymbol": "ASTR",
+        "icon": "icons/astr.svg",
+        "address": "0xbc79a275e34A9101EBb5790dFe1D0d58bA1CBf9E",
+        "underlying": "0x26e6f7c7047252DdE3dcBF26AA492e6a264Db655",
+        "underlyingDecimals": 18,
+        "skipAllowance": false
+      },
+      {
+        "symbol": "cWBTC",
+        "underlyingSymbol": "WBTC",
+        "icon": "icons/wbtc.svg",
+        "address": "0x3680425707701Cc536b49185cF8491846439745a",
+        "underlying": "0x2520c01B9C1dc36e2fA59a4BacE8806620449fdd",
+        "underlyingDecimals": 8,
+        "skipAllowance": false
+      },
+       {
+         "symbol": "cDOT",
+         "underlyingSymbol": "DOT",
+        "icon": "icons/dot.svg",
+        "address": "0xD1a6cC221574e72Ad8BfE1fE0abfdff6F201438F",
+       "underlying": "0xE565757cc757a0985327Af1190185fF7b172868E",
+       "underlyingDecimals": 18,
+        "skipAllowance": false
+      },
+      {
+        "symbol": "cWETH",
+        "underlyingSymbol": "WETH",
+        "icon": "icons/weth.svg",
+        "address": "0x7FD48bbbabCA9E2cadCfc32F3aF75921fa8ac127",
+        "underlying": "0x4200000000000000000000000000000000000006",
+        "underlyingDecimals": 18,
+        "skipAllowance": false
+      },
+      {
+        "symbol": "cUSDC",
+        "underlyingSymbol": "USDC",
+        "icon": "icons/usdc.svg",
+        "address": "0x2744057aC82b4E81a7583BD3c218E2997a4C97DE",
+        "underlying": "0xE9A198d38483aD727ABC8b0B1e16B2d338CF0391",
         "underlyingDecimals": 6,
         "skipAllowance": false
       }

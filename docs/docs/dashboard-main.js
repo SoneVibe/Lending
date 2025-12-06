@@ -1,249 +1,94 @@
 let provider, signer, userAddress, NETWORKS_DATA, ACTIVE;
 let currentRealLiquidityUSD = 0; 
-let selectedProvider = null;
 
 const getEl = (id) => document.getElementById(id);
-
-// --- UI HELPERS ---
 const updateStatus = (connected) => {
   const dot = getEl('statusDot');
   const txt = getEl('connStatus');
   const btn = getEl('btnConnect');
-  
-  if(connected && userAddress) {
+  if(connected) {
     dot.style.color = "var(--success)";
     txt.textContent = "Connected";
-    
-    // Pro Button Style
     btn.textContent = userAddress.substring(0,6) + "..." + userAddress.substring(38);
-    btn.classList.remove('btn-primary');
-    btn.classList.add('btn-connected');
-    
-    // Add Dropdown Icon
-    const arrow = document.createElement("span");
-    arrow.textContent = "▼";
-    arrow.style.fontSize = "0.7em";
-    arrow.style.marginLeft = "6px";
-    if (btn.lastChild && btn.lastChild.tagName === 'SPAN') btn.removeChild(btn.lastChild);
-    btn.appendChild(arrow);
-    
-    // Update Dropdown Data
-    getEl('dropdownAddress').textContent = userAddress.substring(0,8) + "..." + userAddress.substring(38);
-
+    btn.style.background = "rgba(255,255,255,0.1)";
   } else {
     dot.style.color = "var(--danger)";
     txt.textContent = "Disconnected";
-    
-    // Reset Button Style
     btn.textContent = "Connect Wallet";
-    btn.className = "btn-primary"; 
-    btn.style.background = ""; 
+    btn.style.background = "var(--accent)";
   }
 };
 
-// --- INIT APP (OFFLINE SUPPORT & SESSION) ---
-document.addEventListener("DOMContentLoaded", initApp);
-
-async function initApp() {
-    try {
-        NETWORKS_DATA = await window.loadNetworks();
-        initNetworkSelector();
-        
-        // Auto-select Soneium by default if not connected
-        if(!ACTIVE) {
-            const defaultNet = Object.values(NETWORKS_DATA).find(n => n.slug === "soneium" || n.chainId == "1868");
-            if(defaultNet) {
-                 ACTIVE = defaultNet;
-                 const sel = getEl("networkSelect");
-                 if(sel) sel.value = ACTIVE.chainId;
-            }
-        }
-
-        // --- PRO FEATURE: AUTO CONNECT ---
-        if(window.checkAutoConnect) {
-            await window.checkAutoConnect(connectWallet);
-        }
-
-    } catch(e) { console.error("Init Error:", e); }
-}
-
-function initNetworkSelector() {
-    const sel = getEl("networkSelect");
-    if (!NETWORKS_DATA || !sel) return;
-    
-    sel.innerHTML = "";
-    Object.values(NETWORKS_DATA).forEach(n => {
-        if(n.enabled) {
-            const opt = document.createElement("option");
-            opt.value = n.chainId; 
-            opt.textContent = n.label;
-            sel.appendChild(opt);
-        }
-    });
-
-    sel.onchange = async (e) => {
-        const targetChainId = e.target.value;
-        if(userAddress) {
-             await switchNetwork(targetChainId);
-        } else {
-             ACTIVE = Object.values(NETWORKS_DATA).find(n => n.chainId == targetChainId);
-             console.log("Selected network (offline mode):", ACTIVE.label);
-        }
-    };
-}
-
-// --- WALLET MODAL LOGIC ---
-function openWalletModal() {
-    const modal = getEl('walletModal');
-    const list = getEl('walletList');
-    if (!modal || !list) return;
-    
-    list.innerHTML = ''; 
-
-    if (window.WALLET_CONFIG) {
-        window.WALLET_CONFIG.forEach(w => {
-            const isInstalled = w.check();
-            const btn = document.createElement('div');
-            btn.className = 'wallet-btn';
-            btn.innerHTML = `
-                <div class="wallet-info">
-                    ${w.icon}
-                    <span>${w.name}</span>
-                </div>
-                ${isInstalled ? '<span style="color:var(--success); font-size:1.2rem;">›</span>' : '<span class="wallet-badge">Install</span>'}
-            `;
-            
-            btn.onclick = async () => {
-                if(!isInstalled) {
-                    window.open(`https://${w.id}.io`, '_blank');
-                    return;
-                }
-                selectedProvider = w.getProvider();
-                closeWalletModal();
-                await connectWallet();
-            };
-            list.appendChild(btn);
-        });
-    }
-    
-    modal.classList.add('open');
-}
-
-window.closeWalletModal = () => {
-    const modal = getEl('walletModal');
-    if (modal) modal.classList.remove('open');
-};
-
-window.onclick = (e) => {
-    const modal = getEl('walletModal');
-    if (e.target === modal) closeWalletModal();
-    
-    const accountDropdown = getEl("accountDropdown");
-    if (accountDropdown && accountDropdown.classList.contains('show') && !e.target.closest('#btnConnect')) {
-         accountDropdown.classList.remove('show');
-    }
-};
-
-// --- ACCOUNT MENU LOGIC ---
-const btnConnect = getEl("btnConnect");
-const accountDropdown = getEl("accountDropdown");
-
-btnConnect.onclick = (e) => {
-    e.stopPropagation();
-    if(userAddress) {
-        if (accountDropdown) accountDropdown.classList.toggle("show");
-    } else {
-        openWalletModal();
-    }
-};
-
-getEl("btnCopyAddress").onclick = () => {
-    navigator.clipboard.writeText(userAddress);
-    alert("Address copied to clipboard!");
-};
-
-getEl("btnViewExplorer").onclick = () => {
-    if(ACTIVE && ACTIVE.blockExplorerUrls) {
-        window.open(ACTIVE.blockExplorerUrls[0] + "/address/" + userAddress, '_blank');
-    }
-};
-
-getEl("btnDisconnect").onclick = () => {
-    // Clear Session (Pro Feature)
-    if(window.SessionManager) window.SessionManager.clear();
-
-    userAddress = null;
-    signer = null;
-    selectedProvider = null;
-    updateStatus(false);
-    
-    getEl("netWorthDisplay").textContent = "$0.00";
-    getEl("marketsBody").innerHTML = `<tr><td colspan="8" style="text-align:center; padding:30px;">Connect wallet to view markets</td></tr>`;
-    
-    accountDropdown.classList.remove("show");
-};
-
-
-// --- CORE CONNECTION LOGIC ---
 async function connectWallet() {
-  const ethProvider = selectedProvider || window.ethereum;
-  
-  if (!ethProvider) { alert("Please install a Wallet."); return; }
+  if (!window.ethereum) { alert("Please install MetaMask."); return; }
   getEl("btnConnect").textContent = "Connecting...";
   
   try {
-    provider = new ethers.BrowserProvider(ethProvider);
-    if(!NETWORKS_DATA) NETWORKS_DATA = await window.loadNetworks(); 
-    
+    provider = new ethers.BrowserProvider(window.ethereum);
+    NETWORKS_DATA = await window.loadNetworks();
     await provider.send("eth_requestAccounts", []);
     signer = await provider.getSigner();
     userAddress = await signer.getAddress();
     
-    // Save Session (Pro Feature)
-    if(window.SessionManager) window.SessionManager.save();
-    
+    // 1. Obtener ChainID y normalizar a decimal
     const chainIdHex = await provider.send("eth_chainId", []);
     const chainIdDecimal = parseInt(chainIdHex, 16);
     
-    console.log("Detected ChainID:", chainIdDecimal);
+    console.log("Detected ChainID:", chainIdDecimal); // Debug
 
+    // 2. Buscar red activa (comparación flexible string/number)
     ACTIVE = Object.values(NETWORKS_DATA).find(n => 
         (parseInt(n.chainId) === chainIdDecimal) && n.enabled
     );
     
-    const sel = getEl("networkSelect");
-
+    // 3. Auto-Switch si es necesario
     if(!ACTIVE) {
-        console.log("Wallet on unsupported chain. Attempting switch...");
-        let targetId = sel ? sel.value : null;
-        if(!targetId) {
-             const def = Object.values(NETWORKS_DATA).find(n => n.enabled);
-             if(def) targetId = def.chainId;
+        console.log("Network not found in JSON. Attempting switch to Soneium (1868)...");
+        const targetNetwork = Object.values(NETWORKS_DATA).find(n => parseInt(n.chainId) === 1868 && n.enabled);
+        
+        if (targetNetwork) {
+            try {
+                await window.ethereum.request({
+                    method: 'wallet_switchEthereumChain',
+                    params: [{ chainId: "0x" + Number(targetNetwork.chainId).toString(16) }],
+                });
+                window.location.reload();
+                return;
+            } catch (switchError) {
+                if (switchError.code === 4902) {
+                    try {
+                        await window.ethereum.request({
+                            method: 'wallet_addEthereumChain',
+                            params: [{
+                                chainId: "0x" + Number(targetNetwork.chainId).toString(16),
+                                chainName: targetNetwork.label,
+                                rpcUrls: targetNetwork.rpcUrls,
+                                blockExplorerUrls: targetNetwork.blockExplorerUrls,
+                                nativeCurrency: targetNetwork.nativeCurrency
+                            }],
+                        });
+                        window.location.reload();
+                        return;
+                    } catch (addError) {
+                        console.error("Add chain failed", addError);
+                    }
+                }
+            }
         }
-
-        if(targetId) {
-             await switchNetwork(targetId);
-             return; 
-        } else {
-             alert("Unsupported Network.");
-             updateStatus(false);
-             return;
-        }
+        alert(`Wrong Network (ChainID: ${chainIdDecimal}). Please switch to Soneium Mainnet.`);
+        updateStatus(false);
+        getEl("btnConnect").textContent = "Connect Wallet";
+        return;
     }
     
-    if(sel && ACTIVE) sel.value = ACTIVE.chainId;
-
     console.log("Active Network:", ACTIVE.label);
+    console.log("Markets found:", ACTIVE.cTokens ? ACTIVE.cTokens.length : 0);
+
+    // Si llegamos aquí, todo bien
     updateStatus(true);
-    
     fillHypotheticalAssetSelect();
     fillActionAssets();
     await refreshDashboard();
-    
-    if(ethProvider.on) {
-        ethProvider.on('chainChanged', () => window.location.reload());
-        ethProvider.on('accountsChanged', () => window.location.reload());
-    }
     
   } catch (e) {
     console.error("Connection Error:", e);
@@ -252,29 +97,39 @@ async function connectWallet() {
   }
 }
 
+getEl("btnConnect").onclick = connectWallet;
+
 async function refreshDashboard() {
+  // Renderizar mercados primero para asegurar que la tabla se llene
   await renderMarkets();
+  // Luego el resto
   await Promise.all([
     renderAccountStats(),
     renderVibeVault()
   ]);
 }
 
+// ------------------------------------------------------------------
+// MAIN RENDERING LOGIC
+// ------------------------------------------------------------------
 async function renderMarkets() {
   if(!ACTIVE || !userAddress) return;
   
+  // SAFETY CHECK: Si no hay cTokens definidos, salir
   if (!ACTIVE.cTokens || ACTIVE.cTokens.length === 0) {
+      console.warn("No markets configured in networks.json for this network.");
       getEl("marketsBody").innerHTML = `<tr><td colspan="8" style="text-align:center; padding:20px;">No markets configured</td></tr>`;
       return;
   }
 
   const ICON_MAP = { ASTR:"icons/astr.svg", WBTC:"icons/bitcoin.svg", DOT:"icons/dot.svg", WETH:"icons/weth.svg", USDC:"icons/usdc.svg" };
   const tbody = getEl("marketsBody");
-  tbody.innerHTML = "";
+  tbody.innerHTML = ""; // Limpiar tabla
   
   const blocksPerYear = ACTIVE.blocksPerYear || 15768000;
   const master = new ethers.Contract(ACTIVE.master, window.MASTER_ABI, provider);
   
+  // Inicializar rewards si existen
   let vault = null;
   if (window.REWARDS_ADDRESS && window.REWARDS_ADDRESS !== "0x0000000000000000000000000000000000000000") {
       vault = new ethers.Contract(window.REWARDS_ADDRESS, window.REWARDS_ABI, provider);
@@ -294,12 +149,15 @@ async function renderMarkets() {
   let totalAnnualIncome = 0, totalAnnualCost = 0, totalSuppliedUSD = 0, totalBorrowedUSD = 0;
   let globalNetWorth = 0;
 
+  // Iterar sobre mercados
   for(const m of ACTIVE.cTokens){
     try {
       const c = new ethers.Contract(m.address, window.C_TOKEN_ABI, provider);
       const cTokenDecimals = 18;
       const underlyingDecimals = m.underlyingDecimals || 18;
 
+      // Promise.allSettled es mejor para evitar que un fallo rompa toda la tabla, 
+      // pero mantendremos Promise.all para velocidad, con try/catch individual.
       const [
         totalSupplyBig, totalBorrowsBig,
         userCTokensBig, userBorrowsBig,
@@ -313,6 +171,7 @@ async function renderMarkets() {
         c.exchangeRateStored()
       ]);
 
+      // Obtener precio separado para no fallar si oracle falla
       let priceRaw = 0n;
       if (oracle) {
           try { priceRaw = await oracle.getUnderlyingPrice(m.address); } catch {}
@@ -334,6 +193,7 @@ async function renderMarkets() {
       const supplyAPY = rates && rates[1] ? ratePerBlockToAPY(rates[1], blocksPerYear) : 0;
       const borrowAPY = rates && rates[0] ? ratePerBlockToAPY(rates[0], blocksPerYear) : 0;
 
+      // Cálculo de Rewards VIBE (si existe vault)
       let vibeSupplyAPY = 0, vibeBorrowAPY = 0;
       if (vault) {
          try {
@@ -348,6 +208,7 @@ async function renderMarkets() {
              const vibePerSupplyYear = Number(sSpeed.toString()) * blocksPerYear / 1e18;
              const vibePerBorrowYear = Number(bSpeed.toString()) * blocksPerYear / 1e18;
              
+             // Evitar división por cero
              if(totalSupUnderlying > 0.1) vibeSupplyAPY = (vibePerSupplyYear / totalSupUnderlying) * 100;
              if(totalBorUnderlying > 0.1) vibeBorrowAPY = (vibePerBorrowYear / totalBorUnderlying) * 100;
              
@@ -405,6 +266,7 @@ async function renderMarkets() {
     }
   }
   
+  // Actualizar Globales
   getEl("netWorthDisplay").textContent = "$" + globalNetWorth.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
   const totalEquity = totalSuppliedUSD - totalBorrowedUSD;
   let netAPY = 0;
@@ -426,7 +288,7 @@ window.toggleCollateral = async (cTokenAddr, shouldEnter) => {
     const master = new ethers.Contract(ACTIVE.master, window.MASTER_ABI, signer);
     const statusEl = getEl("quickStatus");
     const checkboxes = document.querySelectorAll('.switch input');
-    checkboxes.forEach(c => c.disabled = true);
+    checkboxes.forEach(c => c.disabled = true); // Disable all while processing
 
     try {
         if(statusEl) {
@@ -446,26 +308,30 @@ window.toggleCollateral = async (cTokenAddr, shouldEnter) => {
             const msg = e.message.includes("revert") ? "Cannot disable (Liquidity Risk)" : "Transaction Failed";
             statusEl.textContent = msg; statusEl.style.color = "var(--danger)";
         }
+        // Recargar para restaurar el estado visual correcto del toggle
         setTimeout(refreshDashboard, 2000);
     }
 };
 
+// --- ACCOUNT STATS (Health Factor & Bars) ---
 async function renderAccountStats() {
   if (!userAddress || !ACTIVE) return;
   try {
     const master = new ethers.Contract(ACTIVE.master, window.MASTER_ABI, provider);
     const res = await master.getAccountLiquidity(userAddress);
+    // Soporte para diferentes retornos de ethers.js v6
     const ld = res.ld ? res.ld : res;
     
-    // FIX: Se mantiene la corrección de usar índices [1] y [2]
+    // [1] Liquidation Threshold, [2] Borrow USD
     const liquidationThresholdUSD = Number(ld[1].toString())/1e18;
-    const totalBorrowUSDFromContract = Number(ld[2].toString())/1e18;
+    const borrowUSD = Number(ld[2].toString())/1e18;
     
-    currentRealLiquidityUSD = liquidationThresholdUSD - totalBorrowUSDFromContract;
+    currentRealLiquidityUSD = liquidationThresholdUSD - borrowUSD;
     
+    // 1. Health Factor
     let hf = 0;
-    if (totalBorrowUSDFromContract > 0) {
-        hf = liquidationThresholdUSD / totalBorrowUSDFromContract;
+    if (borrowUSD > 0) {
+        hf = liquidationThresholdUSD / borrowUSD;
     } else {
         hf = Infinity;
     }
@@ -480,8 +346,9 @@ async function renderAccountStats() {
         else hfEl.style.color = "var(--success)"; 
     }
 
-    let percent = liquidationThresholdUSD === 0 ? 0 : (totalBorrowUSDFromContract / liquidationThresholdUSD) * 100;
-    if(totalBorrowUSDFromContract > 0 && liquidationThresholdUSD === 0) percent = 110;
+    // 2. Barra de Colateral
+    let percent = liquidationThresholdUSD === 0 ? 0 : (borrowUSD / liquidationThresholdUSD) * 100;
+    if(borrowUSD > 0 && liquidationThresholdUSD === 0) percent = 110;
 
     const bar = getEl("collateralBar");
     const barTxt = getEl("collateralBarText");
@@ -609,6 +476,9 @@ getEl("btnQuickExecute").onclick = async () => {
         else if (action === "redeem") {
             statusEl.textContent = "Calc cTokens...";
             const exchRate = await cToken.exchangeRateStored();
+            // Convertir Underlying Amount a cTokens
+            // Formula: cTokens = (AmountUnderlying * 1e18) / ExchangeRate
+            // Ajustar decimales si es necesario
             let normalizedAmount = rawAmount;
             if (uDecimals < 18) {
                 normalizedAmount = rawAmount * (10n ** BigInt(18 - uDecimals));
@@ -660,9 +530,6 @@ function fillHypotheticalAssetSelect() {
   });
 }
 
-// -----------------------------------------------------------
-// FIX APLICADO: Lógica de Simulación Hipotética Corregida
-// -----------------------------------------------------------
 getEl("hypotheticalForm").onsubmit = async (e) => {
   e.preventDefault();
   if (!userAddress) { alert("Connect wallet first"); return; }
@@ -679,9 +546,8 @@ getEl("hypotheticalForm").onsubmit = async (e) => {
   const rawAmount = ethers.parseUnits(amountVal, underlyingDecimals); 
   let redeem = 0n, borrow = 0n;
   
-  if (action === "borrow") {
-    borrow = rawAmount;
-  } else {
+  if (action === "borrow") borrow = rawAmount;
+  else {
     try {
         const c = new ethers.Contract(assetAddr, window.C_TOKEN_ABI, provider);
         const exchRate = await c.exchangeRateStored();
@@ -699,28 +565,19 @@ getEl("hypotheticalForm").onsubmit = async (e) => {
 
     const master = new ethers.Contract(ACTIVE.master, window.MASTER_ABI, provider);
     const res = await master.getHypotheticalAccountLiquidity(userAddress, assetAddr, redeem, borrow);
+    const ldNew = res.ldNew ? res.ldNew : (res[0] ? res[0] : res); 
     
-    const ldNew = res.ldNew ? res.ldNew : (res[0] ? res[0] : res);
-    
-    // FIX: Acceso correcto a indices [1] y [2]
-    const liqLimitUSD = Number(ldNew[1].toString()) / 1e18;
-    const bUSD = Number(ldNew[2].toString()) / 1e18;
+    const liqLimitUSD = Number(ldNew.liquidationUSD.toString()) / 1e18; 
+    const bUSD = Number(ldNew.borrowUSD.toString()) / 1e18;
     
     let percent = 0;
-    if (liqLimitUSD > 0) {
-      percent = (bUSD / liqLimitUSD) * 100;
-    } else if (bUSD > 0) {
-      percent = 110;
-    }
+    if (liqLimitUSD > 0) percent = (bUSD / liqLimitUSD) * 100;
+    else if (bUSD > 0) percent = 110;
     
     const bar = getEl("hypotheticalCollateralBar");
     const txt = getEl("hypotheticalCollateralBarText");
     
-    // FIX: Verificar si es colateral en vez de comparar USD
-    const assetsIn = await master.getAssetsIn(userAddress);
-    const isCollateral = assetsIn.map(a => a.toLowerCase()).includes(assetAddr.toLowerCase());
-    
-    if (action === "redeem" && !isCollateral) {
+    if (action === "redeem" && Math.abs(liqLimitUSD - currentRealLiquidityUSD) < 0.01) {
          txt.textContent = "No Change (Asset not used as collateral)";
          txt.style.color = "var(--text-muted)";
          bar.style.width = "0%";
@@ -731,24 +588,13 @@ getEl("hypotheticalForm").onsubmit = async (e) => {
          txt.style.opacity = "1";
          txt.textContent = percent.toFixed(2) + "% (Simulated)";
          
-         if(percent >= 100) { 
-           bar.style.background = "var(--danger)"; 
-           txt.style.color = "var(--danger)"; 
-         } 
-         else if(percent > 90) { 
-           bar.style.background = "rgba(255, 85, 85, 0.6)"; 
-           txt.style.color = "var(--danger)"; 
-         } 
-         else { 
-           bar.style.background = "rgba(249, 224, 97, 0.5)"; 
-           txt.style.color = "var(--warning)"; 
-         }
+         if(percent >= 100) { bar.style.background = "var(--danger)"; txt.style.color = "var(--danger)"; } 
+         else if(percent > 90) { bar.style.background = "rgba(255, 85, 85, 0.6)"; txt.style.color = "var(--danger)"; } 
+         else { bar.style.background = "rgba(249, 224, 97, 0.5)"; txt.style.color = "var(--warning)"; }
     }
-    
     btn.textContent = oldTxt;
-
   } catch(e) { 
-    console.error("Sim Error:", e);
+    console.error(e);
     alert("Simulation failed.");
     e.target.querySelector("button").textContent = "Simulate Impact";
   }
@@ -756,36 +602,3 @@ getEl("hypotheticalForm").onsubmit = async (e) => {
 
 function formatNumber(n, dp=2) { return Number(n).toLocaleString('en-US', {minimumFractionDigits:dp, maximumFractionDigits:dp}); }
 function ratePerBlockToAPY(rate, blocks) { const r = Number(rate)/1e18; return r <= 0 ? 0 : ((Math.pow(1+r, blocks)-1)*100); }
-
-async function switchNetwork(targetChainId) {
-    const targetNetwork = Object.values(NETWORKS_DATA).find(n => n.chainId == targetChainId);
-    if (!targetNetwork) return;
-
-    try {
-        await window.ethereum.request({
-            method: 'wallet_switchEthereumChain',
-            params: [{ chainId: "0x" + Number(targetNetwork.chainId).toString(16) }],
-        });
-        
-    } catch (switchError) {
-        // This error code indicates that the chain has not been added to MetaMask.
-        if (switchError.code === 4902) {
-            try {
-                await window.ethereum.request({
-                    method: 'wallet_addEthereumChain',
-                    params: [{
-                        chainId: "0x" + Number(targetNetwork.chainId).toString(16),
-                        chainName: targetNetwork.label,
-                        rpcUrls: targetNetwork.rpcUrls,
-                        blockExplorerUrls: targetNetwork.blockExplorerUrls,
-                        nativeCurrency: targetNetwork.nativeCurrency
-                    }],
-                });
-            } catch (addError) {
-                console.error("Add chain failed", addError);
-            }
-        } else {
-            console.error("Switch failed", switchError);
-        }
-    }
-}

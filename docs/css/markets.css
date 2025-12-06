@@ -1,0 +1,26 @@
+/* Market Overview Stats */
+.overview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+/* Utilization Bar */
+.util-bar-bg {
+  width: 100px;
+  height: 6px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 3px;
+  margin-top: 6px;
+  overflow: hidden;
+}
+.util-bar-fill {
+  height: 100%;
+  background: var(--success);
+  width: 0%;
+  border-radius: 3px;
+}
+
+/* Text Utilities */
+.text-green { color: var(--success); }
+.text-yellow { color: var(--warning); }
