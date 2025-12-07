@@ -26,7 +26,7 @@
       <a href="vibe-vault.html" class="nav-link">Governance Vault</a>
       <a href="liquidator.html" class="nav-link" style="color:var(--danger);">Liquidator Console</a>
       
-      <!-- NOTA: He quitado el Action Panel de aquí para moverlo al contenido principal -->
+      <!-- NOTA: Action Panel removido de aquí para ponerlo en el flujo principal -->
 
       <div style="flex-grow:1"></div>
       <div style="padding: 10px; font-size: 0.8rem; color: var(--text-muted);">
@@ -132,7 +132,7 @@
         </form>
       </div>
 
-      <!-- Markets Table -->
+      <!-- Markets Table (Market Positions) -->
       <div class="glass-panel">
         <h2 style="margin:0 0 20px 0; font-size:1.2rem;">Market Positions</h2>
         <div class="table-container">
@@ -156,42 +156,48 @@
         </div>
       </div>
 
-      <!-- ================================================================= -->
-      <!-- ACTION PANEL REUBICADO AQUI (ENTRE MARKETS Y VAULT) - 1000% PRO -->
-      <!-- ================================================================= -->
-      <div class="action-panel">
-        <h3 style="margin:0 0 15px 0; font-size:1.2rem; display:flex; align-items:center; gap:8px;">
-          <span style="color:var(--accent)">⚡</span> Quick Trade
-        </h3>
+      <!-- ======================================================= -->
+      <!-- [MOVED] ACTION PANEL: AHORA ENTRE MARKETS Y VAULT       -->
+      <!-- ======================================================= -->
+      <div class="action-panel mobile-friendly">
+        <h4><span style="color:var(--accent)">⚡</span> Trade</h4>
         
+        <!-- Contenedor Grid para layout flexible -->
         <div class="trade-grid">
-            <div class="input-group">
-                <label style="font-size:0.75rem; color:var(--text-muted)">Asset</label>
-                <select id="quickAsset" class="action-input"></select>
-            </div>
-            <div class="input-group">
-                <label style="font-size:0.75rem; color:var(--text-muted)">Action</label>
-                <select id="quickAction" class="action-input">
-                  <option value="mint">Supply (Mint)</option>
-                  <option value="redeem">Withdraw (Redeem)</option>
-                  <option value="borrow">Borrow</option>
-                  <option value="repay">Repay</option>
-                </select>
-            </div>
-            <div class="input-group" style="flex-grow:2;">
-                <label style="font-size:0.75rem; color:var(--text-muted)">Amount</label>
-                <div style="display:flex; gap:10px;">
-                    <input id="quickAmount" type="number" placeholder="0.00" class="action-input" step="0.000001">
-                    <button id="btnQuickExecute" class="action-btn" style="white-space:nowrap;">Execute</button>
-                </div>
-            </div>
+           <!-- Columna 1: Asset -->
+           <div class="input-group">
+               <label style="font-size:0.75rem; color:var(--text-muted)">Asset</label>
+               <select id="quickAsset" class="action-input"></select>
+           </div>
+           
+           <!-- Columna 2: Action -->
+           <div class="input-group">
+               <label style="font-size:0.75rem; color:var(--text-muted)">Action</label>
+               <select id="quickAction" class="action-input">
+                 <option value="mint">Supply (Mint)</option>
+                 <option value="redeem">Withdraw (Redeem)</option>
+                 <option value="borrow">Borrow</option>
+                 <option value="repay">Repay</option>
+               </select>
+           </div>
+           
+           <!-- Columna 3: Amount -->
+           <div class="input-group">
+               <label style="font-size:0.75rem; color:var(--text-muted)">Amount</label>
+               <input id="quickAmount" type="number" placeholder="0.00" class="action-input" step="0.000001">
+           </div>
+           
+           <!-- Columna 4: Button -->
+           <div class="input-group">
+               <button id="btnQuickExecute" class="action-btn" style="width:100%">Execute</button>
+           </div>
         </div>
-        <div id="quickStatus" class="action-status" style="margin-top:10px; text-align:left;">Ready to trade</div>
+        
+        <div id="quickStatus" class="action-status">Ready</div>
       </div>
-      <!-- ================================================================= -->
+      <!-- ======================================================= -->
 
-
-      <!-- Vault Mini -->
+      <!-- Vault Mini (Vault Rewards APY) -->
       <div class="glass-panel" style="border-top: 4px solid var(--warning);">
         <h3 class="vibe-title">
           <img src="icons/vibe.svg" width="20" /> Vault Rewards APY

@@ -107,7 +107,7 @@ function openWalletModal() {
             btn.className = 'wallet-btn';
             btn.innerHTML = `
                 <div class="wallet-info">
-                    ${w.icon}
+                    <img src="${w.icon}" alt="${w.name}" style="width:32px; height:32px; object-fit:contain;">
                     <span>${w.name}</span>
                 </div>
                 ${isInstalled ? '<span style="color:var(--success); font-size:1.2rem;">›</span>' : '<span class="wallet-badge">Install</span>'}
@@ -115,7 +115,7 @@ function openWalletModal() {
             
             btn.onclick = async () => {
                 if(!isInstalled) {
-                    window.open(`https://${w.id}.io`, '_blank');
+                    window.open(w.installUrl, '_blank');
                     return;
                 }
                 selectedProvider = w.getProvider();

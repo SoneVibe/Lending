@@ -518,7 +518,7 @@ footer { border-top: 1px solid var(--card-border); padding: 40px 20px; text-alig
   }
   .sidebar::-webkit-scrollbar { display: none; }
   .logo-area { margin-bottom: 0; margin-right: 20px; font-size: 1.2rem; }
-  .action-panel { display: none; /* Hide sidebar widgets on mobile */ }
+  /* .action-panel { display: none; Hide sidebar widgets on mobile } */
   .sidebar .nav-link { padding: 10px 14px; font-size: 0.9rem; }
   
   /* Grids to single column */
@@ -535,4 +535,51 @@ footer { border-top: 1px solid var(--card-border); padding: 40px 20px; text-alig
   header { flex-direction: column; align-items: flex-start; gap: 15px; }
   .nav-group { width: 100%; justify-content: space-between; }
   .network-select { flex-grow: 1; }
+}
+/* --- NUEVOS ESTILOS PARA ACTION PANEL EN MAIN CONTENT --- */
+
+.trade-grid {
+  display: flex;
+  gap: 15px;
+  align-items: flex-end;
+}
+
+/* En PC se ve horizontal y bonito */
+@media (min-width: 901px) {
+    .action-panel {
+        background: rgba(20, 22, 30, 0.6);
+        border: 1px solid var(--card-border);
+        border-radius: 24px; /* Igual que glass-panel */
+        padding: 24px;
+        margin-top: 0; /* Reset margen anterior */
+    }
+}
+
+/* En Móvil se ve vertical (stack) para que sea fácil de tocar */
+@media (max-width: 900px) {
+  /* Aseguramos que se vea */
+  .action-panel {
+      display: flex !important; /* Forzar visibilidad */
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 16px;
+  }
+  
+  .trade-grid {
+      flex-direction: column;
+      gap: 15px;
+      align-items: stretch; /* Estira los inputs al ancho total */
+  }
+
+  .trade-grid .input-group {
+      width: 100%;
+  }
+
+  /* Botón grande y fácil de tocar en móvil */
+  #btnQuickExecute {
+      width: 100%;
+      padding: 14px;
+      margin-top: 5px;
+  }
 }

@@ -74,9 +74,9 @@ function openWalletModal() {
             const isInstalled = w.check();
             const btn = document.createElement('div');
             btn.className = 'wallet-btn';
-            btn.innerHTML = `<div class="wallet-info">${w.icon}<span>${w.name}</span></div>${isInstalled ? '<span style="color:var(--success); font-size:1.2rem;">›</span>' : '<span class="wallet-badge">Install</span>'}`;
+            btn.innerHTML = `<div class="wallet-info"><img src="${w.icon}" alt="${w.name}" style="width:32px; height:32px; object-fit:contain;"><span>${w.name}</span></div>${isInstalled ? '<span style="color:var(--success); font-size:1.2rem;">›</span>' : '<span class="wallet-badge">Install</span>'}`;
             btn.onclick = async () => {
-                if(!isInstalled) { window.open(`https://${w.id}.io`, '_blank'); return; }
+                if(!isInstalled) { window.open(w.installUrl, '_blank'); return; }
                 selectedProvider = w.getProvider();
                 closeWalletModal();
                 await connectWallet();

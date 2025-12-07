@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="738 351 444 502">
+  <defs>
+    <linearGradient id="trust-grad" x1="1123.26" y1="1865.78" x2="954.61" y2="1337.5" gradientTransform="translate(0 2182) scale(1 -1)" gradientUnits="userSpaceOnUse">
+      <stop offset=".02" stop-color="blue"/>
+      <stop offset=".08" stop-color="#0094ff"/>
+      <stop offset=".16" stop-color="#48ff91"/>
+      <stop offset=".42" stop-color="#0094ff"/>
+      <stop offset=".68" stop-color="#0038ff"/>
+      <stop offset=".9" stop-color="#0500ff"/>
+    </linearGradient>
+  </defs>
+  <!-- Lado Izquierdo (Azul Sólido) -->
+  <path fill="#0500ff" d="m738.71,423.41l221.45-72.3v500.52c-158.18-66.74-221.45-194.65-221.45-266.94v-161.28Z"/>
+  <!-- Lado Derecho (Gradiente) -->
+  <path fill="url(#trust-grad)" d="m1181.62,423.41l-221.45-72.3v500.52c158.18-66.74,221.45-194.65,221.45-266.94v-161.28Z"/>
+</svg>
