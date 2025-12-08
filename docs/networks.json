@@ -18,6 +18,15 @@
         "skipAllowance": false
       },
       {
+        "symbol": "cUSDSC",
+        "underlyingSymbol": "USDSC",
+        "icon": "icons/usdsc.svg",
+        "address": "0x30311045Ae2D84eC06f58c170A18dde84d43b58f",
+        "underlying": "0x3f99231dD03a9F0E7e3421c92B7b90fbe012985a",
+        "underlyingDecimals": 6,
+        "skipAllowance": false
+      },
+      {
         "symbol": "cUSDC",
         "underlyingSymbol": "USDC",
         "icon": "icons/usdc.svg",
