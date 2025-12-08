@@ -549,7 +549,12 @@ function fillActionAssets() {
     opt.value = x.address;
     opt.dataset.decimals = x.underlyingDecimals || 18; 
     opt.dataset.underlying = x.underlying;
-    opt.textContent = x.symbol;
+    // opt.textContent = x.symbol; 
+     // --- CAMBIO PRO AQUÍ ---
+    // Usamos underlyingSymbol si existe (ASTR), si no, quitamos la 'c' del symbol (cASTR -> ASTR)
+    const displayName = x.underlyingSymbol || x.symbol.replace(/^c/, ''); 
+    opt.textContent = displayName; 
+    // -----------------------
     sel.appendChild(opt);
   });
 }
@@ -655,7 +660,12 @@ function fillHypotheticalAssetSelect() {
     const opt = document.createElement("option");
     opt.value = x.address;
     opt.dataset.decimals = x.underlyingDecimals || 18; 
-    opt.textContent = x.symbol;
+    //opt.textContent = x.symbol;
+     // --- CAMBIO PRO AQUÍ ---
+    // Usamos underlyingSymbol si existe (ASTR), si no, quitamos la 'c' del symbol (cASTR -> ASTR)
+    const displayName = x.underlyingSymbol || x.symbol.replace(/^c/, ''); 
+    opt.textContent = displayName; 
+    // -----------------------
     sel.appendChild(opt);
   });
 }
