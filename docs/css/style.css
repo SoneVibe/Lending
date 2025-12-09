@@ -583,3 +583,49 @@ footer { border-top: 1px solid var(--card-border); padding: 40px 20px; text-alig
       margin-top: 5px;
   }
 }
+/* ... [KEEP ALL PREVIOUS CSS] ... */
+
+/* =========================================
+   14. DOCS SPECIFIC STYLES
+   ========================================= */
+.doc-section { margin-bottom: 30px; line-height: 1.6; }
+.doc-header { color: var(--success); font-size: 1.2rem; margin-top: 0; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; margin-bottom: 20px; }
+
+.doc-list { list-style: disc; padding-left: 20px; color: var(--text-muted); }
+.doc-list li { margin-bottom: 8px; }
+.doc-list strong { color: #fff; }
+
+.code-tag {
+  font-family: monospace;
+  background: rgba(0, 224, 255, 0.1);
+  color: var(--success);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.85em;
+}
+
+.doc-callout {
+  background: rgba(45, 108, 223, 0.1);
+  border-left: 4px solid var(--accent);
+  padding: 15px;
+  border-radius: 8px;
+  margin: 20px 0;
+  color: #fff;
+}
+
+/* Docs Table */
+.doc-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+.doc-table th { background: rgba(0,0,0,0.3); color: #fff; text-align: left; padding: 12px; }
+.doc-table td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--text-muted); font-size: 0.9rem; }
+.doc-table tr:last-child td { border-bottom: none; }
+
+/* Timeline */
+.doc-timeline { margin-top: 20px; border-left: 2px solid rgba(255,255,255,0.1); padding-left: 20px; }
+.timeline-item { position: relative; margin-bottom: 30px; }
+.timeline-item::before {
+  content: ''; position: absolute; left: -25px; top: 5px;
+  width: 8px; height: 8px; background: var(--text-muted); border-radius: 50%;
+}
+.timeline-item.active::before { background: var(--success); box-shadow: 0 0 10px var(--success); }
+.timeline-date { font-weight: 700; color: #fff; margin-bottom: 5px; font-size: 0.9rem; }
+.timeline-content { color: var(--text-muted); font-size: 0.9rem; }
