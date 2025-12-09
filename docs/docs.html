@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>VIBE Protocol | Documentation</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="icon" type="image/svg+xml" href="icons/vibe.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- Sidebar: Documentation Navigation -->
+    <nav class="sidebar glass-panel">
+      <div class="logo-area">
+        <svg width="28" height="28" viewBox="0 0 64 64"><circle cx="32" cy="32" r="32" fill="#1a1f35"/><path d="M18 42 L32 18 L46 42 Z" fill="#00e0ff"/></svg>
+        VIBE Docs
+      </div>
+      
+      <div style="font-size:0.75rem; text-transform:uppercase; color:var(--text-muted); margin-left:12px; margin-top:10px; margin-bottom:5px;">Navigation</div>
+      <a href="index.html" class="nav-link">← Back to Home</a>
+      <a href="dashboard.html" class="nav-link" style="color:var(--success);">Launch App</a>
+
+      <div style="font-size:0.75rem; text-transform:uppercase; color:var(--text-muted); margin-left:12px; margin-top:20px; margin-bottom:5px;">Contents</div>
+      <a href="#vision" class="nav-link active">Vision & Status</a>
+      <a href="#lending" class="nav-link">Lending Core</a>
+      <a href="#governance" class="nav-link">Token & Governance</a>
+      <a href="#stablecoin" class="nav-link">VIBEUSD Stablecoin</a>
+      <a href="#router" class="nav-link">Liquidity Router</a>
+      <a href="#roadmap" class="nav-link">Roadmap 2025/26</a>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      
+      <header>
+        <div>
+          <h1 style="margin:0; font-size:1.8rem;">Technical Master Blueprint</h1>
+          <p style="margin:4px 0 0 0; color:var(--text-muted);">Architecture v2.0 | Last Updated: December 9, 2025</p>
+        </div>
+      </header>
+
+      <!-- Section 1: Vision -->
+      <section id="vision" class="glass-panel doc-section">
+        <h2 class="doc-header">🔹 Protocol Vision</h2>
+        <p>VIBE Protocol is architected to be the most advanced, sovereign, and modular DeFi protocol within the EVM and Polkadot ecosystems.</p>
+        <p>We combine the efficiency of established lending markets with the resilience of a unified liquidity architecture. VIBE acts as the financial nervous system connecting <strong>Soneium</strong> and <strong>Astar Network</strong>.</p>
+        
+        <div class="doc-callout">
+            <strong>🚀 Live Status (Dec 9, 2025):</strong><br>
+            The protocol is fully operational on <strong>Soneium Mainnet</strong> and <strong>Astar EVM Mainnet</strong>.
+        </div>
+      </section>
+
+      <!-- Section 2: Lending Layer -->
+      <section id="lending" class="glass-panel doc-section">
+        <h2 class="doc-header">⚙️ 1. Core: Lending Layer (Phase A)</h2>
+        <p>The foundation of the protocol, handling asset pools, interest rates, and solvency.</p>
+        
+        <div class="table-container">
+            <table class="doc-table">
+                <thead>
+                    <tr><th>Contract Module</th><th>Functionality</th><th>Status</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="code-tag">V_cERC20_ExtendedInterest</span></td>
+                        <td>Handles ERC-20 markets (mint, redeem, borrow, repay, liquidate). Includes extension for supply/borrow caps and reward hooks.</td>
+                        <td><span style="color:var(--success)">✅ Live & Stable</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="code-tag">V_MasterEnhanced</span></td>
+                        <td>The Comptroller V3. Coordinates all markets, calculates account health, and enforces global risk parameters.</td>
+                        <td><span style="color:var(--success)">✅ Live & Stable</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="code-tag">InterestRateModelDynamic</span></td>
+                        <td>Modular interest model based on kink utilization curves. Upgradable via governance without market migration.</td>
+                        <td><span style="color:var(--success)">✅ Live</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+      </section>
+
+      <!-- Section 3: Governance & Token -->
+      <section id="governance" class="glass-panel doc-section">
+        <h2 class="doc-header">🧠 2. Governance & VIBE Token (Phase B)</h2>
+        <p>Decentralized control and incentives mechanism.</p>
+
+        <ul class="doc-list">
+            <li><strong>Token Name:</strong> VIBE Governance Token</li>
+            <li><strong>Max Supply:</strong> 1,000,000 VIBE (Soneium)</li>
+            <li><strong>Utility:</strong> Voting rights, Boosting rewards, Safety Module staking.</li>
+        </ul>
+
+        <h3 style="margin-top:20px; color:var(--text-main);">Tokenomics Distribution</h3>
+        <div class="stats-grid" style="margin-top:10px;">
+            <div class="stat-card" style="background:rgba(0,0,0,0.2);">
+                <h3>Community</h3>
+                <div class="stat-value" style="font-size:1.2rem;">60%</div>
+                <div style="font-size:0.8rem; color:var(--text-muted);">Lenders, Borrowers, LM</div>
+            </div>
+            <div class="stat-card" style="background:rgba(0,0,0,0.2);">
+                <h3>Treasury</h3>
+                <div class="stat-value" style="font-size:1.2rem;">20%</div>
+                <div style="font-size:0.8rem; color:var(--text-muted);">Protocol Safety</div>
+            </div>
+            <div class="stat-card" style="background:rgba(0,0,0,0.2);">
+                <h3>Team</h3>
+                <div class="stat-value" style="font-size:1.2rem;">10%</div>
+                <div style="font-size:0.8rem; color:var(--text-muted);">2-Year Vesting</div>
+            </div>
+            <div class="stat-card" style="background:rgba(0,0,0,0.2);">
+                <h3>Eco/Liquidity</h3>
+                <div class="stat-value" style="font-size:1.2rem;">10%</div>
+                <div style="font-size:0.8rem; color:var(--text-muted);">Cross-chain Reserves</div>
+            </div>
+        </div>
+      </section>
+
+      <!-- Section 4: Stablecoin -->
+      <section id="stablecoin" class="glass-panel doc-section">
+        <h2 class="doc-header">💵 3. Stablecoin Layer — VIBEUSD (Phase C)</h2>
+        <p>A native, over-collateralized stablecoin mintable directly via the borrow module. Inspired by modern debt-based stablecoin designs.</p>
+        
+        <ul class="doc-list">
+            <li><strong>VIBEUSDStabilityModule (VSM):</strong> Maintains peg via asymmetric mint/burn mechanics and market making.</li>
+            <li><strong>Parameters:</strong> 
+                <span class="code-tag">LTV Max: 75%</span>, 
+                <span class="code-tag">Liquidation Threshold: 80%</span>, 
+                <span class="code-tag">Stability Fee: 0.5%</span>.
+            </li>
+        </ul>
+      </section>
+
+      <!-- Section 5: Liquidity Router -->
+      <section id="router" class="glass-panel doc-section">
+        <h2 class="doc-header">🪙 4. Omnipool & Liquidity Router (Phase D)</h2>
+        <p>
+            <strong>SoneVibeLiquidityRouter:</strong> An internal swap router that seeks the best execution path across SoneSwap, UniswapV3, and Curve.
+        </p>
+        <p>
+            <strong>Omnipool Adapter:</strong> Allows liquidators to instantly swap seized collateral into debt assets within the same transaction, reducing slippage and increasing system health.
+        </p>
+      </section>
+
+      <!-- Section 6: Roadmap -->
+      <section id="roadmap" class="glass-panel doc-section" style="border-top: 4px solid var(--warning);">
+        <h2 class="doc-header">🧭 Roadmap 2025 – 2026</h2>
+        <div class="doc-timeline">
+            <div class="timeline-item">
+                <div class="timeline-date">Q1 2025 (Completed)</div>
+                <div class="timeline-content">Consolidate Lending Core (cERC20 + cNative + Comptroller V3 Fixed).</div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-date">Q2 2025 (Completed)</div>
+                <div class="timeline-content">VIBE Token Launch + Governance DAO activation.</div>
+            </div>
+            <div class="timeline-item active">
+                <div class="timeline-date" style="color:var(--success)">Q3-Q4 2025 (Current)</div>
+                <div class="timeline-content">
+                    Integration of VIBEUSD Stablecoin & Treasury System.<br>
+                    Deployment of Omnipool Router and Oracle Hub.
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-date">Q1 2026</div>
+                <div class="timeline-content">Cross-chain Bridge Layer (Soneium ↔ Astar). RiskManager AI Beta.</div>
+            </div>
+        </div>
+      </section>
+
+      <section class="glass-panel doc-section" style="text-align:center;">
+        <h3 style="color:var(--accent);">“Liquidity is life.”</h3>
+        <p style="max-width:600px; margin:0 auto; color:var(--text-muted);">
+            SoneVibe is becoming the financial nervous system between Soneium, Astar, and Polkadot — a network where collateral, credit, and governance flow freely with total transparency.
+        </p>
+      </section>
+
+    </div> 
+  </div>
+
+</body>
+</html>
