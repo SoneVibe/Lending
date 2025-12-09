@@ -39,6 +39,47 @@
     "blocksPerYear": 15768000,
     "enabled": true
   },
+    "Astar Mainnet": {
+    "slug": "astar",
+    "label": "Astar Mainnet",
+    "chainId": "592",
+    "rpcUrls": ["https://evm.astar.network/"],
+    "blockExplorerUrls": ["https://astar.blockscout.com"],
+    "nativeCurrency": { "name": "Astar", "symbol": "ASTR", "decimals": 18 },
+    "master": "0x366472468fe831D57b625d2fBbC90bd5a6184042",
+    
+    "cTokens": [
+      {
+        "symbol": "cWASTR",
+        "underlyingSymbol": "WASTR",
+        "icon": "icons/wastr.png",
+        "address": "0x98E79cEF9D6fd270542B810CAC8d5eeD4bCa90C4",
+        "underlying": "0xAeaaf0e2c81Af264101B9129C00F4440cCF0F720",
+        "underlyingDecimals": 18,
+        "skipAllowance": true
+      },
+      {
+        "symbol": "cUSDT",
+        "underlyingSymbol": "USDT",
+        "icon": "icons/tether.svg",
+        "address": "0xdB63B527Bb1B1518dBAFcf439E7bfB9E9Ee7A56E",
+        "underlying": "0xfFFfffFF000000000000000000000001000007C0",
+        "underlyingDecimals": 6,
+        "skipAllowance": false
+      },
+      {
+        "symbol": "cDOT",
+        "underlyingSymbol": "DOT",
+        "icon": "icons/dot.svg",
+        "address": "0x1afE747285C2962B20b00c6eaaD2E8C09B90eE75",
+        "underlying": "0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF",
+        "underlyingDecimals": 10,
+        "skipAllowance": false
+      }
+    ],
+    "blocksPerYear": 5256000,
+    "enabled": true
+  },
   "Minato Testnet": {
     "slug": "minato",
     "label": "Minato Testnet",
