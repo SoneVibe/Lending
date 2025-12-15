@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>VIBE Protocol | Liquidity Pools </title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="icon" type="image/svg+xml" href="icons/vibe.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  
+  <style>
+    /* Estilos específicos para Pools */
+    .pool-card {
+        max-width: 500px;
+        margin: 0 auto;
+        position: relative;
+    }
+    .plus-icon-circle {
+        width: 32px; height: 32px;
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        margin: -16px auto;
+        position: relative;
+        z-index: 10;
+        color: var(--text-muted);
+        font-weight: bold;
+    }
+    .pool-info {
+        margin-top: 20px;
+        background: rgba(255,255,255,0.03);
+        border-radius: 12px;
+        padding: 15px;
+        border: 1px solid rgba(255,255,255,0.05);
+    }
+    .token-select-custom {
+        background: transparent;
+        color: #fff;
+        border: none;
+        font-weight: 600;
+        font-size: 1.1rem;
+        cursor: pointer;
+    }
+    .token-select-custom option {
+        background: #1a1f35;
+    }
+    /* Tabs para Add/Remove */
+    .pool-tabs {
+        display: flex;
+        background: rgba(0,0,0,0.3);
+        padding: 4px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+    }
+    .pool-tab {
+        flex: 1; text-align: center; padding: 10px;
+        border-radius: 10px; cursor: pointer;
+        font-weight: 600; color: var(--text-muted);
+        transition: 0.2s;
+    }
+    .pool-tab.active {
+        background: var(--card-bg); color: #fff;
+        border: 1px solid rgba(255,255,255,0.1);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+    /* Remove Slider */
+    .range-wrap { margin: 20px 0; }
+    .range-val { text-align: right; color: var(--success); font-weight: 700; margin-bottom: 5px; }
+    input[type=range] { width: 100%; cursor: pointer; accent-color: var(--success); }
+
+    /* Import UI (mini) */
+    .import-row { display:flex; gap:10px; margin-top:10px; }
+    .import-row input { flex:1; }
+    .import-row button { white-space:nowrap; }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    <nav class="sidebar glass-panel">
+      <div class="logo-area">
+        <svg width="28" height="28" viewBox="0 0 64 64"><circle cx="32" cy="32" r="32" fill="#1a1f35"/><path d="M18 42 L32 18 L46 42 Z" fill="#00e0ff"/></svg>
+        VIBE Finance
+      </div>
+      <a href="index.html" class="nav-link">Dashboard Home</a>
+      <a href="dashboard.html" class="nav-link">Analytics & Pro</a>
+      <a href="swap.html" class="nav-link">Trade & Swap</a>
+      <a href="#" class="nav-link active" style="color:var(--success); border-color:var(--success); background:rgba(0, 224, 255, 0.1);">Liquidity Pools</a>
+       <a href="farm.html" class="nav-link">Yield Farms</a>
+      <a href="markets.html" class="nav-link">Markets Overview</a>
+      <a href="vibe-vault.html" class="nav-link">Governance Vault</a>
+      <a href="liquidator.html" class="nav-link" style="color:var(--danger);">Liquidator Console</a>
+      
+      <div style="flex-grow:1"></div>
+      <div style="padding: 10px; font-size: 0.8rem; color: var(--text-muted);">
+        Connection Status:<br>
+        <span id="statusDot" style="color: var(--danger)">●</span> <span id="connStatus">Disconnected</span>
+      </div>
+    </nav>
+
+    <div class="main-content">
+      
+      <header>
+        <div>
+          <h1 style="margin:0; font-size:1.8rem; background: linear-gradient(90deg, #fff, #00e0ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Liquidity Pools</h1>
+          <p style="margin:4px 0 0 0; color:var(--text-muted);">Manage your market making positions</p>
+          <p style="margin:4px 0 0 0; color:var(--text-muted);">ONLY <span style="color:red;">ASTR/USDC on SONEIUM Available</span></p>
+          
+        </div>
+        
+        <div class="nav-group">
+          <select id="networkSelect" class="network-select"><option value="" disabled selected>Loading...</option></select>
+          <div class="btn-account-wrapper">
+             <button id="btnConnect" class="btn-primary">Connect Wallet</button>
+             <div id="accountDropdown" class="account-dropdown">
+                 <div style="padding:12px 12px 6px 12px; font-size:0.8rem; color:var(--text-muted); text-transform:uppercase;">Connected Wallet</div>
+                 <div style="padding:0 12px 12px 12px; font-size:1.1rem; font-weight:600; color:#fff;" id="dropdownAddress">0x00...000</div>
+                 <div class="menu-divider"></div>
+                 <div class="menu-item" id="btnCopyAddress"><span>📋</span> Copy Address</div>
+                 <div class="menu-item" id="btnViewExplorer"><span>🔍</span> View on Explorer</div>
+                 <div class="menu-divider"></div>
+                 <div class="menu-item" id="btnDisconnect" style="color:var(--danger);"><span>🚪</span> Disconnect</div>
+             </div>
+          </div>
+        </div>
+      </header>
+
+      <div class="glass-panel pool-card">
+        
+        <div class="pool-tabs">
+            <div id="tabAdd" class="pool-tab active" onclick="setPoolMode('add')">Add Liquidity</div>
+            <div id="tabRemove" class="pool-tab" onclick="setPoolMode('remove')">Remove</div>
+        </div>
+
+        <div style="display:flex; gap:10px; margin-bottom:20px; align-items:center; justify-content:center;">
+             <div style="background:rgba(255,255,255,0.1); padding:8px 12px; border-radius:12px;">
+                <select id="tokenA" class="token-select-custom"></select>
+             </div>
+             <span style="color:var(--text-muted)">+</span>
+             <div style="background:rgba(255,255,255,0.1); padding:8px 12px; border-radius:12px;">
+                <select id="tokenB" class="token-select-custom"></select>
+             </div>
+        </div>
+
+        <!-- IMPORT TOKEN (pro) -->
+        <div class="pool-info" style="margin-top:0;">
+          <div class="detail-row"><span>Import Token (Any Address)</span></div>
+          <div class="import-row">
+            <input id="importAddressInput" class="action-input" placeholder="Paste token/cToken address (0x...)" />
+            <button id="btnOpenImport" class="btn-ghost">Import</button>
+          </div>
+          <div id="importHint" style="margin-top:8px; font-size:0.8rem; color:var(--text-muted);">
+            Imports are stored per network (chainId) in your browser.
+          </div>
+        </div>
+
+        <div id="panelAdd">
+            <div style="background:rgba(0,0,0,0.3); padding:16px; border-radius:16px; border:1px solid rgba(255,255,255,0.05); margin-bottom:10px;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                    <span style="font-size:0.8rem; color:var(--text-muted);" id="lblInputA">Token A</span>
+                    <span style="font-size:0.8rem; color:var(--text-muted);">Bal: <span id="balA">0.00</span></span>
+                </div>
+                <input id="amountA" type="number" placeholder="0.0" style="background:transparent; border:none; color:#fff; font-size:1.4rem; width:100%; outline:none;">
+            </div>
+
+            <div class="plus-icon-circle">+</div>
+
+            <div style="background:rgba(0,0,0,0.3); padding:16px; border-radius:16px; border:1px solid rgba(255,255,255,0.05);">
+                <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                    <span style="font-size:0.8rem; color:var(--text-muted);" id="lblInputB">Token B</span>
+                    <span style="font-size:0.8rem; color:var(--text-muted);">Bal: <span id="balB">0.00</span></span>
+                </div>
+                <input id="amountB" type="number" placeholder="0.0" style="background:transparent; border:none; color:#fff; font-size:1.4rem; width:100%; outline:none;">
+            </div>
+        </div>
+
+        <div id="panelRemove" style="display:none;">
+            <div style="background:rgba(255, 85, 85, 0.05); padding:20px; border-radius:16px; border:1px solid rgba(255, 85, 85, 0.2);">
+                <div style="font-size:0.9rem; color:var(--text-muted); margin-bottom:10px;">Remove Amount</div>
+                <div style="font-size:2rem; font-weight:700; color:#fff;" id="removePercentDisplay">0%</div>
+                
+                <div class="range-wrap">
+                    <input type="range" id="removeRange" min="0" max="100" value="0" step="1">
+                </div>
+                
+                <div style="display:flex; justify-content:space-between; gap:10px; margin-top:15px;">
+                    <button class="btn-ghost" onclick="setRemove(25)">25%</button>
+                    <button class="btn-ghost" onclick="setRemove(50)">50%</button>
+                    <button class="btn-ghost" onclick="setRemove(75)">75%</button>
+                    <button class="btn-ghost" onclick="setRemove(100)">Max</button>
+                </div>
+            </div>
+            
+            <div style="margin-top:15px; text-align:center; font-size:0.9rem;">
+                <div style="margin-bottom:5px;">You will receive:</div>
+                <div style="display:flex; justify-content:space-around; font-weight:600;">
+                    <div><span id="estRemoveA">0.00</span> <span id="lblRemA">A</span></div>
+                    <div><span id="estRemoveB">0.00</span> <span id="lblRemB">B</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="pool-info">
+            <div class="detail-row"><span>Prices and Pool Share</span></div>
+            <div style="display:flex; justify-content:space-between; margin-top:10px; text-align:center;">
+                <div>
+                    <div id="rateA" style="font-weight:600;">--</div>
+                    <div style="font-size:0.7rem; color:var(--text-muted);"><span id="lblRateA">A</span> per <span id="lblRateB">B</span></div>
+                </div>
+                <div>
+                    <div id="rateB" style="font-weight:600;">--</div>
+                    <div style="font-size:0.7rem; color:var(--text-muted);"><span id="lblRateB2">B</span> per <span id="lblRateA2">A</span></div>
+                </div>
+                <div>
+                    <div id="sharePool" style="font-weight:600; color:var(--success);">--%</div>
+                    <div style="font-size:0.7rem; color:var(--text-muted);">Share</div>
+                </div>
+            </div>
+            <div style="margin-top:10px; border-top:1px solid rgba(255,255,255,0.1); padding-top:10px;">
+                <div style="display:flex; justify-content:space-between; font-size:0.8rem;">
+                    <span style="color:var(--text-muted)">Your Position (LP):</span>
+                    <span id="userLpBalance" style="color:var(--warning); font-weight:600;">0.0000</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="pool-info" style="margin-top: 10px; margin-bottom: 20px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <span style="font-size:0.8rem; color:var(--text-muted);">Slippage Tolerance</span>
+                <span id="slippageDisplay" style="color:var(--success); font-weight:600;">0.5%</span>
+            </div>
+            <div style="display:flex; gap:8px;">
+                <button class="btn-ghost" onclick="setSlippage(0.1)" style="flex:1; font-size:0.8rem;">0.1%</button>
+                <button class="btn-ghost" onclick="setSlippage(0.5)" style="flex:1; font-size:0.8rem; border:1px solid var(--success);">0.5%</button>
+                <button class="btn-ghost" onclick="setSlippage(1.0)" style="flex:1; font-size:0.8rem;">1.0%</button>
+                <button class="btn-ghost" onclick="setSlippage(5.0)" style="flex:1; font-size:0.8rem; color:var(--warning);">5.0%</button>
+            </div>
+        </div>
+
+        <button id="btnMainAction" class="btn-primary" style="width:100%; margin-top:0; font-size:1.1rem; padding:16px;">Connect Wallet</button>
+        <div id="txStatus" class="action-status" style="margin-top:10px;"></div>
+
+      </div>
+
+    </div> 
+  </div>
+
+  <!-- Wallet Modal -->
+  <div id="walletModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header"><h2 class="modal-title">Connect Wallet</h2><button class="btn-close" onclick="closeWalletModal()">×</button></div>
+      <div id="walletList" class="wallet-grid"></div>
+      <div style="margin-top:24px; text-align:center; font-size:0.8rem; color:var(--text-muted);">By connecting, you agree to VIBE Terms of Service.</div>
+    </div>
+  </div>
+
+  <!-- Import Preview Modal -->
+  <div id="importModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 class="modal-title">Import Token</h2>
+        <button class="btn-close" id="btnCloseImport">×</button>
+      </div>
+
+      <div style="font-size:0.85rem; color:var(--text-muted); margin-bottom:12px;">
+        We’ll read metadata from chain and store it locally.
+      </div>
+
+      <div style="margin-bottom:12px;">
+        <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:6px;">Address</div>
+        <div id="importAddrPreview" style="font-family:monospace; font-size:0.85rem; background:rgba(255,255,255,0.04); padding:10px; border-radius:12px; border:1px solid rgba(255,255,255,0.07);">
+          --
+        </div>
+      </div>
+
+      <div id="importPreviewCard" style="background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.07); border-radius:16px; padding:14px; margin-bottom:14px;">
+        <div style="display:flex; justify-content:space-between; gap:12px; align-items:center;">
+          <div style="display:flex; gap:10px; align-items:center;">
+            <img id="importIconPreview" src="icons/token.svg" width="34" height="34" style="border-radius:50%;" onerror="this.src='icons/token.svg'">
+            <div>
+              <div id="importSymbolPreview" style="font-weight:700; color:#fff;">--</div>
+              <div id="importNamePreview" style="font-size:0.8rem; color:var(--text-muted);">--</div>
+            </div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:0.75rem; color:var(--text-muted);">Decimals</div>
+            <div id="importDecimalsPreview" style="font-weight:700;">--</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="importWarning" style="font-size:0.85rem; color:var(--warning); background:rgba(249,224,97,0.08); border:1px solid rgba(249,224,97,0.2); padding:10px; border-radius:12px; margin-bottom:14px; display:none;">
+        Warning: This token may not be a standard ERC20. Proceed if you know what you're doing.
+      </div>
+
+      <div id="importError" style="font-size:0.85rem; color:var(--danger); margin-bottom:12px; display:none;"></div>
+
+      <div style="display:flex; gap:10px;">
+        <button class="btn-ghost" id="btnCancelImport" style="flex:1;">Cancel</button>
+        <button class="btn-primary" id="btnConfirmImport" style="flex:1;">Confirm Import</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.10.0/dist/ethers.umd.min.js"></script>
+  <script src="abis.js"></script>
+  <script src="config.js"></script>
+  <script src="wallet-config.js"></script>
+  <script src="swap-config.js"></script>
+  <script src="poolabi.js"></script> 
+  <script src="pools.js"></script>
+</body>
+</html>

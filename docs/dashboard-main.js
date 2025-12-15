@@ -28,7 +28,7 @@ const updateStatus = (connected) => {
     btn.appendChild(arrow);
     
     // Update Dropdown Data
-    getEl('dropdownAddress').textContent = userAddress.substring(0,8) + "..." + userAddress.substring(38);
+    if(getEl('dropdownAddress')) getEl('dropdownAddress').textContent = userAddress.substring(0,8) + "..." + userAddress.substring(38);
 
   } else {
     dot.style.color = "var(--danger)";
@@ -54,6 +54,8 @@ async function initApp() {
             const defaultNet = Object.values(NETWORKS_DATA).find(n => n.slug === "soneium" || n.chainId == "1868");
             if(defaultNet) {
                  ACTIVE = defaultNet;
+                 // EXPOSE GLOBAL FOR WIDGET
+                 window.ACTIVE = ACTIVE; 
                  const sel = getEl("networkSelect");
                  if(sel) sel.value = ACTIVE.chainId;
             }
@@ -87,6 +89,8 @@ function initNetworkSelector() {
              await switchNetwork(targetChainId);
         } else {
              ACTIVE = Object.values(NETWORKS_DATA).find(n => n.chainId == targetChainId);
+             // UPDATE GLOBAL FOR WIDGET
+             window.ACTIVE = ACTIVE;
              console.log("Selected network (offline mode):", ACTIVE.label);
         }
     };
@@ -175,10 +179,18 @@ getEl("btnDisconnect").onclick = () => {
     userAddress = null;
     signer = null;
     selectedProvider = null;
+    // Clear Globals for Widget
+    window.signer = null;
+    window.provider = null;
+    
     updateStatus(false);
     
     getEl("netWorthDisplay").textContent = "$0.00";
     getEl("marketsBody").innerHTML = `<tr><td colspan="8" style="text-align:center; padding:30px;">Connect wallet to view markets</td></tr>`;
+    
+    // Reset Swap Widget Button
+    const btnSwap = getEl('btnDashSwap');
+    if(btnSwap) btnSwap.textContent = "Connect Wallet";
     
     accountDropdown.classList.remove("show");
 };
@@ -199,7 +211,12 @@ async function connectWallet() {
     signer = await provider.getSigner();
     userAddress = await signer.getAddress();
     
-    // Save Session (Pro Feature)
+    // --- EXPOSE GLOBALS FOR SWAP WIDGET ---
+    window.provider = provider;
+    window.signer = signer;
+    // --------------------------------------
+    
+    // Save Session (Pro Feature) - CRUCIAL PARA RECONEXION AL CAMBIAR RED
     if(window.SessionManager) window.SessionManager.save();
     
     const chainIdHex = await provider.send("eth_chainId", []);
@@ -231,15 +248,22 @@ async function connectWallet() {
         }
     }
     
+    // Update Global ACTIVE for Widget
+    window.ACTIVE = ACTIVE;
+    
     if(sel && ACTIVE) sel.value = ACTIVE.chainId;
 
     console.log("Active Network:", ACTIVE.label);
+    
+    // Actualizar UI General
     updateStatus(true);
     
+    // Inicializar Componentes Pro
     fillHypotheticalAssetSelect();
     fillActionAssets();
     await refreshDashboard();
     
+    // Listeners para recargar al cambiar red
     if(ethProvider.on) {
         ethProvider.on('chainChanged', () => window.location.reload());
         ethProvider.on('accountsChanged', () => window.location.reload());
@@ -543,103 +567,106 @@ async function renderVibeVault() {
 function fillActionAssets() {
   if(!ACTIVE || !ACTIVE.cTokens) return;
   const sel = getEl("quickAsset");
+  if(!sel) return; // Guard
   sel.innerHTML = "";
   ACTIVE.cTokens.forEach(x => {
     const opt = document.createElement("option");
     opt.value = x.address;
     opt.dataset.decimals = x.underlyingDecimals || 18; 
     opt.dataset.underlying = x.underlying;
-    // opt.textContent = x.symbol; 
-     // --- CAMBIO PRO AQUÍ ---
-    // Usamos underlyingSymbol si existe (ASTR), si no, quitamos la 'c' del symbol (cASTR -> ASTR)
+    
+    // Visual Fix
     const displayName = x.underlyingSymbol || x.symbol.replace(/^c/, ''); 
     opt.textContent = displayName; 
-    // -----------------------
     sel.appendChild(opt);
   });
 }
 
-getEl("btnQuickExecute").onclick = async () => {
-    if (!signer || !ACTIVE) { alert("Connect wallet first"); return; }
-    const statusEl = getEl("quickStatus");
-    const sel = getEl("quickAsset");
-    const cAddr = sel.value;
-    if(!cAddr) return;
+// --- RESTORED QUICK ACTION LOGIC ---
+const btnQuick = getEl("btnQuickExecute");
+if(btnQuick) {
+    btnQuick.onclick = async () => {
+        if (!signer || !ACTIVE) { alert("Connect wallet first"); return; }
+        const statusEl = getEl("quickStatus");
+        const sel = getEl("quickAsset");
+        const cAddr = sel.value;
+        if(!cAddr) return;
 
-    const selectedOpt = sel.selectedOptions[0];
-    const uDecimals = parseInt(selectedOpt.dataset.decimals || 18);
-    const uAddr = selectedOpt.dataset.underlying;
-    const action = getEl("quickAction").value;
-    const amountStr = getEl("quickAmount").value;
+        const selectedOpt = sel.selectedOptions[0];
+        const uDecimals = parseInt(selectedOpt.dataset.decimals || 18);
+        const uAddr = selectedOpt.dataset.underlying;
+        const action = getEl("quickAction").value;
+        const amountStr = getEl("quickAmount").value;
 
-    if (!amountStr || parseFloat(amountStr) <= 0) { alert("Invalid amount"); return; }
+        if (!amountStr || parseFloat(amountStr) <= 0) { alert("Invalid amount"); return; }
 
-    statusEl.textContent = "Processing...";
-    statusEl.style.color = "var(--warning)";
+        statusEl.textContent = "Processing...";
+        statusEl.style.color = "var(--warning)";
 
-    try {
-        const cToken = new ethers.Contract(cAddr, window.C_TOKEN_ABI, signer);
-        const rawAmount = ethers.parseUnits(amountStr, uDecimals);
+        try {
+            const cToken = new ethers.Contract(cAddr, window.C_TOKEN_ABI, signer);
+            const rawAmount = ethers.parseUnits(amountStr, uDecimals);
 
-        if (action === "mint") {
-            await ensureAllowance(uAddr, cAddr, rawAmount, statusEl);
-            statusEl.textContent = "Minting...";
-            const tx = await cToken.mint(rawAmount);
-            await tx.wait();
-            statusEl.textContent = "Success!";
-        } 
-        else if (action === "borrow") {
-            const master = new ethers.Contract(ACTIVE.master, window.MASTER_ABI, signer);
-            const assetsIn = await master.getAssetsIn(userAddress);
-            const isEntered = assetsIn.map(a => a.toLowerCase()).includes(cAddr.toLowerCase());
-            
-            if (!isEntered) {
-                statusEl.textContent = "Enabling Market...";
-                const txEnter = await master.enterMarkets([cAddr]);
-                await txEnter.wait();
+            if (action === "mint") {
+                await ensureAllowance(uAddr, cAddr, rawAmount, statusEl);
+                statusEl.textContent = "Minting...";
+                const tx = await cToken.mint(rawAmount);
+                await tx.wait();
+                statusEl.textContent = "Success!";
+            } 
+            else if (action === "borrow") {
+                const master = new ethers.Contract(ACTIVE.master, window.MASTER_ABI, signer);
+                const assetsIn = await master.getAssetsIn(userAddress);
+                const isEntered = assetsIn.map(a => a.toLowerCase()).includes(cAddr.toLowerCase());
+                
+                if (!isEntered) {
+                    statusEl.textContent = "Enabling Market...";
+                    const txEnter = await master.enterMarkets([cAddr]);
+                    await txEnter.wait();
+                }
+
+                statusEl.textContent = "Borrowing...";
+                const tx = await cToken.borrow(rawAmount);
+                await tx.wait();
+                statusEl.textContent = "Success!";
+            }
+            else if (action === "repay") {
+                await ensureAllowance(uAddr, cAddr, rawAmount, statusEl);
+                statusEl.textContent = "Repaying...";
+                const tx = await cToken.repay(rawAmount);
+                await tx.wait();
+                statusEl.textContent = "Success!";
+            }
+            else if (action === "redeem") {
+                statusEl.textContent = "Calc cTokens...";
+                const exchRate = await cToken.exchangeRateStored();
+                let normalizedAmount = rawAmount;
+                if (uDecimals < 18) {
+                    normalizedAmount = rawAmount * (10n ** BigInt(18 - uDecimals));
+                } else if (uDecimals > 18) {
+                    normalizedAmount = rawAmount / (10n ** BigInt(uDecimals - 18));
+                }
+                const redeemCTokens = (normalizedAmount * 1000000000000000000n) / exchRate;
+                
+                statusEl.textContent = "Redeeming...";
+                const tx = await cToken.redeem(redeemCTokens);
+                await tx.wait();
+                statusEl.textContent = "Success!";
             }
 
-            statusEl.textContent = "Borrowing...";
-            const tx = await cToken.borrow(rawAmount);
-            await tx.wait();
-            statusEl.textContent = "Success!";
-        }
-        else if (action === "repay") {
-            await ensureAllowance(uAddr, cAddr, rawAmount, statusEl);
-            statusEl.textContent = "Repaying...";
-            const tx = await cToken.repay(rawAmount);
-            await tx.wait();
-            statusEl.textContent = "Success!";
-        }
-        else if (action === "redeem") {
-            statusEl.textContent = "Calc cTokens...";
-            const exchRate = await cToken.exchangeRateStored();
-            let normalizedAmount = rawAmount;
-            if (uDecimals < 18) {
-                normalizedAmount = rawAmount * (10n ** BigInt(18 - uDecimals));
-            } else if (uDecimals > 18) {
-                normalizedAmount = rawAmount / (10n ** BigInt(uDecimals - 18));
-            }
-            const redeemCTokens = (normalizedAmount * 1000000000000000000n) / exchRate;
-            
-            statusEl.textContent = "Redeeming...";
-            const tx = await cToken.redeem(redeemCTokens);
-            await tx.wait();
-            statusEl.textContent = "Success!";
-        }
+            statusEl.style.color = "var(--success)";
+            setTimeout(() => { statusEl.textContent = "Ready"; statusEl.style.color = "var(--text-muted)"; }, 3000);
+            await refreshDashboard();
 
-        statusEl.style.color = "var(--success)";
-        setTimeout(() => { statusEl.textContent = "Ready"; statusEl.style.color = "var(--text-muted)"; }, 3000);
-        await refreshDashboard();
-
-    } catch (e) {
-        console.error(e);
-        let errMsg = e.shortMessage || e.message || "Error";
-        if(errMsg.includes("User rejected")) errMsg = "User Rejected";
-        statusEl.textContent = "Failed: " + errMsg;
-        statusEl.style.color = "var(--danger)";
-    }
-};
+        } catch (e) {
+            console.error(e);
+            let errMsg = e.shortMessage || e.message || "Error";
+            if(errMsg.includes("User rejected")) errMsg = "User Rejected";
+            statusEl.textContent = "Failed: " + errMsg;
+            statusEl.style.color = "var(--danger)";
+        }
+    };
+}
 
 async function ensureAllowance(tokenAddr, spender, amount, statusEl) {
     const token = new ethers.Contract(tokenAddr, window.MIN_ERC20_ABI, signer);
@@ -655,114 +682,110 @@ async function ensureAllowance(tokenAddr, spender, amount, statusEl) {
 function fillHypotheticalAssetSelect() {
   if(!ACTIVE || !ACTIVE.cTokens) return;
   const sel = getEl("hypAssetSelect");
+  if(!sel) return;
   sel.innerHTML = "";
   ACTIVE.cTokens.forEach(x => {
     const opt = document.createElement("option");
     opt.value = x.address;
     opt.dataset.decimals = x.underlyingDecimals || 18; 
-    //opt.textContent = x.symbol;
-     // --- CAMBIO PRO AQUÍ ---
-    // Usamos underlyingSymbol si existe (ASTR), si no, quitamos la 'c' del symbol (cASTR -> ASTR)
     const displayName = x.underlyingSymbol || x.symbol.replace(/^c/, ''); 
     opt.textContent = displayName; 
-    // -----------------------
     sel.appendChild(opt);
   });
 }
 
-// -----------------------------------------------------------
-// FIX APLICADO: Lógica de Simulación Hipotética Corregida
-// -----------------------------------------------------------
-getEl("hypotheticalForm").onsubmit = async (e) => {
-  e.preventDefault();
-  if (!userAddress) { alert("Connect wallet first"); return; }
-  
-  const sel = getEl("hypAssetSelect");
-  if(!sel.value) return;
-  const assetAddr = sel.value;
-  const underlyingDecimals = parseInt(sel.selectedOptions[0].dataset.decimals || 18);
-  const action = getEl("hypActionType").value; 
-  const amountVal = getEl("hypAmount").value;
+// --- RESTORED SIMULATION LOGIC ---
+const hypForm = getEl("hypotheticalForm");
+if(hypForm) {
+    hypForm.onsubmit = async (e) => {
+      e.preventDefault();
+      if (!userAddress) { alert("Connect wallet first"); return; }
+      
+      const sel = getEl("hypAssetSelect");
+      if(!sel.value) return;
+      const assetAddr = sel.value;
+      const underlyingDecimals = parseInt(sel.selectedOptions[0].dataset.decimals || 18);
+      const action = getEl("hypActionType").value; 
+      const amountVal = getEl("hypAmount").value;
 
-  if(!amountVal || parseFloat(amountVal) <= 0) { alert("Enter valid amount"); return; }
+      if(!amountVal || parseFloat(amountVal) <= 0) { alert("Enter valid amount"); return; }
 
-  const rawAmount = ethers.parseUnits(amountVal, underlyingDecimals); 
-  let redeem = 0n, borrow = 0n;
-  
-  if (action === "borrow") {
-    borrow = rawAmount;
-  } else {
-    try {
-        const c = new ethers.Contract(assetAddr, window.C_TOKEN_ABI, provider);
-        const exchRate = await c.exchangeRateStored();
-        let normalizedAmount = rawAmount;
-        if (underlyingDecimals < 18) normalizedAmount = rawAmount * (10n ** BigInt(18 - underlyingDecimals));
-        else if (underlyingDecimals > 18) normalizedAmount = rawAmount / (10n ** BigInt(underlyingDecimals - 18));
-        redeem = (normalizedAmount * 1000000000000000000n) / exchRate;
-    } catch(e) { console.error(e); return; }
-  }
+      const rawAmount = ethers.parseUnits(amountVal, underlyingDecimals); 
+      let redeem = 0n, borrow = 0n;
+      
+      if (action === "borrow") {
+        borrow = rawAmount;
+      } else {
+        try {
+            const c = new ethers.Contract(assetAddr, window.C_TOKEN_ABI, provider);
+            const exchRate = await c.exchangeRateStored();
+            let normalizedAmount = rawAmount;
+            if (underlyingDecimals < 18) normalizedAmount = rawAmount * (10n ** BigInt(18 - underlyingDecimals));
+            else if (underlyingDecimals > 18) normalizedAmount = rawAmount / (10n ** BigInt(underlyingDecimals - 18));
+            redeem = (normalizedAmount * 1000000000000000000n) / exchRate;
+        } catch(e) { console.error(e); return; }
+      }
 
-  try {
-    const btn = e.target.querySelector("button");
-    const oldTxt = btn.textContent;
-    btn.textContent = "Simulating...";
+      try {
+        const btn = e.target.querySelector("button");
+        const oldTxt = btn.textContent;
+        btn.textContent = "Simulating...";
 
-    const master = new ethers.Contract(ACTIVE.master, window.MASTER_ABI, provider);
-    const res = await master.getHypotheticalAccountLiquidity(userAddress, assetAddr, redeem, borrow);
-    
-    const ldNew = res.ldNew ? res.ldNew : (res[0] ? res[0] : res);
-    
-    // FIX: Acceso correcto a indices [1] y [2]
-    const liqLimitUSD = Number(ldNew[1].toString()) / 1e18;
-    const bUSD = Number(ldNew[2].toString()) / 1e18;
-    
-    let percent = 0;
-    if (liqLimitUSD > 0) {
-      percent = (bUSD / liqLimitUSD) * 100;
-    } else if (bUSD > 0) {
-      percent = 110;
-    }
-    
-    const bar = getEl("hypotheticalCollateralBar");
-    const txt = getEl("hypotheticalCollateralBarText");
-    
-    // FIX: Verificar si es colateral en vez de comparar USD
-    const assetsIn = await master.getAssetsIn(userAddress);
-    const isCollateral = assetsIn.map(a => a.toLowerCase()).includes(assetAddr.toLowerCase());
-    
-    if (action === "redeem" && !isCollateral) {
-         txt.textContent = "No Change (Asset not used as collateral)";
-         txt.style.color = "var(--text-muted)";
-         bar.style.width = "0%";
-         bar.style.background = "transparent";
-    } else {
-         const visualPercent = Math.min(100, percent);
-         bar.style.width = visualPercent + "%";
-         txt.style.opacity = "1";
-         txt.textContent = percent.toFixed(2) + "% (Simulated)";
-         
-         if(percent >= 100) { 
-           bar.style.background = "var(--danger)"; 
-           txt.style.color = "var(--danger)"; 
-         } 
-         else if(percent > 90) { 
-           bar.style.background = "rgba(255, 85, 85, 0.6)"; 
-           txt.style.color = "var(--danger)"; 
-         } 
-         else { 
-           bar.style.background = "rgba(249, 224, 97, 0.5)"; 
-           txt.style.color = "var(--warning)"; 
-         }
-    }
-    
-    btn.textContent = oldTxt;
+        const master = new ethers.Contract(ACTIVE.master, window.MASTER_ABI, provider);
+        const res = await master.getHypotheticalAccountLiquidity(userAddress, assetAddr, redeem, borrow);
+        
+        const ldNew = res.ldNew ? res.ldNew : (res[0] ? res[0] : res);
+        
+        const liqLimitUSD = Number(ldNew[1].toString()) / 1e18;
+        const bUSD = Number(ldNew[2].toString()) / 1e18;
+        
+        let percent = 0;
+        if (liqLimitUSD > 0) {
+          percent = (bUSD / liqLimitUSD) * 100;
+        } else if (bUSD > 0) {
+          percent = 110;
+        }
+        
+        const bar = getEl("hypotheticalCollateralBar");
+        const txt = getEl("hypotheticalCollateralBarText");
+        
+        const assetsIn = await master.getAssetsIn(userAddress);
+        const isCollateral = assetsIn.map(a => a.toLowerCase()).includes(assetAddr.toLowerCase());
+        
+        if (action === "redeem" && !isCollateral) {
+             txt.textContent = "No Change (Asset not used as collateral)";
+             txt.style.color = "var(--text-muted)";
+             bar.style.width = "0%";
+             bar.style.background = "transparent";
+        } else {
+             const visualPercent = Math.min(100, percent);
+             bar.style.width = visualPercent + "%";
+             txt.style.opacity = "1";
+             txt.textContent = percent.toFixed(2) + "% (Simulated)";
+             
+             if(percent >= 100) { 
+               bar.style.background = "var(--danger)"; 
+               txt.style.color = "var(--danger)"; 
+             } 
+             else if(percent > 90) { 
+               bar.style.background = "rgba(255, 85, 85, 0.6)"; 
+               txt.style.color = "var(--danger)"; 
+             } 
+             else { 
+               bar.style.background = "rgba(249, 224, 97, 0.5)"; 
+               txt.style.color = "var(--warning)"; 
+             }
+        }
+        
+        btn.textContent = oldTxt;
 
-  } catch(e) { 
-    console.error("Sim Error:", e);
-    alert("Simulation failed.");
-    e.target.querySelector("button").textContent = "Simulate Impact";
-  }
-};
+      } catch(e) { 
+        console.error("Sim Error:", e);
+        alert("Simulation failed.");
+        e.target.querySelector("button").textContent = "Simulate Impact";
+      }
+    };
+}
 
 function formatNumber(n, dp=2) { return Number(n).toLocaleString('en-US', {minimumFractionDigits:dp, maximumFractionDigits:dp}); }
 function ratePerBlockToAPY(rate, blocks) { const r = Number(rate)/1e18; return r <= 0 ? 0 : ((Math.pow(1+r, blocks)-1)*100); }
@@ -778,7 +801,6 @@ async function switchNetwork(targetChainId) {
         });
         
     } catch (switchError) {
-        // This error code indicates that the chain has not been added to MetaMask.
         if (switchError.code === 4902) {
             try {
                 await window.ethereum.request({

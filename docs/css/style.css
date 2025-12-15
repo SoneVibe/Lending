@@ -629,3 +629,413 @@ footer { border-top: 1px solid var(--card-border); padding: 40px 20px; text-alig
 .timeline-item.active::before { background: var(--success); box-shadow: 0 0 10px var(--success); }
 .timeline-date { font-weight: 700; color: #fff; margin-bottom: 5px; font-size: 0.9rem; }
 .timeline-content { color: var(--text-muted); font-size: 0.9rem; }
+/* ... (Tus estilos existentes) ... */
+
+/* ... (Mantén todo lo anterior hasta llegar a la sección SWAP) ... */
+
+/* =========================================
+   15. GOD TIER SWAP UI (REMASTERED)
+   ========================================= */
+
+.swap-container {
+  max-width: 480px;
+  margin: 40px auto; /* Más espacio arriba */
+  position: relative;
+}
+
+/* El fondo brillante detrás del swap (Aura) */
+.swap-container::before {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%; height: 100%;
+  background: radial-gradient(circle, rgba(45, 108, 223, 0.2) 0%, rgba(0,0,0,0) 70%);
+  z-index: -1;
+  pointer-events: none;
+}
+
+.swap-card {
+  background: rgba(20, 22, 30, 0.7); /* Más oscuro para contraste */
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  position: relative;
+  overflow: hidden; /* Para contener brillos */
+}
+
+/* Cabecera del Swap */
+.swap-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 20px;
+  padding: 0 4px;
+}
+.swap-header h3 { margin: 0; font-size: 1.1rem; color: #fff; font-weight: 600; }
+.settings-icon { 
+  opacity: 0.6; cursor: pointer; transition: 0.3s; font-size: 1.2rem;
+}
+.settings-icon:hover { opacity: 1; transform: rotate(90deg); color: var(--success); }
+
+/* Cajas de Input (Token Input Box) */
+.token-input-box {
+  background: rgba(0, 0, 0, 0.4); /* Fondo profundo */
+  border-radius: 20px;
+  padding: 16px 20px;
+  border: 1px solid transparent;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-bottom: 4px; /* Espacio mínimo para el botón de flecha */
+}
+
+.token-input-box:hover {
+  background: rgba(0, 0, 0, 0.5);
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+.token-input-box:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(45, 108, 223, 0.2);
+  background: rgba(0, 0, 0, 0.6);
+}
+
+/* Etiquetas y Balances */
+.token-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.input-label { font-size: 0.85rem; color: var(--text-muted); font-weight: 500; }
+.balance-label { font-size: 0.8rem; color: var(--text-muted); cursor: pointer; }
+.balance-label:hover { color: var(--accent); }
+
+/* El Input Gigante */
+.swap-input {
+  background: transparent !important;
+  border: none !important;
+  font-size: 2rem !important; /* GIGANTE */
+  font-weight: 700;
+  color: #fff !important;
+  padding: 0 !important;
+  width: 60%;
+  height: auto;
+  outline: none;
+  font-family: 'Inter', sans-serif;
+}
+.swap-input::placeholder { color: rgba(255,255,255,0.15); }
+
+/* Selector de Token (Píldora) */
+.token-badge {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 6px 12px 6px 8px;
+  border-radius: 24px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+.token-badge:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+.token-badge span { font-weight: 700; font-size: 1.1rem; color: #fff; }
+.token-badge img { width: 24px; height: 24px; border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
+
+/* Flecha Flotante */
+.swap-arrow {
+  display: flex; justify-content: center; align-items: center;
+  height: 12px; z-index: 10; position: relative;
+}
+.btn-arrow {
+  background: #1a1f35; /* Color sólido para tapar la unión */
+  border: 4px solid var(--bg-dark); /* Borde del color del fondo de la página */
+  width: 40px; height: 40px;
+  border-radius: 12px;
+  color: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+.btn-arrow:hover { 
+  transform: scale(1.1) rotate(180deg);
+  background: var(--accent);
+  color: #fff;
+  border-color: #1a1f35;
+}
+
+/* Detalles del Swap (Acordeón) */
+.swap-details {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 16px;
+  padding: 16px;
+  margin-top: 20px;
+}
+.detail-row {
+  display: flex; justify-content: space-between;
+  margin-bottom: 8px; font-size: 0.85rem; color: var(--text-muted);
+}
+.detail-row:last-child { margin-bottom: 0; }
+.detail-val { color: #fff; font-weight: 500; font-family: monospace; }
+
+/* Botón de Acción Principal */
+#btnSwapAction, #btnZapAction {
+  width: 100%;
+  margin-top: 20px;
+  padding: 18px;
+  font-size: 1.2rem;
+  border-radius: 18px;
+  background: linear-gradient(135deg, var(--accent) 0%, #1e4b9e 100%);
+  box-shadow: 0 8px 20px rgba(45, 108, 223, 0.3);
+  border: none;
+  transition: all 0.2s;
+}
+#btnSwapAction:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 25px rgba(45, 108, 223, 0.5);
+  filter: brightness(1.1);
+}
+#btnSwapAction:disabled {
+  background: #333; color: #666; box-shadow: none; transform: none; cursor: not-allowed;
+}
+
+/* Tabs Estilizados */
+.swap-tabs {
+  display: flex;
+  background: rgba(0,0,0,0.4);
+  padding: 4px;
+  border-radius: 20px;
+  margin-bottom: 25px;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+.swap-tab {
+  flex: 1; text-align: center; padding: 12px;
+  border-radius: 16px; cursor: pointer;
+  font-weight: 600; color: var(--text-muted);
+  transition: all 0.3s;
+}
+.swap-tab:hover { color: #fff; }
+.swap-tab.active {
+  background: var(--card-bg);
+  color: #fff;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+/* Animación de carga para precio */
+@keyframes pulse { 0% { opacity:0.5; } 50% { opacity:1; } 100% { opacity:0.5; } }
+.loading-price { animation: pulse 1.5s infinite; }
+/* =========================================
+   16. PRO SWAP UI (GOD TIER)
+   ========================================= */
+
+/* Layout de 2 columnas para Desktop */
+.pro-dex-grid {
+  display: grid;
+  grid-template-columns: 1fr 420px; /* Gráfico flexible | Swap fijo */
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .pro-dex-grid { grid-template-columns: 1fr; }
+  .chart-panel { display: none; /* Ocultar gráfico en móvil para limpieza */ }
+  .swap-container-pro { margin: 0 auto; width: 100%; max-width: 420px; }
+}
+
+/* Panel del Gráfico */
+.chart-panel {
+  min-height: 400px;
+  display: flex; flex-direction: column;
+}
+.chart-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 20px; padding-bottom: 15px;
+  border-bottom: 1px solid var(--card-border);
+}
+.chart-intervals {
+  display: flex; gap: 5px; background: rgba(0,0,0,0.3);
+  padding: 4px; border-radius: 8px;
+}
+.chart-intervals span {
+  padding: 4px 10px; border-radius: 6px; font-size: 0.75rem;
+  color: var(--text-muted); cursor: pointer; transition: 0.2s;
+}
+.chart-intervals span:hover, .chart-intervals span.active {
+  background: var(--card-bg); color: #fff;
+}
+
+/* Panel de Swap Pro */
+.swap-card-pro {
+  background: #13161f; /* Fondo más sólido para contraste */
+  border: 1px solid var(--card-border);
+  border-radius: 24px;
+  padding: 20px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+}
+
+.swap-header-pro {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 15px;
+}
+.swap-header-pro h3 { margin: 0; font-size: 1.1rem; color: #fff; }
+
+/* Inputs Pro */
+.token-input-box-pro {
+  background: #0b0c15; /* Muy oscuro */
+  border-radius: 16px;
+  padding: 16px;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+}
+.token-input-box-pro:focus-within {
+  border-color: var(--accent);
+  background: #0f111a;
+}
+
+.token-flex-main {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 8px;
+}
+
+.swap-input-pro {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  font-size: 2rem;
+  font-weight: 600;
+  color: #fff !important;
+  width: 60%;
+}
+.swap-input-pro::placeholder { color: #444; }
+
+.token-badge-pro {
+  display: flex; align-items: center; gap: 8px;
+  background: #2c2f3e;
+  padding: 6px 12px 6px 8px;
+  border-radius: 24px;
+  font-weight: 700;
+  font-size: 1.1rem;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  transition: 0.2s;
+}
+.token-badge-pro:hover { background: #3a3e52; }
+
+.usd-approx {
+  font-size: 0.8rem; color: var(--text-muted);
+  margin-top: 4px; text-align: left;
+}
+
+/* Botón central */
+.swap-arrow-pro {
+  display: flex; justify-content: center;
+  margin: -14px 0; z-index: 10; position: relative;
+}
+.btn-arrow-pro {
+  background: #13161f;
+  border: 4px solid #13161f;
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  color: var(--text-muted);
+  background-color: #2c2f3e;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: 0.2s;
+}
+.btn-arrow-pro:hover { background-color: var(--accent); color: #fff; }
+
+/* Botón Acción Grande */
+.btn-primary-pro {
+  background: var(--accent);
+  color: #fff; border: none;
+  width: 100%; border-radius: 16px;
+  padding: 18px; font-size: 1.2rem; font-weight: 600;
+  margin-top: 15px; cursor: pointer;
+  box-shadow: 0 4px 20px var(--accent-glow);
+  transition: 0.2s;
+}
+.btn-primary-pro:hover { transform: translateY(-2px); }
+.btn-primary-pro:disabled { background: #333; color: #666; box-shadow: none; transform: none; }
+/* ... (Tus estilos anteriores) ... */
+
+/* =========================================
+   15. PAGE SPECIFIC: FARM & SOUS CHEF
+   ========================================= */
+.farm-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; }
+
+.farm-card {
+  background: var(--card-bg); border: 1px solid var(--card-border);
+  border-radius: 24px; padding: 24px; position: relative;
+  overflow: hidden; transition: transform 0.3s, border-color 0.3s;
+}
+.farm-card:hover { transform: translateY(-5px); border-color: var(--accent); }
+
+.farm-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+.icon-stack { display: flex; align-items: center; }
+.icon-stack img { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #1a1f35; }
+.icon-stack img:nth-child(2) { margin-left: -15px; z-index: 0; }
+.icon-stack img:nth-child(1) { z-index: 1; }
+
+.farm-badge {
+  background: rgba(45, 108, 223, 0.2); color: var(--accent);
+  padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;
+}
+.farm-badge.hot { background: rgba(249, 224, 97, 0.2); color: var(--warning); }
+
+.farm-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+.stat-row { display: flex; flex-direction: column; }
+.stat-label-sm { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; }
+.stat-val-lg { font-size: 1.2rem; font-weight: 700; color: #fff; }
+
+.harvest-box {
+  background: rgba(0,0,0,0.2); border-radius: 16px; padding: 15px;
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;
+}
+.btn-harvest {
+  background: var(--success); color: #000; border: none;
+  padding: 8px 16px; border-radius: 8px; font-weight: 700; cursor: pointer;
+  font-size: 0.85rem;
+}
+.btn-harvest:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Sous Chef Specific */
+.chef-card { border-top: 4px solid var(--warning); background: linear-gradient(145deg, rgba(30,34,48,0.8), rgba(249,224,97,0.05)); }
+/* MINI TOKEN SELECTOR */
+.token-select-mini {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 6px 10px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    outline: none;
+    appearance: none; /* Quita la flecha por defecto fea */
+    text-align: center;
+    min-width: 80px;
+}
+.token-select-mini:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+.token-select-mini option {
+    background: #1a1f35;
+    color: #fff;
+}
+/* --- DASHBOARD WIDGET PRO EXTRAS --- */
+.mini-slippage-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-muted);
+    padding: 4px 8px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.mini-slippage-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border-color: var(--accent);
+}

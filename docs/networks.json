@@ -7,6 +7,25 @@
     "blockExplorerUrls": ["https://soneium.blockscout.com/"],
     "nativeCurrency": { "name": "Ether", "symbol": "ETH", "decimals": 18 },
     "master": "0x2F38ecB638DC4fB636A85167C203d791f2809E60",
+    "router": "0xa393E76bE079cF1ccf684D0f815795Dde248f157", 
+    "factory": "0x06C0b58287794a0bdce20ce768b601CA974618DC", 
+
+        "swapTokens": {
+        "base": { 
+            "symbol": "ETH", 
+            "underlyingAddress": "0x4200000000000000000000000000000000000006", 
+            "decimals": 18, 
+            "icon": "icons/weth.svg",
+            "isNative": true
+        },
+        "quote": { 
+            "symbol": "LIGHT", 
+            "address": "0x84998bf491C80a79B99540666569F360d5Acae6E", 
+            "decimals": 6, 
+            "icon": "icons/sonevibe.png",
+            "isNative": false
+        }
+    },
     "cTokens": [
       {
         "symbol": "cASTR",
@@ -88,6 +107,61 @@
     "blockExplorerUrls": ["https://soneium-minato.blockscout.com/"],
     "nativeCurrency": { "name": "Ether", "symbol": "ETH", "decimals": 18 },
     "master": "0x8183764EB2f95AA2E8ee4F72A0C6AB3808d51b24",
+    "router": "0x8035BB4080F7439704c57D3296C4bF3c92B2B84e", 
+    "factory": "0x743bF6Af1635e39913231F33Ecb6A676322065dD", 
+    "zap": "0xb9320f4B9A19AC622d39d252cFAE168bf77e0e18",
+     "sousChefs": [
+      {
+        "id": 0,
+        "name": "Auto LIGHT",
+        "contract": "0xc81E5BC51D7523AE1114FE333E5C87Fb8E9F921f", 
+        "stakeToken": "0x0Bc17A9C941eDeD2f7f8fB369553b7b5F353Ade9",
+        "rewardToken": "0xE565757cc757a0985327Af1190185fF7b172868E",
+        "stakeSymbol": "LIGHT",
+        "rewardSymbol": "DOT",
+        "apr": "2,450%",
+        "isAuto": true
+      },
+      {
+        "id": 1,
+        "name": "Earn USDC",
+        "contract": "0xDIR_CONTRATO_EARN_USDC",
+        "stakeToken": "0xDIR_TOKEN_LIGHT",
+        "rewardToken": "0xDIR_TOKEN_USDC",
+        "stakeSymbol": "LIGHT",
+        "rewardSymbol": "USDC",
+        "apr": "85%"
+      }
+    ],
+    "swapTokens": {
+        "base": { 
+            "symbol": "ETH", 
+            "underlyingAddress": "0x4200000000000000000000000000000000000006", 
+            "decimals": 18, 
+            "icon": "icons/weth.svg",
+            "isNative": true
+        },
+        "quote": { 
+            "symbol": "LIGHT", 
+            "address": "0xed82c5856Cb9189379357887D58b933Ba7B04F88", 
+            "decimals": 18, 
+            "icon": "icons/vibe.svg",
+            "isNative": false
+        }
+        
+    },
+   
+    "masterChef": "0x5D9Eb0547f1914EB71d69ae68C9c36e9221D02c9", 
+    "farms": [
+      {
+        "pid": 0,
+        "lpToken": "0xec02438F5C2D09AbcE6A988331471bb371CDede4", 
+        "lpSymbol": "VIBE-ETH LP",
+        "icon1": "icons/vibe.svg",
+        "icon2": "icons/weth.svg"
+      }
+    ],
+
     "cTokens": [
       {
         "symbol": "cASTR",

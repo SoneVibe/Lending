@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>VIBE Sous Chef | Staking Pools</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="icon" type="image/svg+xml" href="icons/vibe.svg">
+  <link rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* Estilos Específicos para Chef */
+    .chef-card { border-top: 4px solid var(--warning); }
+    .action-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+    .toggle-group { background: rgba(0,0,0,0.3); border-radius: 8px; padding: 3px; display: flex; gap: 5px; }
+    .toggle-btn { background: transparent; border: none; color: var(--text-muted); padding: 5px 12px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer; transition: 0.2s; }
+    .toggle-btn.active { background: rgba(255,255,255,0.1); color: #fff; }
+    .toggle-btn.active.unstake-mode { background: rgba(255, 85, 85, 0.2); color: var(--danger); }
+    .sous-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    <nav class="sidebar glass-panel">
+      <div class="logo-area">
+        <svg width="28" height="28" viewBox="0 0 64 64"><circle cx="32" cy="32" r="32" fill="#1a1f35"/><path d="M18 42 L32 18 L46 42 Z" fill="#00e0ff"/></svg>
+        VIBE Finance
+      </div>
+      <a href="index.html" class="nav-link">Dashboard Home</a>
+      <a href="swap.html" class="nav-link">Trade & Swap</a>
+      <a href="farm.html" class="nav-link">Yield Farms</a>
+      <a href="#" class="nav-link active" style="color:var(--warning); border-color:var(--warning); background:rgba(249,224,97,0.1);">Sous Chef Pools</a>
+      <a href="markets.html" class="nav-link">Markets Overview</a>
+      <div style="flex-grow:1"></div>
+      <div style="padding: 10px; font-size: 0.8rem; color: var(--text-muted);">
+        Network Status:<br>
+        <span id="statusDot" style="color: var(--danger)">●</span> <span id="connStatus">Disconnected</span>
+      </div>
+    </nav>
+
+    <div class="main-content">
+      <header>
+        <div>
+          <h1 style="margin:0; font-size:1.8rem; color:var(--warning);">Sous Chef 👨‍🍳</h1>
+          <p style="margin:4px 0 0 0; color:var(--text-muted);">Stake LIGHT to earn Tokens</p>
+        </div>
+        <div class="nav-group">
+          <select id="networkSelect" class="network-select"><option>Loading...</option></select>
+          <div class="btn-account-wrapper">
+             <button id="btnConnect" class="btn-primary">Connect Wallet</button>
+             <div id="accountDropdown" class="account-dropdown">
+                 <div style="padding:12px 12px 6px 12px; font-size:0.8rem; color:var(--text-muted);">CONNECTED</div>
+                 <div style="padding:0 12px 12px 12px; font-size:1.1rem; font-weight:600; color:#fff;" id="dropdownAddress">...</div>
+                 <div class="menu-divider"></div>
+                 <div class="menu-item" id="btnCopyAddress"><span>📋</span> Copy Address</div>
+                 <div class="menu-item" id="btnDisconnect" style="color:var(--danger);"><span>🚪</span> Disconnect</div>
+             </div>
+          </div>
+        </div>
+      </header>
+
+      <div class="sous-grid">
+        
+        <!-- POOL 0: AUTO LIGHT -->
+        <div class="glass-panel chef-card" id="pool-0">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <img src="icons/vibe.svg" width="40" style="border-radius:50%; border:2px solid #1a1f35;">
+                    <div>
+                        <h3 style="margin:0; font-size:1.1rem;">Auto LIGHT</h3>
+                        <span style="font-size:0.75rem; color:var(--text-muted);">Stake LIGHT, Earn LIGHT</span>
+                    </div>
+                </div>
+                <div style="text-align:right;">
+                    <div style="font-size:0.75rem; color:var(--text-muted);">APY</div>
+                    <div style="font-size:1.2rem; font-weight:700; color:var(--warning);">2,450%</div>
+                </div>
+            </div>
+
+            <div style="background:rgba(249, 224, 97, 0.05); padding:15px; border-radius:12px; margin-bottom:15px; border:1px solid rgba(249, 224, 97, 0.2);">
+                <div style="display:flex; justify-content:space-between;">
+                    <span style="color:var(--warning); font-size:0.8rem;">LIGHT Earned</span>
+                    <button class="btn-harvest" onclick="handleHarvest(0)" disabled style="padding:4px 10px; font-size:0.75rem;">Harvest</button>
+                </div>
+                <div class="val-earned" style="font-size:1.4rem; font-weight:600; color:#fff; margin-top:5px;">0.000</div>
+            </div>
+
+            <div style="margin-bottom:15px;">
+                <div style="font-size:0.8rem; color:var(--text-muted); display:flex; justify-content:space-between;">
+                    <span>Staked LIGHT</span>
+                    <span class="val-staked" style="color:#fff;">0.00</span>
+                </div>
+            </div>
+
+            <!-- Tabs & Action -->
+            <div class="action-header">
+                <div class="toggle-group">
+                    <button class="toggle-btn active" onclick="setPoolMode(0, 'stake', this)">Stake</button>
+                    <button class="toggle-btn" onclick="setPoolMode(0, 'unstake', this)">Unstake</button>
+                </div>
+                <span style="font-size:0.75rem; color:var(--text-muted);">Avail: <span class="val-wallet">0.00</span></span>
+            </div>
+
+            <div style="display:flex; gap:8px;">
+                <div class="input-group" style="flex-grow:1; position:relative;">
+                    <input class="pool-input" type="number" placeholder="0.0" style="padding-right:50px;">
+                    <button class="btn-max" onclick="handleMax(0)" style="position:absolute; right:5px; top:50%; transform:translateY(-50%); background:rgba(255,255,255,0.1); border:none; color:var(--accent); font-size:0.7rem; padding:3px 6px; border-radius:4px; cursor:pointer;">MAX</button>
+                </div>
+                <button class="btn-action btn-primary" onclick="handleAction(0)" style="min-width:100px;">Connect</button>
+            </div>
+        </div>
+
+        <!-- POOL 1: EARN USDC -->
+        <div class="glass-panel" style="border-top: 4px solid var(--accent);" id="pool-1">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <img src="icons/usdc.svg" width="40" style="border-radius:50%; border:2px solid #1a1f35;">
+                    <div>
+                        <h3 style="margin:0; font-size:1.1rem;">Earn USDC</h3>
+                        <span style="font-size:0.75rem; color:var(--text-muted);">Stake LIGHT, Earn USDC</span>
+                    </div>
+                </div>
+                <div style="text-align:right;">
+                    <div style="font-size:0.75rem; color:var(--text-muted);">APR</div>
+                    <div style="font-size:1.2rem; font-weight:700; color:var(--accent);">85%</div>
+                </div>
+            </div>
+
+            <div style="background:rgba(45, 108, 223, 0.1); padding:15px; border-radius:12px; margin-bottom:15px;">
+                <div style="display:flex; justify-content:space-between;">
+                    <span style="color:var(--accent); font-size:0.8rem;">USDC Earned</span>
+                    <button class="btn-harvest" onclick="handleHarvest(1)" disabled style="padding:4px 10px; font-size:0.75rem;">Harvest</button>
+                </div>
+                <div class="val-earned" style="font-size:1.4rem; font-weight:600; color:#fff; margin-top:5px;">0.000</div>
+            </div>
+
+            <div style="margin-bottom:15px;">
+                <div style="font-size:0.8rem; color:var(--text-muted); display:flex; justify-content:space-between;">
+                    <span>Staked LIGHT</span>
+                    <span class="val-staked" style="color:#fff;">0.00</span>
+                </div>
+            </div>
+
+            <!-- Tabs & Action -->
+            <div class="action-header">
+                <div class="toggle-group">
+                    <button class="toggle-btn active" onclick="setPoolMode(1, 'stake', this)">Stake</button>
+                    <button class="toggle-btn" onclick="setPoolMode(1, 'unstake', this)">Unstake</button>
+                </div>
+                <span style="font-size:0.75rem; color:var(--text-muted);">Avail: <span class="val-wallet">0.00</span></span>
+            </div>
+
+            <div style="display:flex; gap:8px;">
+                <div class="input-group" style="flex-grow:1; position:relative;">
+                    <input class="pool-input" type="number" placeholder="0.0" style="padding-right:50px;">
+                    <button class="btn-max" onclick="handleMax(1)" style="position:absolute; right:5px; top:50%; transform:translateY(-50%); background:rgba(255,255,255,0.1); border:none; color:var(--accent); font-size:0.7rem; padding:3px 6px; border-radius:4px; cursor:pointer;">MAX</button>
+                </div>
+                <button class="btn-action btn-primary" onclick="handleAction(1)" style="min-width:100px;">Connect</button>
+            </div>
+        </div>
+
+      </div>
+    </div> 
+  </div>
+
+  <!-- Wallet Modal -->
+  <div id="walletModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header"><h2 class="modal-title">Connect Wallet</h2><button class="btn-close" onclick="closeWalletModal()">×</button></div>
+      <div id="walletList" class="wallet-grid"></div>
+      <div style="margin-top:24px; text-align:center; font-size:0.8rem; color:var(--text-muted);">By connecting, you agree to VIBE Terms of Service.</div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.10.0/dist/ethers.umd.min.js"></script>
+  <script src="abis.js"></script>
+  <script src="config.js"></script>
+  <script src="wallet-config.js"></script>
+  <script src="souschef.js"></script>
+</body>
+</html>
