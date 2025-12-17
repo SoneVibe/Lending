@@ -1,4 +1,4 @@
-// VIBESWAP LOGIC - PRO TIER (DYNAMIC + SLIPPAGE + LIQUIDATOR STYLE CONNECT)
+// VIBESWAP LOGIC - PRO TIER (DYNAMIC + SLIPPAGE + LIQUIDATOR STYLE CONNECT + WRAP/UNWRAP)
 let provider, signer, userAddress, NETWORKS_DATA, ACTIVE;
 let selectedProvider = null;
 
@@ -6,6 +6,16 @@ let selectedProvider = null;
 let isEthToToken = true;   
 let currentSlippage = 0.5; 
 let pairData = { base: null, quote: null };
+
+// FLAG GLOBAL PARA LA EJECUCIÓN
+let isWrapAction = false;
+let isUnwrapAction = false;
+
+// ABI MINIMO PARA WETH
+const WETH_ABI = [
+    "function deposit() payable",
+    "function withdraw(uint256 amount)"
+];
 
 const getEl = (id) => document.getElementById(id);
 
@@ -67,7 +77,6 @@ async function initApp() {
         // USAMOS SWAP CONFIG (CRÍTICO)
         NETWORKS_DATA = await window.loadSwapConfig();
         initNetworkSelector();
-        // NOTA: Quitamos initChart() de aquí arriba para evitar errores de timing
         
         // Auto-select Default (Soneium)
         ACTIVE = Object.values(NETWORKS_DATA).find(n => n.chainId == "1868" && n.enabled);
@@ -75,7 +84,7 @@ async function initApp() {
         // Initial Asset Setup
         if(ACTIVE) {
             setupAssets(ACTIVE);
-            updateBalances(); // Asumo que ya tienes esto
+            updateBalances(); 
             
             // PARCHE: Inicializamos la gráfica AQUÍ, cuando ACTIVE ya existe
             await initHybridChart(); 
@@ -141,7 +150,7 @@ window.onclick = (e) => {
     const modal = getEl('walletModal');
     const tokenModal = getEl('tokenModal');
     if (e.target === modal) closeWalletModal();
-    if (e.target === tokenModal) closeTokenModal(); // Manejar ambos modales
+    if (e.target === tokenModal) closeTokenModal(); 
     
     const accountDropdown = getEl("accountDropdown");
     if (accountDropdown && accountDropdown.classList.contains('show') && !e.target.closest('#btnConnect')) {
@@ -212,10 +221,9 @@ async function connectWallet() {
         if(sel && ACTIVE) sel.value = ACTIVE.chainId;
         setupAssets(ACTIVE);
         
-        // USA EL UI HELPER DEL LIQUIDATOR
         updateStatus(true);
         updateBalances();
-        loadChartData(); // <--- PARCHE: REFRESCAR CHART AL CONECTAR
+        loadChartData(); 
 
         if(ethProvider.on) {
              ethProvider.on('chainChanged', () => window.location.reload());
@@ -240,6 +248,7 @@ async function switchNetwork(targetChainId) {
         console.error(switchError);
     }
 }
+
 // --- SWAP UI LOGIC ---
 
 window.setTab = (tab) => {
@@ -284,14 +293,12 @@ function formatSmartRate(rate) {
     return rate.toFixed(4);
 }
 
-// Configura los iconos y símbolos iniciales
 function setupAssets(network) {
     if(!network.swapTokens) return;
     
     pairData.base = network.swapTokens.base;   
     pairData.quote = network.swapTokens.quote; 
     
-    // Asegurar flags de isNative si no existen
     if(pairData.base.isNative === undefined) pairData.base.isNative = true;
     
     updateSwapUI();
@@ -308,7 +315,6 @@ function updateSwapUI() {
     getEl('symIn').textContent = inToken.symbol;
     getEl('symOut').textContent = outToken.symbol;
     
-    // Fix imágenes con fallback
     const imgIn = getEl('imgIn');
     const imgOut = getEl('imgOut');
     if(imgIn) {
@@ -324,18 +330,15 @@ function updateSwapUI() {
     if(chartTitle) chartTitle.textContent = `${quote.symbol} / ${base.symbol}`;
 }
 
-// --- CORE FIX: BALANCES CORRECTOS ---
 async function updateBalances() {
     if(!signer || !ACTIVE || !pairData.base || !pairData.quote) return;
     try {
         const base = pairData.base;
         const quote = pairData.quote;
         
-        // Identificar cual es cual basado en la dirección del swap
         const tokenInObj = isEthToToken ? base : quote;
         const tokenOutObj = isEthToToken ? quote : base;
 
-        // Función auxiliar para leer saldo de un token arbitrario
         const getBalanceForToken = async (tokenObj) => {
             if(tokenObj.isNative || tokenObj.address === 'NATIVE') {
                 const b = await provider.getBalance(userAddress);
@@ -343,14 +346,13 @@ async function updateBalances() {
             } else {
                 const c = new ethers.Contract(tokenObj.address, window.MIN_ERC20_ABI, provider);
                 const b = await c.balanceOf(userAddress);
-                return parseFloat(ethers.formatUnits(b, tokenObj.decimals)).toFixed(2); // Usa decimales correctos
+                return parseFloat(ethers.formatUnits(b, tokenObj.decimals)).toFixed(2); 
             }
         };
 
         const balIn = await getBalanceForToken(tokenInObj);
         const balOut = await getBalanceForToken(tokenOutObj);
         
-        // Zap Balance siempre es nativo (ETH)
         const ethBalRaw = await provider.getBalance(userAddress);
         const ethBalFmt = parseFloat(ethers.formatEther(ethBalRaw)).toFixed(4);
 
@@ -366,11 +368,16 @@ const amountIn = getEl('amountIn');
 const amountOut = getEl('amountOut');
 const btnSwap = getEl('btnSwapAction');
 
-// INPUT LISTENER (QUOTE + PRICE IMPACT)
+// INPUT LISTENER (QUOTE + PRICE IMPACT + WRAP DETECTION)
 if(amountIn) {
     amountIn.addEventListener('input', async () => {
         const val = amountIn.value;
         const details = getEl('swapDetails');
+        
+        // Reset States
+        isWrapAction = false;
+        isUnwrapAction = false;
+        if(btnSwap && userAddress) btnSwap.textContent = "Swap";
         
         if(!val || parseFloat(val) === 0 || !ACTIVE?.router) {
             amountOut.value = "";
@@ -383,43 +390,60 @@ if(amountIn) {
         if(btnSwap) { btnSwap.disabled = true; btnSwap.textContent = "Fetching Price..."; }
 
         try {
-            const router = new ethers.Contract(ACTIVE.router, window.ROUTER_ABI, provider);
-            
             if (!pairData.base || !pairData.quote) throw new Error("Pair data incomplete");
 
-            // Configurar direcciones para el Router
-            // Si el token es Nativo, el router usa WETH en el path para cotizar, 
-            // pero las funciones swapExactETH... manejan el wrap internamente.
-            
-            // Determinar WETH Address de la red
-            const WETH_ADDR = ACTIVE.swapTokens.base.underlyingAddress; // Dirección del contrato WETH
-
+            const WETH_ADDR = ACTIVE.swapTokens.base.underlyingAddress; 
             const tokenInObj = isEthToToken ? pairData.base : pairData.quote;
             const tokenOutObj = isEthToToken ? pairData.quote : pairData.base;
 
-            const addrIn = (tokenInObj.isNative || tokenInObj.address === 'NATIVE') ? WETH_ADDR : tokenInObj.address;
-            const addrOut = (tokenOutObj.isNative || tokenOutObj.address === 'NATIVE') ? WETH_ADDR : tokenOutObj.address;
+            // --- WRAP/UNWRAP DETECTION ---
+            const addrIn = (tokenInObj.isNative || tokenInObj.address === 'NATIVE') ? 'NATIVE' : tokenInObj.address.toLowerCase();
+            const addrOut = (tokenOutObj.isNative || tokenOutObj.address === 'NATIVE') ? 'NATIVE' : tokenOutObj.address.toLowerCase();
+            const wethLC = WETH_ADDR.toLowerCase();
+
+            // CASO WRAP: Native -> WETH
+            if(addrIn === 'NATIVE' && addrOut === wethLC) {
+                isWrapAction = true;
+                amountOut.value = val; // 1:1
+                if(details) details.style.display = 'block';
+                getEl('priceDisplay').textContent = "1 : 1 (Wrap)";
+                getEl('impactDisplay').textContent = "0.00%";
+                getEl('minReceivedDisplay').textContent = `${val} ${tokenOutObj.symbol}`;
+                if(btnSwap) { btnSwap.textContent = "Wrap"; btnSwap.disabled = false; }
+                return;
+            }
+
+            // CASO UNWRAP: WETH -> Native
+            if(addrIn === wethLC && addrOut === 'NATIVE') {
+                isUnwrapAction = true;
+                amountOut.value = val; // 1:1
+                if(details) details.style.display = 'block';
+                getEl('priceDisplay').textContent = "1 : 1 (Unwrap)";
+                getEl('impactDisplay').textContent = "0.00%";
+                getEl('minReceivedDisplay').textContent = `${val} ${tokenOutObj.symbol}`;
+                if(btnSwap) { btnSwap.textContent = "Unwrap"; btnSwap.disabled = false; }
+                return;
+            }
+            // -----------------------------
+
+            // Lógica Router Standard (Si no es Wrap/Unwrap)
+            const router = new ethers.Contract(ACTIVE.router, window.ROUTER_ABI, provider);
             
-            const path = [addrIn, addrOut];
+            // Si es nativo para router usamos WETH Address en el path
+            const pathIn = (addrIn === 'NATIVE') ? WETH_ADDR : tokenInObj.address;
+            const pathOut = (addrOut === 'NATIVE') ? WETH_ADDR : tokenOutObj.address;
+            const path = [pathIn, pathOut];
             
-            // Decimales Correctos
-            const decimalsIn = tokenInObj.decimals;
-            const decimalsOut = tokenOutObj.decimals;
-            
-            // 1. Obtener Quote (Router)
-            const amountWei = ethers.parseUnits(val, decimalsIn);
+            const amountWei = ethers.parseUnits(val, tokenInObj.decimals);
             const amounts = await router.getAmountsOut(amountWei, path);
-            const outFmt = ethers.formatUnits(amounts[1], decimalsOut);
+            const outFmt = ethers.formatUnits(amounts[1], tokenOutObj.decimals);
             
-            // Actualizar UI Input B
             amountOut.value = parseFloat(outFmt).toFixed(6);
             if(details) details.style.display = 'block';
             
-            // 2. CÁLCULO DE PRICE IMPACT
-            const impactData = await calculatePriceImpact(amountWei, path, decimalsIn);
+            const impactData = await calculatePriceImpact(amountWei, path, tokenInObj.decimals);
             updateImpactUI(impactData);
 
-            // 3. Rate y Min Received
             const rate = parseFloat(outFmt) / parseFloat(val);
             getEl('priceDisplay').textContent = `1 ${tokenInObj.symbol} ≈ ${formatSmartRate(rate)} ${tokenOutObj.symbol}`;
             
@@ -432,7 +456,7 @@ if(amountIn) {
         } catch(e) {
             console.log("Quote Error:", e);
             amountOut.value = "0.0";
-            if(btnSwap) { btnSwap.textContent = "Insufficient Liquidity / Config"; btnSwap.disabled = true; }
+            if(btnSwap) { btnSwap.textContent = "Insufficient Liquidity"; btnSwap.disabled = true; }
             const impactEl = getEl('impactDisplay');
             if(impactEl) impactEl.textContent = "--";
         }
@@ -444,10 +468,7 @@ if(getEl('btnSwitch')) {
         isEthToToken = !isEthToToken;
         updateSwapUI();
         updateBalances();
-        
-        // PARCHE: RECARGAR GRÁFICA AL INVERTIR (SWITCH)
         loadChartData(); 
-        
         amountIn.value = ""; amountOut.value = "";
         getEl('swapDetails').style.display = 'none';
     };
@@ -460,78 +481,90 @@ if(btnSwap) {
         if(!val) return;
 
         const statusDiv = getEl('swapStatus');
-        
+        const tokenInObj = isEthToToken ? pairData.base : pairData.quote;
+        const amountInWei = ethers.parseUnits(val, tokenInObj.decimals);
+        const WETH_ADDR = ACTIVE.swapTokens.base.underlyingAddress;
+
         try {
-            const router = new ethers.Contract(ACTIVE.router, window.ROUTER_ABI, signer);
-            
-            const tokenInObj = isEthToToken ? pairData.base : pairData.quote;
-            const tokenOutObj = isEthToToken ? pairData.quote : pairData.base;
-            
-            const WETH_ADDR = ACTIVE.swapTokens.base.underlyingAddress;
-            const addrIn = (tokenInObj.isNative || tokenInObj.address === 'NATIVE') ? WETH_ADDR : tokenInObj.address;
-            const addrOut = (tokenOutObj.isNative || tokenOutObj.address === 'NATIVE') ? WETH_ADDR : tokenOutObj.address;
-            
-            const path = [addrIn, addrOut];
-            
-            const amountInWei = ethers.parseUnits(val, tokenInObj.decimals);
-            
-            const amounts = await router.getAmountsOut(amountInWei, path);
-            const amountOutExpected = amounts[1];
-            
-            const slippageBps = BigInt(Math.floor(currentSlippage * 100));
-            const BPS_MAX = 10000n;
-            const amountOutMin = (amountOutExpected * (BPS_MAX - slippageBps)) / BPS_MAX;
-            const deadline = Math.floor(Date.now() / 1000) + 1200;
-
-            statusDiv.innerText = `Swapping...`;
-            statusDiv.style.color = "var(--warning)";
-
             let tx;
-            
-            // Lógica de Swap basada en si es nativo o token
-            if(tokenInObj.isNative || tokenInObj.address === 'NATIVE') {
-                // ETH -> Token
-                tx = await router.swapExactETHForTokens(
-                    amountOutMin, path, userAddress, deadline, { value: amountInWei }
-                );
-            } else if (tokenOutObj.isNative || tokenOutObj.address === 'NATIVE') {
-                // Token -> ETH
-                const tokenContract = new ethers.Contract(tokenInObj.address, window.MIN_ERC20_ABI, signer);
-                const allow = await tokenContract.allowance(userAddress, ACTIVE.router);
-                if(allow < amountInWei) {
-                    statusDiv.innerText = "Approving Token...";
-                    const txApp = await tokenContract.approve(ACTIVE.router, ethers.MaxUint256);
-                    await txApp.wait();
+
+            // --- EXECUTE WRAP / UNWRAP ---
+            if(isWrapAction || isUnwrapAction) {
+                const wethContract = new ethers.Contract(WETH_ADDR, WETH_ABI, signer);
+                
+                if (isWrapAction) {
+                    statusDiv.innerText = `Wrapping ETH...`;
+                    statusDiv.style.color = "var(--warning)";
+                    tx = await wethContract.deposit({ value: amountInWei });
+                } else {
+                    statusDiv.innerText = `Unwrapping WETH...`;
+                    statusDiv.style.color = "var(--warning)";
+                    tx = await wethContract.withdraw(amountInWei);
                 }
-                statusDiv.innerText = "Confirm Swap...";
-                tx = await router.swapExactTokensForETH(
-                    amountInWei, amountOutMin, path, userAddress, deadline
-                );
-            } else {
-                // Token -> Token (No implementado en UI básica, pero preparado)
-                const tokenContract = new ethers.Contract(tokenInObj.address, window.MIN_ERC20_ABI, signer);
-                const allow = await tokenContract.allowance(userAddress, ACTIVE.router);
-                if(allow < amountInWei) {
-                    statusDiv.innerText = "Approving Token...";
-                    const txApp = await tokenContract.approve(ACTIVE.router, ethers.MaxUint256);
-                    await txApp.wait();
+            } 
+            // --- EXECUTE STANDARD ROUTER SWAP ---
+            else {
+                const router = new ethers.Contract(ACTIVE.router, window.ROUTER_ABI, signer);
+                
+                const tokenOutObj = isEthToToken ? pairData.quote : pairData.base;
+                
+                const addrIn = (tokenInObj.isNative || tokenInObj.address === 'NATIVE') ? WETH_ADDR : tokenInObj.address;
+                const addrOut = (tokenOutObj.isNative || tokenOutObj.address === 'NATIVE') ? WETH_ADDR : tokenOutObj.address;
+                const path = [addrIn, addrOut];
+                
+                const amounts = await router.getAmountsOut(amountInWei, path);
+                const amountOutExpected = amounts[1];
+                
+                const slippageBps = BigInt(Math.floor(currentSlippage * 100));
+                const BPS_MAX = 10000n;
+                const amountOutMin = (amountOutExpected * (BPS_MAX - slippageBps)) / BPS_MAX;
+                const deadline = Math.floor(Date.now() / 1000) + 1200;
+
+                statusDiv.innerText = `Swapping...`;
+                statusDiv.style.color = "var(--warning)";
+
+                // Aprobaciones y Swap Standard
+                if(tokenInObj.isNative || tokenInObj.address === 'NATIVE') {
+                    tx = await router.swapExactETHForTokens(
+                        amountOutMin, path, userAddress, deadline, { value: amountInWei }
+                    );
+                } else if (tokenOutObj.isNative || tokenOutObj.address === 'NATIVE') {
+                    const tokenContract = new ethers.Contract(tokenInObj.address, window.MIN_ERC20_ABI, signer);
+                    const allow = await tokenContract.allowance(userAddress, ACTIVE.router);
+                    if(allow < amountInWei) {
+                        statusDiv.innerText = "Approving Token...";
+                        const txApp = await tokenContract.approve(ACTIVE.router, ethers.MaxUint256);
+                        await txApp.wait();
+                    }
+                    statusDiv.innerText = "Confirm Swap...";
+                    tx = await router.swapExactTokensForETH(
+                        amountInWei, amountOutMin, path, userAddress, deadline
+                    );
+                } else {
+                    const tokenContract = new ethers.Contract(tokenInObj.address, window.MIN_ERC20_ABI, signer);
+                    const allow = await tokenContract.allowance(userAddress, ACTIVE.router);
+                    if(allow < amountInWei) {
+                        statusDiv.innerText = "Approving Token...";
+                        const txApp = await tokenContract.approve(ACTIVE.router, ethers.MaxUint256);
+                        await txApp.wait();
+                    }
+                    statusDiv.innerText = "Confirm Swap...";
+                    tx = await router.swapExactTokensForTokens(
+                        amountInWei, amountOutMin, path, userAddress, deadline
+                    );
                 }
-                statusDiv.innerText = "Confirm Swap...";
-                tx = await router.swapExactTokensForTokens(
-                    amountInWei, amountOutMin, path, userAddress, deadline
-                );
             }
 
             statusDiv.innerText = "Tx Sent...";
             await tx.wait();
-            statusDiv.innerText = "Swap Successful! 🚀";
+            statusDiv.innerText = isWrapAction ? "Wrap Successful! 🌯" : (isUnwrapAction ? "Unwrap Successful! 🔓" : "Swap Successful! 🚀");
             statusDiv.style.color = "var(--success)";
             updateBalances();
             amountIn.value = ""; amountOut.value = "";
             
         } catch(e) {
             console.error(e);
-            let msg = "Swap Failed";
+            let msg = "Transaction Failed";
             if(e.reason && e.reason.includes("INSUFFICIENT_OUTPUT_AMOUNT")) msg = "Slippage Error";
             statusDiv.innerText = msg;
             statusDiv.style.color = "var(--danger)";
@@ -632,9 +665,6 @@ async function selectToken(token) {
 
     let finalAddress = token.address;
     
-    // Si es NATIVO, tratamos de sacar la dirección del Underlying para propósitos internos si es necesario
-    // Pero mantenemos isNative=true para la lógica de balances
-    
     const newTokenObj = {
         symbol: token.symbol,
         address: finalAddress,
@@ -648,7 +678,6 @@ async function selectToken(token) {
 
     updateSwapUI();     
     updateBalances(); 
-    // PARCHE: Recargar gráfica al cambiar token
     loadChartData(); 
     getEl('amountIn').value = ""; getEl('amountOut').value = "";
     if(getEl('swapDetails')) getEl('swapDetails').style.display = 'none';
@@ -700,7 +729,6 @@ async function calculatePriceImpact(amountInWei, path, decimalsIn) {
         const amountInFloat = parseFloat(ethers.formatUnits(amountInWei, decimalsIn));
         const reserveInFloat = parseFloat(ethers.formatUnits(reserveIn, decimalsIn));
 
-        // Impacto Simplificado (Standard AMM)
         const impact = (amountInFloat / (reserveInFloat + amountInFloat)) * 100;
         
         return { impact: impact, warning: null };
@@ -731,9 +759,6 @@ function updateImpactUI(impactData) {
     el.textContent = text;
     el.style.color = color;
 }
-
-// ... (MANTÉN TODO EL CÓDIGO ANTERIOR HASTA LLEGAR A LA SECCIÓN DEL CHART) ...
-// ... (Justo después de la función updateImpactUI) ...
 
 /* =========================================================
    HYBRID CHART: SYNTHETIC HISTORY + REAL-TIME UPDATES (CON FALLBACK)
@@ -966,9 +991,6 @@ function updateRealTimeCandle(price) {
         };
         candleSeries.update(lastCandleData);
     }
-    // Solo actualizamos el título numérico si NO estamos en modo fallback (para no confundir)
-    // Opcionalmente, puedes actualizarlo siempre.
-    // updateChartTitle(price); 
 }
 
 function updateChartTitle(price) {
