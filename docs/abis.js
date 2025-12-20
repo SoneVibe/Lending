@@ -141,5 +141,42 @@ window.SOUSCHEF_ABI = [
   { "inputs": [{"internalType": "uint256", "name": "_amount", "type": "uint256"}], "name": "withdraw", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
   { "inputs": [], "name": "emergencyWithdraw", "outputs": [], "stateMutability": "nonpayable", "type": "function" }
 ];
+// ... (Tus ABIs anteriores C_TOKEN_ABI, MASTER_ABI, etc siguen arriba)
 
-window.REWARDS_ADDRESS = "0x2F38ecB638DC4fB636A85167C203d791f2809E60";
+window.STABILITY_ABI = [
+  // Funciones de Lectura
+  { "inputs": [], "name": "feeIn", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" },
+  { "inputs": [], "name": "feeOut", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" },
+  { "inputs": [], "name": "paused", "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }], "stateMutability": "view", "type": "function" },
+  { "inputs": [], "name": "reserveAsset", "outputs": [{ "internalType": "address", "name": "", "type": "address" }], "stateMutability": "view", "type": "function" },
+  { "inputs": [], "name": "reserveCap", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" },
+  { "inputs": [], "name": "reserveDecimals", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" },
+  { "inputs": [], "name": "svusd", "outputs": [{ "internalType": "contract SVUSD", "name": "", "type": "address" }], "stateMutability": "view", "type": "function" },
+  
+  // Funciones de Escritura
+  { "inputs": [{ "internalType": "uint256", "name": "amountUSDC", "type": "uint256" }], "name": "buySVUSD", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
+  { "inputs": [{ "internalType": "uint256", "name": "amountSVUSD", "type": "uint256" }], "name": "sellSVUSD", "outputs": [], "stateMutability": "nonpayable", "type": "function" }
+];
+
+window.ERC20_ABI = [
+  { "inputs": [{ "internalType": "address", "name": "account", "type": "address" }], "name": "balanceOf", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" },
+  { "inputs": [{ "internalType": "address", "name": "spender", "type": "address" }, { "internalType": "uint256", "name": "amount", "type": "uint256" }], "name": "approve", "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }], "stateMutability": "nonpayable", "type": "function" },
+  { "inputs": [{ "internalType": "address", "name": "owner", "type": "address" }, { "internalType": "address", "name": "spender", "type": "address" }], "name": "allowance", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }
+];
+// ... (Tus ABIs anteriores C_TOKEN_ABI, MASTER_ABI, etc siguen igual) ...
+
+// AGREGA ESTO AL FINAL DE abis.js
+window.CSVUSD_MINTABLE_ABI = [
+  // Lectura
+  { "inputs": [], "name": "borrowRatePerBlock", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" },
+  { "inputs": [{ "internalType": "address", "name": "account", "type": "address" }], "name": "borrowBalance", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" },
+  { "inputs": [], "name": "interestRateModel", "outputs": [{ "internalType": "contract IInterestRateModel", "name": "", "type": "address" }], "stateMutability": "view", "type": "function" },
+  { "inputs": [], "name": "totalSupply", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" },
+  { "inputs": [], "name": "totalBorrows", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" },
+  
+  // Escritura (Minting y Burning de deuda)
+  { "inputs": [{ "internalType": "uint256", "name": "amount", "type": "uint256" }], "name": "borrow", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
+  { "inputs": [{ "internalType": "uint256", "name": "amount", "type": "uint256" }], "name": "repay", "outputs": [], "stateMutability": "nonpayable", "type": "function" }
+];
+
+window.REWARDS_ADDRESS = "0x1126859aB6911Fc3b4f86f2F65E7B6F2eEDe5185";

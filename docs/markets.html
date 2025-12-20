@@ -20,13 +20,15 @@
         VIBE Finance
       </div>
       <a href="index.html" class="nav-link">Dashboard Home</a>
-      <a href="dashboard.html" class="nav-link">Analytics & Pro</a>
+      <a href="dashboard.html" class="nav-link">Lend/Borrow</a>
       <a href="markets.html" class="nav-link active">Markets Overview</a>
        <!-- NUEVO ENLACE AGREGADO AQUI -->
       <a href="swap.html" class="nav-link">Swap</a>
+      <a href="mint-svusd.html" class="nav-link">Mint SVUSDC</a>
+      <a href="swapstabilizer.html" class="nav-link">Stabilizer SVUSDC</a>
       <a href="vibe-vault.html" class="nav-link">Governance Vault</a>
       <a href="liquidator.html" class="nav-link" style="color:var(--danger);">Liquidator Console</a>
-      <a href="souschefv2.html" class="nav-link active" style="color:var(--warning); border-color:var(--warning); background:rgba(249,224,97,0.1);">Sous Chef Pools Preview</a>
+      <a href="souschefv2.html" class="nav-link">Sous Chef Pools Preview</a>
       
       <div style="flex-grow:1"></div>
       <div style="padding: 10px; font-size: 0.8rem; color: var(--text-muted);">
@@ -100,11 +102,18 @@
                 <th>Reserves</th>
                 <th>Supply APY</th>
                 <th>Borrow APY</th>
+                <!-- ============================ -->
+                <!-- [MODIFICADO] NUEVAS COLUMNAS -->
+                <!-- ============================ -->
+                <th>Max LTV</th> 
+                <th>Liq. Threshold</th>
+                <!-- ============================ -->
                 <th>Utilization</th>
               </tr>
             </thead>
             <tbody id="marketsBody">
-              <tr><td colspan="7" style="text-align:center; padding:30px; color:var(--text-muted);">Loading market data...</td></tr>
+              <!-- [MODIFICADO] colspan aumentado a 9 -->
+              <tr><td colspan="9" style="text-align:center; padding:30px; color:var(--text-muted);">Loading market data...</td></tr>
             </tbody>
           </table>
         </div>

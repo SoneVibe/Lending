@@ -1,0 +1,28 @@
+{
+  "1868": {
+    "chainId": "1868",
+    "name": "Soneium Mainnet",
+    "rpc": "https://rpc.soneium.org",
+    "explorer": "https://soneium.blockscout.com",
+    "contracts": {
+      "svusd": "0xTU_CONTRATO_SVUSD",
+      "csvusd": "0xTU_CONTRATO_CSVUSD_AQUI", 
+      "stabilityModule": "0xTU_CONTRATO_STABILITY_MODULE",
+      "reserveAsset": "0xTU_CONTRATO_USDC" 
+    },
+    "reserveDecimals": 6
+  },
+  "1946": {
+    "chainId": "1946",
+    "name": "Minato Testnet",
+    "rpc": "https://rpc.minato.soneium.org",
+    "explorer": "https://soneium-minato.blockscout.com",
+    "contracts": {
+      "svusd": "0x79604C0D88E57A98f900492Bb563232d07312428",
+      "csvusd": "0x2B5575644CD1fCa7725922e6f30f798888F03533", 
+      "stabilityModule": "0x8A52De344FccB11CeD9a4b89704935377bf6715d",
+      "reserveAsset": "0xE9A198d38483aD727ABC8b0B1e16B2d338CF0391"
+    },
+    "reserveDecimals": 6
+  }
+}

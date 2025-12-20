@@ -6,7 +6,8 @@
     "rpcUrls": ["https://rpc.soneium.org"],
     "blockExplorerUrls": ["https://soneium.blockscout.com/"],
     "nativeCurrency": { "name": "Ether", "symbol": "ETH", "decimals": 18 },
-    "master": "0x2F38ecB638DC4fB636A85167C203d791f2809E60",
+    "master": "0x1126859aB6911Fc3b4f86f2F65E7B6F2eEDe5185",
+    "stabilityModule": "0x7F1aF1382899263aF50Bc6d3601bdaB1E17Ba20D",
     "router": "0xa393E76bE079cF1ccf684D0f815795Dde248f157", 
     "factory": "0x06C0b58287794a0bdce20ce768b601CA974618DC", 
 
@@ -31,7 +32,7 @@
         "symbol": "cASTR",
         "underlyingSymbol": "ASTR",
         "icon": "icons/astr.svg",
-        "address": "0xA5e4C8C6E15F3dc844F000f1c8AB17dEe278Cc69",
+        "address": "0x7CA06966B0c07C5e35aA180643E98bB3057EBb27",
         "underlying": "0x2CAE934a1e84F693fbb78CA5ED3B0A6893259441",
         "underlyingDecimals": 18,
         "skipAllowance": false
@@ -40,7 +41,7 @@
         "symbol": "cUSDSC",
         "underlyingSymbol": "USDSC",
         "icon": "icons/usdsc.svg",
-        "address": "0x30311045Ae2D84eC06f58c170A18dde84d43b58f",
+        "address": "0xDB3e66b87c42C7F3599fbdcBFe08DfF0689A6D77",
         "underlying": "0x3f99231dD03a9F0E7e3421c92B7b90fbe012985a",
         "underlyingDecimals": 6,
         "skipAllowance": false
@@ -49,7 +50,7 @@
         "symbol": "cUSDC",
         "underlyingSymbol": "USDC",
         "icon": "icons/usdc.svg",
-        "address": "0x4E6Ef632644BF8179B11a46fb800d79C5bF67592",
+        "address": "0x96ae93Df119c131469b38e3d558899F23678dCFb",
         "underlying": "0xbA9986D2381edf1DA03B0B9c1f8b00dc4AacC369",
         "underlyingDecimals": 6,
         "skipAllowance": false
@@ -125,7 +126,8 @@
     "rpcUrls": ["https://rpc.minato.soneium.org"],
     "blockExplorerUrls": ["https://soneium-minato.blockscout.com/"],
     "nativeCurrency": { "name": "Ether", "symbol": "ETH", "decimals": 18 },
-    "master": "0x8183764EB2f95AA2E8ee4F72A0C6AB3808d51b24",
+    "master": "0x3deF5fD62B365bA86198BD30A29B567e2051F987",
+     "stabilityModule": "0x8A52De344FccB11CeD9a4b89704935377bf6715d",
     "router": "0x8035BB4080F7439704c57D3296C4bF3c92B2B84e", 
     "factory": "0x743bF6Af1635e39913231F33Ecb6A676322065dD", 
     "zap": "0xb9320f4B9A19AC622d39d252cFAE168bf77e0e18",
@@ -186,43 +188,29 @@
         "symbol": "cASTR",
         "underlyingSymbol": "ASTR",
         "icon": "icons/astr.svg",
-        "address": "0xbc79a275e34A9101EBb5790dFe1D0d58bA1CBf9E",
+        "address": "0x4315E72D2785bc2cb7036C1E6800bD5E1E1E1add",
         "underlying": "0x26e6f7c7047252DdE3dcBF26AA492e6a264Db655",
         "underlyingDecimals": 18,
         "skipAllowance": false
       },
-      {
-        "symbol": "cWBTC",
-        "underlyingSymbol": "WBTC",
-        "icon": "icons/wbtc.svg",
-        "address": "0x3680425707701Cc536b49185cF8491846439745a",
-        "underlying": "0x2520c01B9C1dc36e2fA59a4BacE8806620449fdd",
-        "underlyingDecimals": 8,
-        "skipAllowance": false
-      },
+
        {
          "symbol": "cDOT",
          "underlyingSymbol": "DOT",
         "icon": "icons/dot.svg",
-        "address": "0xD1a6cC221574e72Ad8BfE1fE0abfdff6F201438F",
+        "address": "0x17d8068e1922C850FE31dA77192591B8b00DC352",
        "underlying": "0xE565757cc757a0985327Af1190185fF7b172868E",
        "underlyingDecimals": 18,
         "skipAllowance": false
       },
-      {
-        "symbol": "cWETH",
-        "underlyingSymbol": "WETH",
-        "icon": "icons/weth.svg",
-        "address": "0x7FD48bbbabCA9E2cadCfc32F3aF75921fa8ac127",
-        "underlying": "0x4200000000000000000000000000000000000006",
-        "underlyingDecimals": 18,
-        "skipAllowance": false
-      },
+
+
+     
       {
         "symbol": "cUSDC",
         "underlyingSymbol": "USDC",
         "icon": "icons/usdc.svg",
-        "address": "0x2744057aC82b4E81a7583BD3c218E2997a4C97DE",
+        "address": "0xf33BB238F5Ebf5f0178028B9C0d8D63829d7479f",
         "underlying": "0xE9A198d38483aD727ABC8b0B1e16B2d338CF0391",
         "underlyingDecimals": 6,
         "skipAllowance": false

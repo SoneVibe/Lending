@@ -243,7 +243,7 @@ async function switchNetwork(targetChainId) {
 }
 
 // ------------------------------------------------------------------
-// GLOBAL MARKET DATA LOGIC (MANTENIDA EXACTA)
+// GLOBAL MARKET DATA LOGIC (FIXED ABI FOR COLLATERAL FACTOR)
 // ------------------------------------------------------------------
 async function loadMarketData() {
     if(!ACTIVE) return;
@@ -253,7 +253,18 @@ async function loadMarketData() {
     tbody.innerHTML = "";
     
     const blocksPerYear = ACTIVE.blocksPerYear || 15768000;
-    const master = new ethers.Contract(ACTIVE.master, window.MASTER_ABI, provider);
+    
+    // [MODIFICADO] ABI Extra para asegurar que leemos los mappings del Comptroller Enhanced
+    // Esto soluciona el error "master.marketCollateralFactorMantissa is not a function"
+    const COMP_EXTRA_ABI = [
+        "function marketCollateralFactorMantissa(address) view returns (uint)",
+        "function marketLiquidationThresholdMantissa(address) view returns (uint)",
+        "function oracle() view returns (address)"
+    ];
+
+    // [MODIFICADO] Combinamos ABI global con el extra
+    const FULL_ABI = window.MASTER_ABI ? [...window.MASTER_ABI, ...COMP_EXTRA_ABI] : COMP_EXTRA_ABI;
+    const master = new ethers.Contract(ACTIVE.master, FULL_ABI, provider);
     
     let oracle = null;
     try {
@@ -275,6 +286,18 @@ async function loadMarketData() {
                 oracle ? oracle.getUnderlyingPrice(m.address) : 0n
             ]);
 
+            // [MODIFICADO] Fetch Risk Params (CF & LiT)
+            let cfRaw = 0n;
+            let ltRaw = 0n;
+            try {
+                [cfRaw, ltRaw] = await Promise.all([
+                    master.marketCollateralFactorMantissa(m.address),
+                    master.marketLiquidationThresholdMantissa(m.address)
+                ]);
+            } catch(e) {
+                console.warn(`Risk params fetch failed for ${m.symbol}`, e);
+            }
+
             const priceUSD = oracle && priceRaw > 0n ? parseFloat(ethers.formatUnits(priceRaw, 18)) : 0;
             const totalSupplyUnderlying = (Number(totalSupplyRaw) * Number(exchRateRaw)) / 1e36;
             const totalSupplyUSD = totalSupplyUnderlying * priceUSD;
@@ -286,6 +309,10 @@ async function loadMarketData() {
             const supplyAPY = rates && rates[1] ? ratePerBlockToAPY(rates[1], blocksPerYear) : 0;
             const borrowAPY = rates && rates[0] ? ratePerBlockToAPY(rates[0], blocksPerYear) : 0;
             const utilRate = totalSupplyUnderlying > 0 ? (totalBorrowsUnderlying / totalSupplyUnderlying) * 100 : 0;
+
+            // [MODIFICADO] Calcular porcentajes para UI
+            const cfPercent = Number(cfRaw) / 1e16; 
+            const ltPercent = Number(ltRaw) / 1e16;
 
             globalSupplyUSD += totalSupplyUSD;
             globalBorrowUSD += totalBorrowsUSD;
@@ -305,6 +332,10 @@ async function loadMarketData() {
                 <td><div style="color:var(--warning)">$${formatCompact(totalReservesUSD)}</div><div style="font-size:0.75em; color:var(--text-muted);">${formatNumber(totalReservesUnderlying, displayDec)} ${uSym}</div></td>
                 <td><span class="text-green">${supplyAPY.toFixed(2)}%</span></td>
                 <td><span class="text-yellow">${borrowAPY.toFixed(2)}%</span></td>
+                <!-- [MODIFICADO] COLUMNAS NUEVAS -->
+                <td><span style="color:#a5b4fc; font-weight:600;">${cfPercent.toFixed(0)}%</span></td>
+                <td><span style="color:#f87171; font-weight:600;">${ltPercent.toFixed(0)}%</span></td>
+                <!-- FIN NUEVAS -->
                 <td style="min-width:120px;"><div style="display:flex; justify-content:space-between; font-size:0.75rem; margin-bottom:2px;"><span>${utilRate.toFixed(1)}%</span></div><div class="util-bar-bg"><div class="util-bar-fill" style="width:${Math.min(100, utilRate)}%"></div></div></td>
             `;
             tbody.appendChild(tr);
