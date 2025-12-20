@@ -66,7 +66,7 @@
     "rpcUrls": ["https://evm.astar.network/"],
     "blockExplorerUrls": ["https://astar.blockscout.com"],
     "nativeCurrency": { "name": "Astar", "symbol": "ASTR", "decimals": 18 },
-    "master": "0x366472468fe831D57b625d2fBbC90bd5a6184042",
+    "master": "0x4B07FedD55C65373Dec9d983EA279D7d65259ec7",
     "router": "0x3Fd8D270270aDe83e519377bC02A68c3231002C2", 
     "factory": "0x1b404A1e41cCe5f98DC9CBF0c1372F8b68e2588c", 
 
@@ -92,16 +92,16 @@
         "symbol": "cWASTR",
         "underlyingSymbol": "WASTR",
         "icon": "icons/wastr.png",
-        "address": "0x98E79cEF9D6fd270542B810CAC8d5eeD4bCa90C4",
+        "address": "0x40f4bFA1e152Ac5a9b066C0BEc5BD83227F8520A",
         "underlying": "0xAeaaf0e2c81Af264101B9129C00F4440cCF0F720",
         "underlyingDecimals": 18,
-        "skipAllowance": true
+        "skipAllowance": false
       },
       {
         "symbol": "cUSDT",
         "underlyingSymbol": "USDT",
         "icon": "icons/tether.svg",
-        "address": "0xdB63B527Bb1B1518dBAFcf439E7bfB9E9Ee7A56E",
+        "address": "0xA7f41D0f41ec8aeb5d57c0E5850F0dB28Ca68E54",
         "underlying": "0xfFFfffFF000000000000000000000001000007C0",
         "underlyingDecimals": 6,
         "skipAllowance": false
@@ -110,7 +110,7 @@
         "symbol": "cDOT",
         "underlyingSymbol": "DOT",
         "icon": "icons/dot.svg",
-        "address": "0x1afE747285C2962B20b00c6eaaD2E8C09B90eE75",
+        "address": "0xe5cE001dD3439A198b2A19567D5F3CD6cd30e61f",
         "underlying": "0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF",
         "underlyingDecimals": 10,
         "skipAllowance": false
