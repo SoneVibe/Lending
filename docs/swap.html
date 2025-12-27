@@ -6,8 +6,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <link rel="icon" type="image/svg+xml" href="icons/vibe.svg">
   <link rel="stylesheet" href="css/style.css">
-    <!-- CSS Responsivo (NUEVO) -->
-  <link rel="stylesheet" href="css/swap-responsive.css">
+    <link rel="stylesheet" href="css/swap-responsive.css">
   <script src="https://unpkg.com/lightweight-charts@3.8.0/dist/lightweight-charts.standalone.production.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
@@ -25,14 +24,12 @@
       <a href="pools.html" class="nav-link">ADD Liquidity</a>
       <a href="markets.html" class="nav-link">Markets Overview</a>
        <a href="mint-svusd.html" class="nav-link">Mint SVUSD</a>
-       <!-- NUEVO BOTÓN AQUÍ -->
-  <a href="swapstabilizer.html" class="nav-link">Peg Stabilizer (SVUSD)</a>
+       <a href="swapstabilizer.html" class="nav-link">Peg Stabilizer (SVUSD)</a>
       <a href="souschef.html" class="nav-link">Sous Chef Pools</a>
       <a href="vibe-vault.html" class="nav-link">Governance Vault</a>
       <a href="liquidator.html" class="nav-link" style="color:var(--danger);">Liquidator Console</a>
       
       <div style="flex-grow:1"></div>
-      <!-- ACTUALIZADO: Estilo idéntico a Markets -->
       <div style="padding: 10px; font-size: 0.8rem; color: var(--text-muted);">
         Network Status:<br>
         <span id="statusDot" style="color: var(--warning)">●</span> <span id="connStatus">Syncing...</span>
@@ -50,7 +47,6 @@
         <div class="nav-group">
           <select id="networkSelect" class="network-select"><option value="" disabled selected>Loading...</option></select>
           
-          <!-- ACTUALIZADO: Estructura de Botón y Dropdown idéntica a Markets -->
           <div class="btn-account-wrapper">
              <button id="btnConnect" class="btn-primary">Connect Wallet</button>
              <div id="accountDropdown" class="account-dropdown">
@@ -84,11 +80,6 @@
         </div>
 
         <div class="swap-container-pro">
-            <div class="swap-tabs">
-                <div class="swap-tab active" onclick="setTab('swap')">Swap</div>
-                <div class="swap-tab" onclick="setTab('zap')">Zap ⚡</div>
-            </div>
-
             <div id="swapPanel" class="swap-card-pro">
                 <div class="swap-header-pro">
                     <h3>Market Order</h3>
@@ -150,35 +141,7 @@
                 <div id="swapStatus" class="action-status" style="margin-top:10px;"></div>
             </div>
 
-            <div id="zapPanel" class="swap-card-pro" style="display:none; border:1px solid var(--warning);">
-                <div class="swap-header-pro">
-                    <h3 style="color:var(--warning)">Zap Liquidity</h3>
-                    <span class="apy-badge borrow">Pro Mode</span>
-                </div>
-                <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:15px;">Auto-convert <strong>ETH</strong> into LP Tokens.</p>
-                <div class="token-input-box-pro">
-                    <div class="token-flex">
-                        <label>Input (ETH)</label>
-                        <span class="balance-label">Bal: <span id="zapBal">0.00</span></span>
-                    </div>
-                    <div class="token-flex-main">
-                        <input type="number" id="zapAmount" class="swap-input-pro" placeholder="0.0">
-                        <div class="token-badge-pro"><img src="icons/weth.svg" width="24"> <span>ETH</span></div>
-                    </div>
-                </div>
-                <div style="text-align:center; padding:10px; font-size:1.2rem; color:var(--text-muted);">⬇</div>
-                <div class="token-input-box-pro" style="background:rgba(249, 224, 97, 0.05); border:1px solid rgba(249, 224, 97, 0.2);">
-                    <div class="token-flex"><label style="color:var(--warning)">You Receive (LP)</label></div>
-                    <div class="token-flex-main">
-                        <span id="zapEstOut" style="font-size:1.5rem; font-weight:600; color:var(--warning)">0.00</span>
-                        <div class="token-badge-pro"><span>VIBE-LP</span></div>
-                    </div>
-                </div>
-                <button id="btnZapAction" class="btn-primary-pro" style="background:var(--warning); color:#000; box-shadow:none;">Zap ⚡</button>
-                <div id="zapStatus" class="action-status" style="margin-top:10px;"></div>
-            </div>
-
-        </div> 
+            </div> 
       </div>
     </div> 
   </div>
@@ -202,32 +165,9 @@
     </div>
   </div>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const chartContainer = document.getElementById('priceChart');
-        if(chartContainer && window.LightweightCharts) {
-            const chart = LightweightCharts.createChart(chartContainer, {
-                layout: { backgroundColor: 'transparent', textColor: '#8fa2b7' },
-                grid: { vertLines: { color: 'rgba(255,255,255,0.05)' }, horzLines: { color: 'rgba(255,255,255,0.05)' } },
-                width: chartContainer.clientWidth, height: 350
-            });
-            const series = chart.addCandlestickSeries({ upColor: '#00e0ff', downColor: '#ff5555', borderVisible: false, wickUpColor: '#00e0ff', wickDownColor: '#ff5555' });
-            const data = []; let time = Date.now()/1000 - 8640000; let val = 100;
-            for(let i=0; i<100; i++) {
-                let open=val, close=val+(Math.random()*10-5);
-                data.push({ time: time+i*86400, open, high: Math.max(open,close)+2, low: Math.min(open,close)-2, close });
-                val=close;
-            }
-            series.setData(data);
-            window.addEventListener('resize', () => chart.applyOptions({ width: chartContainer.clientWidth }));
-        }
-    });
-  </script>
-
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.10.0/dist/ethers.umd.min.js"></script>
   <script src="abis.js"></script>
-  <script src="config.js"></script> <!-- Asegúrate de que este cargue SessionManager -->
-  <script src="wallet-config.js"></script>
+  <script src="config.js"></script> <script src="wallet-config.js"></script>
   <script src="swap-config.js"></script>
   <script src="swap.js"></script>
 </body>

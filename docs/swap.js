@@ -251,22 +251,7 @@ async function switchNetwork(targetChainId) {
 
 // --- SWAP UI LOGIC ---
 
-window.setTab = (tab) => {
-    const swapPanel = getEl('swapPanel');
-    const zapPanel = getEl('zapPanel');
-    const tabs = document.querySelectorAll('.swap-tab');
-    tabs.forEach(t => t.classList.remove('active'));
-    
-    if(tab === 'swap') {
-        tabs[0].classList.add('active');
-        if(swapPanel) swapPanel.style.display = 'block';
-        if(zapPanel) zapPanel.style.display = 'none';
-    } else {
-        tabs[1].classList.add('active');
-        if(swapPanel) swapPanel.style.display = 'none';
-        if(zapPanel) zapPanel.style.display = 'block';
-    }
-};
+// NOTA: Se eliminó la función setTab ya que no hay Zap.
 
 window.setSlippage = (val) => {
     currentSlippage = val;
@@ -277,7 +262,11 @@ window.setSlippage = (val) => {
 
     const buttons = document.querySelectorAll('.btn-ghost');
     buttons.forEach(b => {
-        if(b.textContent.includes(val.toString())) {
+        // CORRECCIÓN: Convertimos el texto del botón a número para comparar exactamente
+        // Esto evita que "0.5%" se marque cuando seleccionas "5%" (porque 0.5 contiene 5 en string)
+        const btnVal = parseFloat(b.textContent);
+        
+        if(btnVal === val) {
             b.style.border = val >= 5 ? '1px solid var(--warning)' : '1px solid var(--success)';
         } else {
             b.style.border = '1px solid transparent';
@@ -353,12 +342,8 @@ async function updateBalances() {
         const balIn = await getBalanceForToken(tokenInObj);
         const balOut = await getBalanceForToken(tokenOutObj);
         
-        const ethBalRaw = await provider.getBalance(userAddress);
-        const ethBalFmt = parseFloat(ethers.formatEther(ethBalRaw)).toFixed(4);
-
         getEl('balIn').textContent = balIn;
         getEl('balOut').textContent = balOut;
-        getEl('zapBal').textContent = ethBalFmt;
 
     } catch(e) { console.error("Balance Error", e); }
 }
