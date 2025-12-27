@@ -9,6 +9,31 @@
     <link rel="stylesheet" href="css/swap-responsive.css">
   <script src="https://unpkg.com/lightweight-charts@3.8.0/dist/lightweight-charts.standalone.production.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+  /* ESTILOS PARA LOS ICONOS SUPERPUESTOS EN LA GRÁFICA */
+  .double-icon-container {
+      display: flex;
+      align-items: center;
+      position: relative;
+      width: 50px; /* Espacio para dos iconos */
+      height: 32px;
+  }
+  .double-icon-container img {
+      width: 32px; 
+      height: 32px; 
+      border-radius: 50%; 
+      object-fit: contain;
+      border: 2px solid #1a1f35; /* Color de fondo para separar */
+  }
+  /* El segundo icono se superpone al primero */
+  .double-icon-container img:nth-child(2) {
+      margin-left: -12px; /* Efecto superposición */
+      z-index: 1;
+  }
+  .double-icon-container img:first-child {
+      z-index: 2; /* El primero va arriba */
+  }
+</style>
 </head>
 <body>
 
@@ -67,7 +92,7 @@
         <div class="glass-panel chart-panel">
             <div class="chart-header">
                 <div style="display:flex; gap:10px; align-items:center;">
-                    <img id="chartIcon" src="icons/vibe.svg" width="24" onerror="this.src='icons/token.svg'">
+                    <div id="chartIcons" class="double-icon-container"><img src="icons/vibe.svg" class="icon-primary" onerror="this.src='icons/token.svg'"></div> 
                     <h3 id="chartPairName" style="margin:0; color:#fff;">LIGHT / ETH</h3>
                 </div>
                 <div class="chart-intervals">

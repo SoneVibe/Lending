@@ -251,8 +251,6 @@ async function switchNetwork(targetChainId) {
 
 // --- SWAP UI LOGIC ---
 
-// NOTA: Se eliminó la función setTab ya que no hay Zap.
-
 window.setSlippage = (val) => {
     currentSlippage = val;
     const disp = getEl('slippageDisplay');
@@ -262,10 +260,7 @@ window.setSlippage = (val) => {
 
     const buttons = document.querySelectorAll('.btn-ghost');
     buttons.forEach(b => {
-        // CORRECCIÓN: Convertimos el texto del botón a número para comparar exactamente
-        // Esto evita que "0.5%" se marque cuando seleccionas "5%" (porque 0.5 contiene 5 en string)
         const btnVal = parseFloat(b.textContent);
-        
         if(btnVal === val) {
             b.style.border = val >= 5 ? '1px solid var(--warning)' : '1px solid var(--success)';
         } else {
@@ -293,6 +288,32 @@ function setupAssets(network) {
     updateSwapUI();
 }
 
+// === FUNCIÓN CORREGIDA: ORDEN DE ICONOS ASTR -> USDC ===
+function updateChartIcons() {
+    const container = getEl('chartIcons');
+    if(!container || !pairData.base || !pairData.quote) return;
+
+    // CORRECCIÓN AQUÍ: Invertimos el orden respecto a la versión anterior.
+    // Ahora t1 es el 'base' (o el input actual) para que salga primero (izquierda/arriba)
+    // t2 es el 'quote' (o el output actual) para que salga segundo (derecha/abajo)
+    const t1 = isEthToToken ? pairData.base : pairData.quote;
+    const t2 = isEthToToken ? pairData.quote : pairData.base;
+
+    // Crear las imágenes
+    const img1 = document.createElement('img');
+    img1.src = t1.icon || 'icons/token.svg';
+    img1.onerror = () => { img1.src = 'icons/token.svg'; }; 
+    
+    const img2 = document.createElement('img');
+    img2.src = t2.icon || 'icons/token.svg';
+    img2.onerror = () => { img2.src = 'icons/token.svg'; }; 
+
+    // Limpiar y añadir
+    container.innerHTML = '';
+    container.appendChild(img1);
+    container.appendChild(img2);
+}
+
 function updateSwapUI() {
     if (!pairData || !pairData.base || !pairData.quote) return;
 
@@ -317,6 +338,9 @@ function updateSwapUI() {
     
     const chartTitle = getEl('chartPairName');
     if(chartTitle) chartTitle.textContent = `${quote.symbol} / ${base.symbol}`;
+
+    // --- LLAMADA A LA FUNCIÓN DE ICONOS ---
+    updateChartIcons();
 }
 
 async function updateBalances() {
