@@ -467,68 +467,18 @@ function renderGrid(items, containerId, isMyListing) {
 /**
  * METADATA FETCHER (Robust IPFS & HTTP handling)
  */
-/**
- * METADATA FETCHER (Robust IPFS & HTTP handling)
- * Fix: Reemplaza gateways muertos como nftstorage por gateways públicos activos.
- */
-/**
- * METADATA FETCHER (God Mode: Multi-Gateway Fallback)
- * Intenta recuperar datos de múltiples fuentes IPFS para evitar timeouts y 429s.
- */
 async function fetchMetadata(tokenId, imgId) {
-    
-    // Lista de Gateways Públicos de Respaldo (Ordenados por probabilidad de éxito)
-    const GATEWAYS = [
-        "https://ipfs.io/ipfs/",                  // El estándar
-        "https://gateway.pinata.cloud/ipfs/",     // Rápido, pero estricto con rate limits
-        "https://cloudflare-ipfs.com/ipfs/",      // Muy robusto
-        "https://dweb.link/ipfs/",                // Alternativa clásica
-        "https://4everland.io/ipfs/"              // Otro backup
-    ];
-
-    // Helper para limpiar la URI y dejar solo el CID/Path
-    const getIpfsPath = (url) => {
-        if (!url) return null;
-        // Si ya es un link HTTP de gateway, extraemos lo que sigue a /ipfs/
-        if (url.includes("/ipfs/")) return url.split("/ipfs/")[1];
-        // Si es protocolo ipfs://
-        if (url.startsWith("ipfs://")) return url.replace("ipfs://", "");
-        return null; // No es IPFS
-    };
-
-    // Helper para probar gateways en secuencia
-    const fetchWithFallback = async (ipfsPath) => {
-        for (const gateway of GATEWAYS) {
-            try {
-                const url = `${gateway}${ipfsPath}`;
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 4000); // 4 seg timeout por gateway
-                
-                const res = await fetch(url, { signal: controller.signal });
-                clearTimeout(timeoutId);
-                
-                if (res.ok) {
-                    return await res.json(); // ÉXITO
-                }
-            } catch (err) {
-                // Continuar al siguiente gateway
-            }
-        }
-        throw new Error("All gateways failed");
+    const resolveIPFS = (url) => {
+        if (!url) return "";
+        if (url.startsWith("ipfs://")) return url.replace("ipfs://", "https://gateway.pinata.cloud/ipfs/");
+        return url;
     };
     
-    // Helper para imágenes (devuelve URL válida)
-    const resolveImageUrl = async (ipfsPath) => {
-        // Para imágenes no hacemos fetch, solo devolvemos una URL que sepamos que suele cargar
-        // Usamos ipfs.io o cloudflare por defecto para imágenes
-        return `https://ipfs.io/ipfs/${ipfsPath}`; 
-    };
-
     try {
         const collection = APP_STATE.currentCollection;
+        // Usamos provider de lectura (puede ser RPC público o Wallet)
         let uri;
         
-        // 1. Obtener URI del contrato
         if (collection.type === "ERC1155") {
             const contract = new ethers.Contract(collection.address, window.MARKET_ABIS.ERC1155, provider);
             uri = await contract.uri(tokenId);
@@ -539,49 +489,30 @@ async function fetchMetadata(tokenId, imgId) {
 
         if(!uri) return;
 
-        // Limpieza de ID para ERC1155
+        // ERC1155 standard: reemplazar {id} por hex padding 64
         if(uri.includes("{id}")) {
             const hexId = BigInt(tokenId).toString(16).padStart(64, '0');
             uri = uri.replace("{id}", hexId);
         }
         
-        // 2. Intentar obtener el JSON Metadata
-        const ipfsPath = getIpfsPath(uri);
-        let json;
+        const finalUrl = resolveIPFS(uri);
         
-        if (ipfsPath) {
-            // Es IPFS: Usar estrategia multi-gateway
-            json = await fetchWithFallback(ipfsPath);
-        } else {
-            // Es HTTP normal: Fetch directo
-            const res = await fetch(uri);
-            json = await res.json();
-        }
+        // Fetch JSON Metadata
+        const res = await fetch(finalUrl);
+        const json = await res.json();
         
-        // 3. Renderizar Imagen
+        // Actualizar UI
         const imgEl = getEl(imgId);
-        if(imgEl && json) {
-            const imageRaw = json.image || json.image_url;
-            if(imageRaw) {
-                const imagePath = getIpfsPath(imageRaw);
-                if (imagePath) {
-                    // Si es IPFS, construimos URL limpia
-                    imgEl.src = `https://ipfs.io/ipfs/${imagePath}`;
-                    
-                    // Fallback de imagen en el elemento HTML si falla la carga
-                    imgEl.onerror = () => {
-                        imgEl.src = `https://cloudflare-ipfs.com/ipfs/${imagePath}`;
-                    };
-                } else {
-                    // HTTP normal
-                    imgEl.src = imageRaw;
-                }
-                imgEl.style.opacity = "1";
+        if(imgEl) {
+            const imageUri = json.image || json.image_url; // Compatibilidad OpenSea
+            if(imageUri) {
+                imgEl.src = resolveIPFS(imageUri);
+                imgEl.style.opacity = "1"; // Quitar efecto 'loading'
             }
         }
         
     } catch(e) { 
-        console.warn(`🔥 Token ${tokenId} metadata unavailable.`, e);
+        // Silent error
     }
 }
 
