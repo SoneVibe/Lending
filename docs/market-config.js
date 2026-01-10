@@ -1,5 +1,5 @@
 // ============================================================
-// SONEVIBE MARKET CONFIGURATION V4 (MULTI-CHAIN & GRAPH)
+// SONEVIBE MARKET CONFIGURATION V5 (MULTI-CHAIN: GRAPH & SUBQUERY)
 // ============================================================
 
 /**
@@ -15,27 +15,26 @@ const ICONS = {
 /**
  * CONFIGURACIÓN MAESTRA DE MERCADO
  * Clave: ChainID (string decimal)
- * * NOTA IMPORTANTE:
+ * NOTA IMPORTANTE:
  * - isNative: false -> El contrato usa ERC20 (approve + transferFrom).
- * - graphEndpoint: URL de tu Subgraph en The Graph Studio.
+ * - graphEndpoint: URL de tu Subgraph/SubQuery.
+ * - indexerType: 'THEGRAPH' (Defecto) o 'SUBQUERY'.
  */
 const MARKET_CONFIG = {
     // --- SONEIUM MINATO TESTNET (ChainID: 1946) ---
-    // [CONFIGURACIÓN ACTIVA BASADA EN TU ARCHIVO]
     "1946": {
         label: "Minato Testnet",
-        // Dirección de tu contrato Proxy V3 desplegado en Minato
-        marketplaceAddress: "0x8f77C59d58488C576f444D5481958935a811fcFB", 
+        marketplaceAddress: "0x8f77C59d58488C576f444D5481958935a811fcFB",
         
-        // URL de tu Subgraph (Déjalo vacío string "" para usar modo RPC por defecto)
-        graphEndpoint: "https://api.studio.thegraph.com/query/1721868/sone-vibe-market/v0.0.16", 
+        // Usando The Graph
+        indexerType: "THEGRAPH",
+        graphEndpoint: "https://api.studio.thegraph.com/query/1721868/sone-vibe-market/v0.0.16",
         
         paymentToken: {
-            // Token configurado en tu archivo (ASTR Wrapper o Test Token)
             address: "0x26e6f7c7047252DdE3dcBF26AA492e6a264Db655", 
             symbol: "ASTR",
             decimals: 18,
-            isNative: false // Tu contrato usa paymentToken.safeTransferFrom
+            isNative: false 
         },
         collections: [
             {
@@ -54,17 +53,21 @@ const MARKET_CONFIG = {
             }
         ]
     },
-    //Soneium Mainnet
+
+    // --- SONEIUM MAINNET (ChainID: 1868) ---
     "1868": {
         label: "Soneium Mainnet",
         marketplaceAddress: "0x7242ACB7a27052abBe49EF096aC473e9cBC02627",
+        
+        // Usando The Graph
+        indexerType: "THEGRAPH",
         graphEndpoint: "https://api.studio.thegraph.com/query/1721868/sone-vibe-market-soneium/v0.0.1",
+        
         paymentToken: {
             address: "0x2CAE934a1e84F693fbb78CA5ED3B0A6893259441",
             symbol: "ASTR",
             decimals: 18,
             isNative: false
-
         },
         collections: [
             {
@@ -75,42 +78,59 @@ const MARKET_CONFIG = {
                 imagePlaceholder: ICONS.vibe
             },
             {
-                id: " (JCC)",
+                id: "jcc-collection",
                 name: "Japan Creators Collection (JCC)",
                 address: "0x8a6387C00f5069e71124907F2a0F5bCBca611105",
                 type: "ERC721",
                 imagePlaceholder: ICONS.vibe
             }
-
         ]
     },
 
-    // --- ASTAR MAINNET (ChainID: 592) ---
-    // [PREPARADO PARA FUTURO DEPLOY]
+    // --- ASTAR EVM MAINNET (ChainID: 592) ---
+    // [CONFIGURACIÓN PARA SUBQUERY PRODUCTION]
     "592": {
         label: "Astar Mainnet",
-        // Coloca aquí la dirección cuando despliegues en Astar Mainnet
+        // Dirección de tu contrato Proxy V3 desplegado en Astar
         marketplaceAddress: "0x691459a1D00e6fa2BD39502FF58BfDE8a804940c", 
         
-        graphEndpoint: "https://api.goldsky.com/api/public/project_cmjv32flcjyeh01v8c706bhmw/subgraphs/sone-vibe-astar/v1/gn", 
+        // Configuración SUBQUERY
+        indexerType: "SUBQUERY",
         
+        // OPCIÓN A: Producción (SubQuery Managed Service)
+        // Reemplaza esto con tu URL HTTPS de producción cuando despliegues (ej: https://api.subquery.network/sq/...)
+        graphEndpoint: "https://index-api.onfinality.io/sq/SoneVibe/sone-vibe-astar", 
+        
+        // OPCIÓN B: Desarrollo Local (Descomentar para probar con Docker)
+        // graphEndpoint: "http://localhost:3000",
+
         paymentToken: {
-            address: "0xAeaaf0e2c81Af264101B9129C00F4440cCF0F720", // Ejemplo WASTR
+            // Dirección de Wrapped ASTR en Astar Mainnet (Verifica esta dirección en el explorer)
+            address: "0xAeaaf0e2c81Af264101B9129C00F4440cCF0F720", 
             symbol: "WASTR",
             decimals: 18,
             isNative: false
         },
         collections: [
-            // Agrega aquí tus colecciones de Astar Mainnet cuando estén listas
-            /*
+            // [SUGERENCIA]: Para agregar colecciones futuras en Astar:
+            // 1. Despliega tu NFT o obtén la dirección de uno existente.
+            // 2. Copia este bloque, cambia 'address', 'name' y 'type'.
+            // 3. Asegúrate que 'type' sea exactamente "ERC721" o "ERC1155".
             {
-                id: "astar-yoki",
-                name: "Yoki Astar",
-                address: "0x...",
-                type: "ERC1155",
+                id: "Astar Degens",
+                name: "Astar Degens Official",
+                address: "0xd59fC6Bfd9732AB19b03664a45dC29B8421BDA9a", // <--- CAMBIAR POR DIRECCIÓN REAL
+                type: "ERC721",
+                imagePlaceholder: ICONS.vibe
+            },
+            {
+                id: "Test Degen",
+                name: "Test Degen",
+                address: "0x74d9431C9cD7a1872FCEf824348a8475F6E0Ef99",
+                type: "ERC721",
                 imagePlaceholder: ICONS.vibe
             }
-            */
+
         ]
     }
 };

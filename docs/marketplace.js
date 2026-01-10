@@ -1,5 +1,5 @@
 // ==========================================
-// SONEVIBE MARKETPLACE CONTROLLER V5 (UNIFIED WALLET & GRAPH)
+// SONEVIBE MARKETPLACE CONTROLLER V5 (UNIFIED WALLET & HYBRID GRAPH)
 // ==========================================
 
 // Variables Globales de Web3
@@ -229,7 +229,7 @@ function initCollectionSelector() {
 
 /**
  * ORQUESTADOR PRINCIPAL DE DATOS
- * Decide si usar The Graph o RPC
+ * Decide si usar The Graph, SubQuery o RPC
  */
 async function refreshMarketData() {
     if(!provider || !ACTIVE_MARKET_CONFIG || !APP_STATE.currentCollection) return;
@@ -246,22 +246,25 @@ async function refreshMarketData() {
 
     let success = false;
 
-    // A. INTENTO 1: THE GRAPH (Si hay endpoint configurado)
+    // A. INTENTO 1: INDEXADORES (The Graph o SubQuery)
     if (ACTIVE_MARKET_CONFIG.graphEndpoint) {
         console.time("GraphFetch");
         try {
             await fetchFromGraph();
             success = true;
-            APP_STATE.mode = 'GRAPH';
-            updateSourceIndicator("graph");
-            console.log("⚡ Data loaded from The Graph");
+            
+            // Determinar etiqueta para UI
+            const sourceType = ACTIVE_MARKET_CONFIG.indexerType === 'SUBQUERY' ? 'subquery' : 'graph';
+            APP_STATE.mode = 'GRAPH'; // Mismo modo interno
+            updateSourceIndicator(sourceType);
+            console.log(`⚡ Data loaded from ${sourceType.toUpperCase()}`);
         } catch (e) {
-            console.warn("⚠️ Graph failed, falling back to RPC...", e);
+            console.warn("⚠️ Indexer failed, falling back to RPC...", e);
         }
         console.timeEnd("GraphFetch");
     }
 
-    // B. INTENTO 2: RPC FALLBACK (Si Graph falló o no existe)
+    // B. INTENTO 2: RPC FALLBACK (Si el Indexador falló o no existe)
     if (!success) {
         console.time("RPCFetch");
         try {
@@ -291,28 +294,63 @@ async function refreshMarketData() {
     }
 }
 
-// --- ESTRATEGIA A: THE GRAPH ---
+// --- ESTRATEGIA A: HYBRID GRAPH (The Graph & SubQuery) ---
+// ... (resto del código igual hasta fetchFromGraph)
+
+// --- ESTRATEGIA A: HYBRID GRAPH (The Graph & SubQuery) ---
 async function fetchFromGraph() {
     const endpoint = ACTIVE_MARKET_CONFIG.graphEndpoint;
-    const collectionAddr = APP_STATE.currentCollection.address.toLowerCase();
-
-    // Query GraphQL: Solo items activos, con stock > 0, de la colección actual
-    const query = `
-    {
-      listings(where: { 
-        nftContract: "${collectionAddr}", 
-        active: true, 
-        amount_gt: "0" 
-      }, orderBy: blockTimestamp, orderDirection: desc) {
-        id
-        seller
-        tokenId
-        pricePerUnit
-        amount
-        tokenType
-      }
+    // Si la URL contiene "TU_USUARIO" o está vacía, forzamos error para ir al RPC
+    if (!endpoint || endpoint.includes("TU_USUARIO")) {
+        throw new Error("Invalid Graph Endpoint Configuration");
     }
-    `;
+
+    const indexerType = ACTIVE_MARKET_CONFIG.indexerType || 'THEGRAPH'; 
+    const collectionAddr = APP_STATE.currentCollection.address.toLowerCase();
+    
+    let query;
+
+    if (indexerType === 'SUBQUERY') {
+        // Query para SubQuery
+        // Nota: SubQuery requiere nombres de campos en camelCase exacto según schema
+        query = `
+        {
+          listings(filter: {
+            nftContract: { equalTo: "${collectionAddr}" },
+            active: { equalTo: true },
+            amount: { greaterThan: "0" }
+          }, orderBy: BLOCK_TIMESTAMP_DESC) {
+            nodes {
+              id
+              seller
+              nftContract
+              tokenId
+              pricePerUnit
+              amount
+              active
+            }
+          }
+        }
+        `;
+    } else {
+        // Query para The Graph
+        query = `
+        {
+          listings(where: { 
+            nftContract: "${collectionAddr}", 
+            active: true, 
+            amount_gt: "0" 
+          }, orderBy: blockTimestamp, orderDirection: desc) {
+            id
+            seller
+            tokenId
+            pricePerUnit
+            amount
+            tokenType
+          }
+        }
+        `;
+    }
 
     const res = await fetch(endpoint, {
         method: "POST",
@@ -321,58 +359,89 @@ async function fetchFromGraph() {
     });
 
     const json = await res.json();
-    if (json.errors) throw new Error("GraphQLError");
+    
+    if (json.errors) {
+        console.error("Graph Error:", json.errors);
+        throw new Error("GraphQLError");
+    }
 
-    // Mapear respuesta a nuestro formato interno
-    APP_STATE.listings = json.data.listings.map(item => ({
-        tokenId: item.tokenId, // String desde Graph
+    // Normalización de Datos
+    let rawItems = [];
+
+    if (indexerType === 'SUBQUERY') {
+        // SubQuery suele devolver data.listings.nodes
+        rawItems = json.data.listings.nodes ? json.data.listings.nodes : [];
+    } else {
+        rawItems = json.data.listings;
+    }
+
+    APP_STATE.listings = rawItems.map(item => ({
+        tokenId: item.tokenId.toString(), 
         seller: item.seller,
-        price: BigInt(item.pricePerUnit), // Convertir a BigInt para consistencia con ethers
+        price: BigInt(item.pricePerUnit), 
         amount: BigInt(item.amount),
-        tokenType: item.tokenType // 0 o 1
+        // Inferencia de tipo si no viene en la data (SubQuery MVP)
+        tokenType: item.tokenType !== undefined 
+            ? item.tokenType 
+            : (APP_STATE.currentCollection.type === 'ERC1155' ? 1 : 0) 
     }));
 }
 
-// --- ESTRATEGIA B: RPC (Scan de Eventos) ---
+// --- ESTRATEGIA B: RPC (Scan de Eventos con Chunking) ---
 async function fetchFromRPC() {
     const marketAddress = ACTIVE_MARKET_CONFIG.marketplaceAddress;
-    // Usamos el ABI global definido en market-config.js
     if(!marketContract) marketContract = new ethers.Contract(marketAddress, window.MARKET_ABIS.MARKET, provider);
 
     const currentBlock = await provider.getBlockNumber();
-    // Scanear últimos 10,000 bloques (ajustar según la red para evitar timeout)
-    const fromBlock = currentBlock - 10000 > 0 ? currentBlock - 10000 : 0;
     
+    // CONFIGURACIÓN DE CHUNKS SEGÚN RED
+    // Astar RPCs públicos son estrictos (Max 1024 blocks). Soneium permite más.
+    const MAX_BLOCK_RANGE = ACTIVE_NETWORK.chainId == "592" ? 1000 : 5000; 
+    const TOTAL_HISTORY_TO_SCAN = 10000; // Cuántos bloques atrás queremos mirar en total
+
+    const startBlock = currentBlock - TOTAL_HISTORY_TO_SCAN > 0 ? currentBlock - TOTAL_HISTORY_TO_SCAN : 0;
     const filter = marketContract.filters.ItemListed(); 
-    const logs = await marketContract.queryFilter(filter, fromBlock);
+    
+    let allLogs = [];
+
+    // Hacemos llamadas en bucle ("Chunking") para evitar el error -32603
+    for (let i = startBlock; i < currentBlock; i += MAX_BLOCK_RANGE) {
+        const to = Math.min(i + MAX_BLOCK_RANGE, currentBlock);
+        try {
+            const chunkLogs = await marketContract.queryFilter(filter, i, to);
+            allLogs = allLogs.concat(chunkLogs);
+        } catch (e) {
+            console.warn(`Error fetching logs chunk ${i}-${to}`, e);
+            // Continuamos con el siguiente chunk aunque este falle
+        }
+    }
     
     const processedIds = new Set();
 
-    // Loop inverso para ver los más nuevos primero
-    for (let i = logs.length - 1; i >= 0; i--) {
-        const log = logs[i];
+    // Procesar logs (Inverso para más recientes primero)
+    for (let i = allLogs.length - 1; i >= 0; i--) {
+        const log = allLogs[i];
         const nftContractAddr = log.args[1];
         const tokenId = log.args[2];
 
-        // Filtro estricto por colección actual
         if(nftContractAddr.toLowerCase() !== APP_STATE.currentCollection.address.toLowerCase()) continue;
 
-        // Evitar duplicados (RPC escanea eventos, no estado actual directo)
         if (!processedIds.has(tokenId.toString())) {
-            // Verificar estado actual on-chain (llamada individual necesaria en modo RPC)
-            const details = await marketContract.listings(nftContractAddr, tokenId);
-            
-            // details struct: [seller, nftContract, tokenId, price, amount, type, active]
-            // details[6] is active, details[4] is amount
-            if(details[6] === true && details[4] > 0n) {
-                APP_STATE.listings.push({
-                    tokenId: tokenId.toString(),
-                    seller: details[0],
-                    price: details[3],
-                    amount: details[4],
-                    tokenType: Number(details[5])
-                });
-                processedIds.add(tokenId.toString());
+            // Verificar estado actual on-chain
+            try {
+                const details = await marketContract.listings(nftContractAddr, tokenId);
+                if(details[6] === true && details[4] > 0n) {
+                    APP_STATE.listings.push({
+                        tokenId: tokenId.toString(),
+                        seller: details[0],
+                        price: details[3],
+                        amount: details[4],
+                        tokenType: Number(details[5])
+                    });
+                    processedIds.add(tokenId.toString());
+                }
+            } catch(e) {
+                console.warn("Error fetching item details on-chain", e);
             }
         }
     }
@@ -388,6 +457,9 @@ function updateSourceIndicator(status) {
     if(status === 'graph') {
         div.classList.add('source-active', 'graph');
         txt.textContent = "Live via The Graph";
+    } else if (status === 'subquery') {
+        div.classList.add('source-active', 'graph'); // Usamos mismo estilo visual 'graph'
+        txt.textContent = "Live via SubQuery";
     } else if (status === 'rpc') {
         div.classList.add('source-active', 'rpc');
         txt.textContent = "Live via RPC Scan";
