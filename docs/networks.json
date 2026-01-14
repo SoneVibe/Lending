@@ -130,7 +130,7 @@
      "stabilityModule": "0x8A52De344FccB11CeD9a4b89704935377bf6715d",
     "router": "0x8035BB4080F7439704c57D3296C4bF3c92B2B84e", 
     "factory": "0x743bF6Af1635e39913231F33Ecb6A676322065dD", 
-    "zap": "0xb9320f4B9A19AC622d39d252cFAE168bf77e0e18",
+    "zap": "",
      "sousChefs": [
       {
         "id": 0,

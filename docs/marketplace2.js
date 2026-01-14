@@ -537,93 +537,139 @@ function renderGrid(items, containerId, isMyListing) {
 }
 
 /**
- * METADATA FETCHER (Robust IPFS & HTTP handling)
- */
 /**
- * SENIOR METADATA FETCHER V2 (Multi-Gateway & Path Support)
- * Soporta: ipfs://CID, ipfs://CID/file.json, HTTPs directos y Fallbacks.
+ * 🛠️ SENIOR MARKETPLACE FETCHER V4 (Broken Metadata Bypass Edition)
+ * Solución: Si el JSON falla (común en colecciones antiguas),
+ * reconstruye manualmente la URL de la imagen usando CIDs conocidos.
  */
-async function fetchMetadata(tokenId, imgId) {
-    // 1. Resolver Inteligente de IPFS
-    const resolveIPFS = (url, gateway = 'ipfs.io') => {
-        if (!url) return "";
-        // Si ya es http/s, lo dejamos pasar, pero limpiamos espacios
-        if (url.trim().toLowerCase().startsWith("http")) return url.trim();
 
-        // Limpieza profunda de protocolo:
-        // Elimina "ipfs://", "ipfs://ipfs/", "ipfs/" al inicio
-        const cleanPath = url.replace(/^ipfs?:\/\/(ipfs\/)?/, "").replace(/^ipfs\//, "");
-        
-        // Retornamos ruta limpia con el gateway elegido
-        return `https://${gateway}/ipfs/${cleanPath}`;
+// 1. CONFIGURACIÓN DE RESCATE (Añade aquí colecciones con JSON roto pero imágenes vivas)
+const BROKEN_COLLECTIONS = {
+    // Astar Degens Contract (LowerCase)
+    "0xd59fc6bfd9732ab19b03664a45dc29b8421bda9a": {
+        // El CID de la IMAGEN que vimos en el explorador (Qm... no el bafy... del json)
+        imageBase: "QmSQ2FHMTi8MFa88ERS6niseb2ggeGrBvqsLZHgd23L8sF", 
+        extension: ".png",
+        namePrefix: "Astar Degen #" // Fallback para el nombre
+    }
+    // Puedes añadir más contratos aquí si pasa con otros
+};
+
+async function fetchMetadata(tokenId, imgId) {
+    // A. Lista de Gateways (Mezclamos públicos y específicos de NFT)
+    const GATEWAYS = [
+        "https://ipfs.io/ipfs/",             // El más compatible con rutas viejas Qm...
+        "https://gateway.pinata.cloud/ipfs/",// Rápido
+        "https://cloudflare-ipfs.com/ipfs/", // Cache agresivo
+        "https://dweb.link/ipfs/"            // Fallback
+    ];
+
+    const cleanIPFS = (url) => {
+        if (!url) return "";
+        if (url.startsWith("http")) return url;
+        return url.replace(/^ipfs?:\/\/(ipfs\/)?/, "").replace(/^ipfs\//, "");
     };
-    
+
+    const getGatewayUrl = (path, gatewayIndex = 0) => {
+        return `${GATEWAYS[gatewayIndex]}${cleanIPFS(path)}`;
+    };
+
     try {
-        const collection = APP_STATE.currentCollection;
+        const collectionAddress = APP_STATE.currentCollection.address.toLowerCase();
         let uri;
-        
-        // A. Obtener URI del contrato (Lectura Blockchain)
-        if (collection.type === "ERC1155") {
-            const contract = new ethers.Contract(collection.address, window.MARKET_ABIS.ERC1155, provider);
-            uri = await contract.uri(tokenId);
-        } else {
-            const contract = new ethers.Contract(collection.address, window.MARKET_ABIS.ERC721, provider);
-            uri = await contract.tokenURI(tokenId);
+        let isBrokenMetadata = false;
+
+        // B. Intentar leer URI del contrato
+        try {
+            if (APP_STATE.currentCollection.type === "ERC1155") {
+                const contract = new ethers.Contract(collectionAddress, window.MARKET_ABIS.ERC1155, provider);
+                uri = await contract.uri(tokenId);
+            } else {
+                const contract = new ethers.Contract(collectionAddress, window.MARKET_ABIS.ERC721, provider);
+                uri = await contract.tokenURI(tokenId);
+            }
+        } catch (err) {
+            console.warn("Contract read failed, trying forced fallback");
+            isBrokenMetadata = true;
         }
 
-        if(!uri) return;
-
-        // B. Parseo Estándar ERC1155 ({id} -> hex)
-        if(uri.includes("{id}")) {
+        // Si el contrato devuelve algo, procesamos {id}
+        if (uri && uri.includes("{id}")) {
             const hexId = BigInt(tokenId).toString(16).padStart(64, '0');
             uri = uri.replace("{id}", hexId);
         }
-        
-        // C. Fetch del JSON (Con Redundancia)
-        let json;
-        try {
-            // Intento 1: Gateway Estándar (ipfs.io es muy bueno resolviendo rutas /802.json)
-            const primaryUrl = resolveIPFS(uri, 'ipfs.io');
-            const res = await fetch(primaryUrl);
-            if (!res.ok) throw new Error("Gateway 1 timeout");
-            json = await res.json();
-        } catch (err) {
-            console.warn(`Retrying metadata #${tokenId} with backup gateway...`);
-            // Intento 2: Fallback a dweb.link (Protocol Labs) si el primero falla
-            const backupUrl = resolveIPFS(uri, 'dweb.link');
-            const res = await fetch(backupUrl);
-            json = await res.json();
-        }
-        
-        // D. Renderizado de Imagen
-        const imgEl = getEl(imgId);
-        if(imgEl && json) {
-            // Buscamos la propiedad de imagen (soporte OpenSea/Standard)
-            const imageUri = json.image || json.image_url || json.animation_url; 
-            
-            if(imageUri) {
-                // Asignamos src usando un gateway rápido para medios
-                imgEl.src = resolveIPFS(imageUri, 'ipfs.io');
-                
-                // Efecto visual: Solo mostrar cuando cargue (evita parpadeos)
-                imgEl.onload = () => { 
-                    imgEl.style.opacity = "1"; 
-                    // Ocultar loader si existe
-                    const loader = document.getElementById(imgId.replace('img-', 'loader-'));
-                    if(loader) loader.style.display = 'none';
-                };
 
-                // Fallback final de imagen: Si ipfs.io falla cargando la FOTO, probar Cloudflare
-                imgEl.onerror = () => {
-                    console.warn("Image load fail, switching gateway");
-                    imgEl.src = resolveIPFS(imageUri, 'cloudflare-ipfs.com');
-                };
+        let json = null;
+        let imageUri = null;
+
+        // C. INTENTO DE FETCH DEL JSON (Solo si tenemos URI)
+        if (uri && !isBrokenMetadata) {
+            try {
+                // Intentamos Fetch rápido con un Timeout corto (2s) para no bloquear la UI
+                const controller = new AbortController();
+                const id = setTimeout(() => controller.abort(), 2000);
+                
+                // Usamos ipfs.io primero para JSONs viejos, suele ir mejor
+                const res = await fetch(getGatewayUrl(uri, 0), { signal: controller.signal });
+                clearTimeout(id);
+                
+                if (res.ok) {
+                    json = await res.json();
+                    imageUri = json.image || json.image_url || json.animation_url;
+                } else {
+                    throw new Error("JSON Fetch failed");
+                }
+            } catch (e) {
+                console.warn(`JSON muerto para #${tokenId}. Iniciando protocolo de rescate...`);
+                isBrokenMetadata = true; // Activar plan B
             }
         }
-        
-    } catch(e) { 
-        // Fail silencioso para no ensuciar consola en producción, pero útil para debug
-        console.warn(`Silent Drop #${tokenId}: Metadata unreachable`);
+
+        // D. PROTOCOLO DE RESCATE (EL "TRUCO")
+        // Si falló el JSON o el contrato, verificamos si tenemos un Override manual
+        if ((!json || isBrokenMetadata) && BROKEN_COLLECTIONS[collectionAddress]) {
+            const fix = BROKEN_COLLECTIONS[collectionAddress];
+            console.log(`🔧 Aplicando fix manual para ${fix.namePrefix}${tokenId}`);
+            
+            // Reconstruimos la URL de la imagen directamente (saltándonos el JSON muerto)
+            // Usamos ipfs.io para la imagen Qm... que sabemos que funciona
+            imageUri = `ipfs://${fix.imageBase}/${tokenId}${fix.extension}`;
+            
+            // Simulamos datos mínimos para que la UI no se vea vacía
+            json = {
+                name: `${fix.namePrefix}${tokenId}`,
+                description: "Metadata retrieved via SoneVibe Recovery Protocol",
+                image: imageUri
+            };
+        }
+
+        // E. RENDERIZADO FINAL
+        const imgEl = getEl(imgId);
+        if (imgEl && imageUri) {
+            // Usar gateway para la imagen
+            // Para imágenes 'Qm...', ipfs.io suele resolver mejor que cloudflare a veces
+            imgEl.src = getGatewayUrl(imageUri, 0); 
+
+            imgEl.onload = () => {
+                imgEl.style.opacity = "1";
+                const loader = document.getElementById(imgId.replace('img-', 'loader-'));
+                if(loader) loader.style.display = 'none';
+            };
+
+            // Fallback de imagen en cascada
+            imgEl.onerror = () => {
+                // Si falla ipfs.io, probamos Pinata
+                if (imgEl.src.includes("ipfs.io")) {
+                    imgEl.src = getGatewayUrl(imageUri, 1);
+                } else if (!imgEl.src.includes("placeholder")) {
+                    // Último recurso
+                    imgEl.src = "assets/placeholder.png";
+                }
+            };
+        }
+
+    } catch (e) {
+        console.error(`Fatal error token #${tokenId}`, e);
     }
 }
 // =========================================================
