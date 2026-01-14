@@ -70,13 +70,13 @@ const MARKET_CONFIG = {
             isNative: false
         },
         collections: [
-          /*  {
+            {
                 id: "yoki-origins",
                 name: "Yoki Origins (Official)",
                 address: "0x5f2a5818DF3216Aa6ac44632541db8F3EC4e9954", 
                 type: "ERC1155", 
                 imagePlaceholder: ICONS.vibe
-            }, */
+            },
             {
                 id: "jcc-collection",
                 name: "Japan Creators Collection (JCC)",
@@ -116,16 +116,16 @@ const MARKET_CONFIG = {
             // 1. Despliega tu NFT o obtén la dirección de uno existente.
             // 2. Copia este bloque, cambia 'address', 'name' y 'type'.
             // 3. Asegúrate que 'type' sea exactamente "ERC721" o "ERC1155".
-          /*  {
+            {
                 id: "Astar Degens",
                 name: "Astar Degens Official",
                 address: "0xd59fC6Bfd9732AB19b03664a45dC29B8421BDA9a", // <--- CAMBIAR POR DIRECCIÓN REAL
                 type: "ERC721",
                 imagePlaceholder: ICONS.vibe
-            },*/
+            },
             {
                 id: "Test Degen",
-                name: "*Test Degen* For the officials tap on the left menu",
+                name: "Test Degen",
                 address: "0x74d9431C9cD7a1872FCEf824348a8475F6E0Ef99",
                 type: "ERC721",
                 imagePlaceholder: ICONS.vibe

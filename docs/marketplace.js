@@ -539,93 +539,179 @@ function renderGrid(items, containerId, isMyListing) {
 /**
  * METADATA FETCHER (Robust IPFS & HTTP handling)
  */
-/**
- * SENIOR METADATA FETCHER V2 (Multi-Gateway & Path Support)
- * Soporta: ipfs://CID, ipfs://CID/file.json, HTTPs directos y Fallbacks.
- */
+// ==========================================
+// 🛠️ FETCH METADATA V5 (FIXED & ROBUST)
+// ==========================================
+
+// 1. Base de datos de CIDs rotos y sus correcciones
+const METADATA_FIXES = {
+    // Astar Degens (El contrato 0xd59f...)
+    "0xd59fc6bfd9732ab19b03664a45dc29b8421bda9a": {
+        imageBase: "QmSQ2FHMTi8MFa88ERS6niseb2ggeGrBvqsLZHgd23L8sF",
+        extension: ".png",
+        namePrefix: "Astar Degen #"
+    },
+    // Si tienes otra colección rota, añade el CID del directorio aquí si lo conoces
+    "bafybeiecbnxyn6aqvzqy3xe3wl6pzz7grqzu7wuaxedjosr4bi3qjxgcj4": {
+        imageBase: "QmSQ2FHMTi8MFa88ERS6niseb2ggeGrBvqsLZHgd23L8sF",
+        extension: ".png",
+        namePrefix: "Astar Degen #"
+    }
+};
+
+// 2. Gateways IPFS ordenados por prioridad
+const IPFS_GATEWAYS = [
+    "https://ipfs.io/ipfs/",             
+    "https://gateway.pinata.cloud/ipfs/",
+    "https://cloudflare-ipfs.com/ipfs/", 
+    "https://dweb.link/ipfs/",           
+    "https://nftstorage.link/ipfs/"      
+];
+
+// Helper: Limpia prefijos ipfs://
+const cleanIPFS = (url) => {
+    if (!url) return "";
+    // Si ya es http, retornamos tal cual
+    if (url.startsWith("http")) return url;
+    return url.replace(/^ipfs?:\/\/(ipfs\/)?/, "").replace(/^ipfs\//, "");
+};
+
+// Helper: Construye URL
+const getGatewayUrl = (path, gatewayIndex = 0) => {
+    if (path.startsWith("http")) return path;
+    const cleanPath = cleanIPFS(path);
+    return `${IPFS_GATEWAYS[gatewayIndex % IPFS_GATEWAYS.length]}${cleanPath}`;
+};
+
 async function fetchMetadata(tokenId, imgId) {
-    // 1. Resolver Inteligente de IPFS
-    const resolveIPFS = (url, gateway = 'ipfs.io') => {
-        if (!url) return "";
-        // Si ya es http/s, lo dejamos pasar, pero limpiamos espacios
-        if (url.trim().toLowerCase().startsWith("http")) return url.trim();
+    const imgEl = getEl(imgId);
+    if (!imgEl) return;
 
-        // Limpieza profunda de protocolo:
-        // Elimina "ipfs://", "ipfs://ipfs/", "ipfs/" al inicio
-        const cleanPath = url.replace(/^ipfs?:\/\/(ipfs\/)?/, "").replace(/^ipfs\//, "");
-        
-        // Retornamos ruta limpia con el gateway elegido
-        return `https://${gateway}/ipfs/${cleanPath}`;
-    };
-    
+    // Loader overlay (buscamos el ID del loader basado en el ID de la imagen)
+    const loaderId = imgId.replace('img-', 'loader-');
+    const loaderEl = getEl(loaderId);
+
     try {
-        const collection = APP_STATE.currentCollection;
-        let uri;
-        
-        // A. Obtener URI del contrato (Lectura Blockchain)
-        if (collection.type === "ERC1155") {
-            const contract = new ethers.Contract(collection.address, window.MARKET_ABIS.ERC1155, provider);
-            uri = await contract.uri(tokenId);
-        } else {
-            const contract = new ethers.Contract(collection.address, window.MARKET_ABIS.ERC721, provider);
-            uri = await contract.tokenURI(tokenId);
+        const collectionAddress = APP_STATE.currentCollection.address.toLowerCase();
+        let uri = null;
+        let imageUri = null;
+        let isBrokenMetadata = false;
+
+        // --- A. DETECCIÓN PREVENTIVA (Fix Hardcodeado) ---
+        // Si sabemos que esta colección está rota por dirección, saltamos el contrato
+        if (METADATA_FIXES[collectionAddress]) {
+            // console.log(`[#${tokenId}] Known broken Collection. Using Fast Recovery.`);
+            isBrokenMetadata = true;
         }
 
-        if(!uri) return;
+        // --- B. OBTENER URI DEL CONTRATO (Si no está marcado como roto) ---
+        if (!isBrokenMetadata) {
+            try {
+                const isERC1155 = APP_STATE.currentCollection.type === 'ERC1155';
+                const abi = isERC1155 ? window.MARKET_ABIS.ERC1155 : window.MARKET_ABIS.ERC721;
+                // Usamos 'provider' global
+                const contract = new ethers.Contract(collectionAddress, abi, provider);
 
-        // B. Parseo Estándar ERC1155 ({id} -> hex)
-        if(uri.includes("{id}")) {
-            const hexId = BigInt(tokenId).toString(16).padStart(64, '0');
-            uri = uri.replace("{id}", hexId);
-        }
-        
-        // C. Fetch del JSON (Con Redundancia)
-        let json;
-        try {
-            // Intento 1: Gateway Estándar (ipfs.io es muy bueno resolviendo rutas /802.json)
-            const primaryUrl = resolveIPFS(uri, 'ipfs.io');
-            const res = await fetch(primaryUrl);
-            if (!res.ok) throw new Error("Gateway 1 timeout");
-            json = await res.json();
-        } catch (err) {
-            console.warn(`Retrying metadata #${tokenId} with backup gateway...`);
-            // Intento 2: Fallback a dweb.link (Protocol Labs) si el primero falla
-            const backupUrl = resolveIPFS(uri, 'dweb.link');
-            const res = await fetch(backupUrl);
-            json = await res.json();
-        }
-        
-        // D. Renderizado de Imagen
-        const imgEl = getEl(imgId);
-        if(imgEl && json) {
-            // Buscamos la propiedad de imagen (soporte OpenSea/Standard)
-            const imageUri = json.image || json.image_url || json.animation_url; 
-            
-            if(imageUri) {
-                // Asignamos src usando un gateway rápido para medios
-                imgEl.src = resolveIPFS(imageUri, 'ipfs.io');
-                
-                // Efecto visual: Solo mostrar cuando cargue (evita parpadeos)
-                imgEl.onload = () => { 
-                    imgEl.style.opacity = "1"; 
-                    // Ocultar loader si existe
-                    const loader = document.getElementById(imgId.replace('img-', 'loader-'));
-                    if(loader) loader.style.display = 'none';
-                };
+                uri = isERC1155 ? await contract.uri(tokenId) : await contract.tokenURI(tokenId);
 
-                // Fallback final de imagen: Si ipfs.io falla cargando la FOTO, probar Cloudflare
-                imgEl.onerror = () => {
-                    console.warn("Image load fail, switching gateway");
-                    imgEl.src = resolveIPFS(imageUri, 'cloudflare-ipfs.com');
-                };
+                // Normalizar URI: Reemplazar {id} si existe
+                if (uri && uri.includes("{id}")) {
+                    const hexId = BigInt(tokenId).toString(16).padStart(64, '0').toLowerCase();
+                    uri = uri.replace("{id}", hexId);
+                }
+            } catch (err) {
+                console.warn(`[#${tokenId}] Contract URI read failed, activating recovery.`);
+                isBrokenMetadata = true;
             }
         }
-        
-    } catch(e) { 
-        // Fail silencioso para no ensuciar consola en producción, pero útil para debug
-        console.warn(`Silent Drop #${tokenId}: Metadata unreachable`);
+
+        // --- C. VERIFICAR CID ROTO EN URI ---
+        let cidRoot = "";
+        if (uri) {
+            const cleaned = cleanIPFS(uri);
+            cidRoot = cleaned.split('/')[0]; // Extraer el CID raiz
+            if (METADATA_FIXES[cidRoot]) isBrokenMetadata = true;
+        }
+
+        // --- D. FETCH DEL JSON (Solo si parece sano) ---
+        let json = null;
+        if (uri && !isBrokenMetadata) {
+            try {
+                // Timeout agresivo (2.5s)
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 2500);
+
+                const res = await fetch(getGatewayUrl(uri, 0), { signal: controller.signal });
+                clearTimeout(timeoutId);
+
+                if (res.ok) {
+                    json = await res.json();
+                    imageUri = json.image || json.image_url || json.animation_url;
+                } else {
+                    throw new Error("HTTP " + res.status);
+                }
+            } catch (e) {
+                isBrokenMetadata = true;
+            }
+        }
+
+        // --- E. PROTOCOLO DE RESCATE (FALLBACK) ---
+        if (isBrokenMetadata) {
+            // Buscamos config por Address O por CID
+            const fix = METADATA_FIXES[collectionAddress] || METADATA_FIXES[cidRoot];
+            
+            if (fix) {
+                // Reconstrucción Manual
+                imageUri = `ipfs://${fix.imageBase}/${tokenId}${fix.extension}`;
+                // Metadata sintética
+                json = { name: `${fix.namePrefix}${tokenId}` };
+            }
+        }
+
+        // --- F. RENDERIZADO EN CASCADA (WATERFALL) ---
+        if (imageUri) {
+            let gatewayIndex = 0;
+
+            const tryLoadImage = () => {
+                if (gatewayIndex >= IPFS_GATEWAYS.length) {
+                    // Fallaron todos -> Placeholder
+                    imgEl.src = APP_STATE.currentCollection.imagePlaceholder || "assets/placeholder.png"; 
+                    if(loaderEl) loaderEl.style.display = 'none';
+                    return;
+                }
+
+                const currentUrl = getGatewayUrl(imageUri, gatewayIndex);
+                imgEl.src = currentUrl;
+            };
+
+            imgEl.onload = () => {
+                imgEl.style.opacity = "1"; // Fade in
+                if(loaderEl) loaderEl.style.display = 'none';
+            };
+
+            imgEl.onerror = () => {
+                // Si falla, probar siguiente gateway
+                gatewayIndex++;
+                tryLoadImage();
+            };
+
+            // Iniciar carga
+            tryLoadImage();
+
+        } else {
+            // Nada funcionó
+            imgEl.src = APP_STATE.currentCollection.imagePlaceholder || "assets/placeholder.png";
+            if(loaderEl) loaderEl.style.display = 'none';
+        }
+
+    } catch (fatalError) {
+        console.error(`Fatal error handling #${tokenId}:`, fatalError);
+        imgEl.src = "assets/placeholder.png";
+        if(loaderEl) loaderEl.style.display = 'none';
     }
 }
+
+
 // =========================================================
 // 5. UI HELPERS & UTILS
 // =========================================================
