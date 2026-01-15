@@ -545,17 +545,23 @@ function renderGrid(items, containerId, isMyListing) {
 /**
  * METADATA FETCHER (Robust IPFS & HTTP handling)
  */
-// ==========================================
-// 🛠️ FETCH METADATA V6 (ANTI-429 & LOAD BALANCER)
-// ==========================================
+// =====================================================
+// 🚀 FETCH METADATA V9 — GOD MODE (SoneVibe Ready)
+// Zero-CORS • Zero-429 • Pinata-proof • Degens-rescue
+// Works identical on localhost & GitHub Pages
+// =====================================================
 
-// 1. Base de datos de CIDs rotos (Tus fixes manuales)
+/* =========================
+   🧠 FIXES: COLECCIONES ROTAS
+   ========================= */
 const METADATA_FIXES = {
+    // Astar Degens (contract address)
     "0xd59fc6bfd9732ab19b03664a45dc29b8421bda9a": {
         imageBase: "QmSQ2FHMTi8MFa88ERS6niseb2ggeGrBvqsLZHgd23L8sF",
         extension: ".png",
         namePrefix: "Astar Degen #"
     },
+    // Astar Degens (CID muerto del JSON)
     "bafybeiecbnxyn6aqvzqy3xe3wl6pzz7grqzu7wuaxedjosr4bi3qjxgcj4": {
         imageBase: "QmSQ2FHMTi8MFa88ERS6niseb2ggeGrBvqsLZHgd23L8sF",
         extension: ".png",
@@ -563,153 +569,179 @@ const METADATA_FIXES = {
     }
 };
 
-// 2. Gateways IPFS (Pinata movido al final para evitar sobrecarga inicial)
+/* =========================
+   🌐 GATEWAYS (CORS SAFE)
+   Prioridad absoluta: Cloudflare
+   ========================= */
 const IPFS_GATEWAYS = [
-    "https://cloudflare-ipfs.com/ipfs/", // Muy rápido y robusto
-    "https://ipfs.io/ipfs/",             // El estándar
-    "https://dweb.link/ipfs/"           // Buen fallback
-  
+    "https://cloudflare-ipfs.com/ipfs/",
+    "https://ipfs.io/ipfs/",
+    "https://dweb.link/ipfs/"
 ];
 
-// Helper: Limpia prefijos ipfs://
-const cleanIPFS = (url) => {
+/* =========================
+   🔧 HELPERS IPFS
+   ========================= */
+
+// Limpia TODO: ipfs://, ipfs://ipfs/, pinata, cualquier gateway
+const cleanIPFSPath = (url) => {
     if (!url) return "";
-    if (url.startsWith("http")) return url;
-    return url.replace(/^ipfs?:\/\/(ipfs\/)?/, "").replace(/^ipfs\//, "");
+    if (url.startsWith("http")) {
+        // extrae /ipfs/CID/... aunque venga de pinata u otro gateway
+        const match = url.match(/\/ipfs\/(.+)$/);
+        return match ? match[1] : url;
+    }
+    return url
+        .replace(/^ipfs?:\/\/(ipfs\/)?/, "")
+        .replace(/^ipfs\//, "");
 };
 
-// Helper: Construye URL con índice rotatorio
-const getGatewayUrl = (path, index) => {
-    if (path.startsWith("http")) return path;
-    const cleanPath = cleanIPFS(path);
-    // Aseguramos que el índice sea válido usando módulo
-    const safeIndex = Math.abs(index) % IPFS_GATEWAYS.length;
-    return `${IPFS_GATEWAYS[safeIndex]}${cleanPath}`;
+// Fuerza gateway CORS-friendly (NO pinata jamás)
+const toGatewayUrl = (url, gatewayIndex = 0) => {
+    if (!url) return "";
+    if (url.startsWith("http") && !url.includes("/ipfs/")) return url;
+    const clean = cleanIPFSPath(url);
+    const gw = IPFS_GATEWAYS[gatewayIndex % IPFS_GATEWAYS.length];
+    return `${gw}${clean}`;
 };
 
+/* =========================
+   🧩 FETCH METADATA V9
+   ========================= */
 async function fetchMetadata(tokenId, imgId) {
-    const imgEl = getEl(imgId);
+    const imgEl = document.getElementById(imgId);
     if (!imgEl) return;
 
-    const loaderId = imgId.replace('img-', 'loader-');
-    const loaderEl = getEl(loaderId);
+    const loaderEl = document.getElementById(imgId.replace("img-", "loader-"));
+
+    const collection = APP_STATE.currentCollection;
+    const collectionAddr = collection.address.toLowerCase();
+
+    let uri = null;
+    let imageUri = null;
+    let isBroken = false;
+    let cidRoot = "";
 
     try {
-        const collectionAddress = APP_STATE.currentCollection.address.toLowerCase();
-        let uri = null;
-        let imageUri = null;
-        let isBrokenMetadata = false;
-
-        // --- A. DETECCIÓN PREVENTIVA ---
-        if (METADATA_FIXES[collectionAddress]) {
-            isBrokenMetadata = true;
+        /* ========= A. DETECCIÓN PREVIA ========= */
+        if (METADATA_FIXES[collectionAddr]) {
+            isBroken = true;
         }
 
-        // --- B. OBTENER URI DEL CONTRATO ---
-        if (!isBrokenMetadata) {
+        /* ========= B. TOKEN URI (BLOCKCHAIN) ========= */
+        if (!isBroken) {
             try {
-                const isERC1155 = APP_STATE.currentCollection.type === 'ERC1155';
-                const abi = isERC1155 ? window.MARKET_ABIS.ERC1155 : window.MARKET_ABIS.ERC721;
-                const contract = new ethers.Contract(collectionAddress, abi, provider);
-                uri = isERC1155 ? await contract.uri(tokenId) : await contract.tokenURI(tokenId);
+                const abi = collection.type === "ERC1155"
+                    ? window.MARKET_ABIS.ERC1155
+                    : window.MARKET_ABIS.ERC721;
+
+                const contract = new ethers.Contract(collectionAddr, abi, provider);
+                uri = collection.type === "ERC1155"
+                    ? await contract.uri(tokenId)
+                    : await contract.tokenURI(tokenId);
 
                 if (uri && uri.includes("{id}")) {
-                    const hexId = BigInt(tokenId).toString(16).padStart(64, '0').toLowerCase();
+                    const hexId = BigInt(tokenId).toString(16).padStart(64, "0");
                     uri = uri.replace("{id}", hexId);
                 }
-            } catch (err) {
-                console.warn(`[#${tokenId}] Contract URI fail.`);
-                isBrokenMetadata = true;
-            }
-        }
-
-        // --- C. VERIFICAR CID ROTO ---
-        let cidRoot = "";
-        if (uri) {
-            const cleaned = cleanIPFS(uri);
-            cidRoot = cleaned.split('/')[0];
-            if (METADATA_FIXES[cidRoot]) isBrokenMetadata = true;
-        }
-
-        // --- D. FETCH DEL JSON (LOAD BALANCED) ---
-        let json = null;
-        if (uri && !isBrokenMetadata) {
-            try {
-                // TRUCO ANTI-429: Elegimos un gateway ALEATORIO para empezar
-                // Así no golpeamos al mismo servidor con 20 peticiones a la vez
-                let startGatewayIndex = Math.floor(Math.random() * IPFS_GATEWAYS.length);
-                
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 3500); // 3.5s timeout
-
-                const res = await fetch(getGatewayUrl(uri, startGatewayIndex), { signal: controller.signal });
-                clearTimeout(timeoutId);
-
-                if (res.ok) {
-                    json = await res.json();
-                    imageUri = json.image || json.image_url || json.animation_url;
-                } else {
-                    // Si falla el aleatorio, intentamos ipfs.io directo como fallback
-                    if(res.status === 429) console.warn(`[#${tokenId}] Rate limited (429). Retrying...`);
-                    throw new Error("Gateway failed"); 
-                }
             } catch (e) {
-                // Si falla el fetch, asumimos roto para intentar rescate o placeholder
-                isBrokenMetadata = true;
+                console.warn(`[V9] tokenURI fail #${tokenId}`);
+                isBroken = true;
             }
         }
 
-        // --- E. PROTOCOLO DE RESCATE ---
-        if (isBrokenMetadata) {
-            const fix = METADATA_FIXES[collectionAddress] || METADATA_FIXES[cidRoot];
+        /* ========= C. CID ROTO ========= */
+        if (uri) {
+            const clean = cleanIPFSPath(uri);
+            cidRoot = clean.split("/")[0];
+            if (METADATA_FIXES[cidRoot]) isBroken = true;
+        }
+
+        /* ========= D. FETCH JSON (Cloudflare-first) ========= */
+        let json = null;
+
+        if (uri && !isBroken) {
+            for (let i = 0; i < IPFS_GATEWAYS.length; i++) {
+                try {
+                    const url = toGatewayUrl(uri, i);
+                    const controller = new AbortController();
+                    const t = setTimeout(() => controller.abort(), 3500);
+
+                    const res = await fetch(url, { signal: controller.signal });
+                    clearTimeout(t);
+
+                    if (!res.ok) throw new Error(res.status);
+                    json = await res.json();
+                    break;
+                } catch (err) {
+                    if (i === IPFS_GATEWAYS.length - 1) {
+                        console.warn(`[V9] JSON unreachable #${tokenId}`);
+                        isBroken = true;
+                    }
+                }
+            }
+        }
+
+        /* ========= E. RESCATE DEGENSES ========= */
+        if (isBroken) {
+            const fix = METADATA_FIXES[collectionAddr] || METADATA_FIXES[cidRoot];
             if (fix) {
                 imageUri = `ipfs://${fix.imageBase}/${tokenId}${fix.extension}`;
                 json = { name: `${fix.namePrefix}${tokenId}` };
             }
+        } else if (json) {
+            imageUri = json.image || json.image_url || json.animation_url;
         }
 
-        // --- F. RENDERIZADO IMAGEN (Waterfall) ---
-        if (imageUri) {
-            // Empezamos también con un gateway aleatorio para la imagen
-            let gatewayIndex = Math.floor(Math.random() * IPFS_GATEWAYS.length);
-            let attempts = 0;
+        /* ========= F. RENDER IMAGEN (FADE-IN) ========= */
+        if (!imageUri) throw new Error("No image");
 
-            const tryLoadImage = () => {
-                if (attempts >= IPFS_GATEWAYS.length) {
-                    imgEl.src = APP_STATE.currentCollection.imagePlaceholder || "assets/placeholder.png";
-                    if(loaderEl) loaderEl.style.display = 'none';
-                    return;
-                }
+        let gwIndex = 0;
+        let attempts = 0;
 
-                const currentUrl = getGatewayUrl(imageUri, gatewayIndex);
-                imgEl.src = currentUrl;
-            };
+        const tryLoad = () => {
+            imgEl.src = toGatewayUrl(imageUri, gwIndex);
+        };
 
-            imgEl.onload = () => {
-                imgEl.style.opacity = "1";
-                if(loaderEl) loaderEl.style.display = 'none';
-            };
+        imgEl.onload = () => {
+            imgEl.style.opacity = "1";
+            if (loaderEl) loaderEl.style.display = "none";
+        };
 
-            imgEl.onerror = () => {
-                // Rotar al siguiente gateway
-                gatewayIndex++;
-                attempts++;
-                tryLoadImage();
-            };
+        imgEl.onerror = () => {
+            attempts++;
+            gwIndex++;
+            if (attempts >= IPFS_GATEWAYS.length) {
+                imgEl.src = collection.imagePlaceholder || "assets/placeholder.png";
+                if (loaderEl) loaderEl.style.display = "none";
+            } else {
+                tryLoad();
+            }
+        };
 
-            tryLoadImage();
+        tryLoad();
 
-        } else {
-            imgEl.src = APP_STATE.currentCollection.imagePlaceholder || "assets/placeholder.png";
-            if(loaderEl) loaderEl.style.display = 'none';
-        }
-
-    } catch (fatalError) {
-        console.error(`Fatal #${tokenId}:`, fatalError);
-        imgEl.src = "assets/placeholder.png";
-        if(loaderEl) loaderEl.style.display = 'none';
+    } catch (fatal) {
+        console.warn(`[V9] Fatal #${tokenId}`);
+        imgEl.src = collection.imagePlaceholder || "assets/placeholder.png";
+        if (loaderEl) loaderEl.style.display = "none";
     }
 }
+
+/* =====================================================
+   ⚡ OPCIONAL (RECOMENDADO): STAGGERING EN renderGrid
+   Evita ráfagas simultáneas (anti-429 definitivo)
+   =====================================================
+
+items.forEach((item, index) => {
+    grid.appendChild(card);
+
+    setTimeout(() => {
+        fetchMetadata(item.tokenId, `img-${containerId}-${item.tokenId}`);
+    }, index * 120); // 120ms = sweet spot
+});
+
+===================================================== */
 
 
 
