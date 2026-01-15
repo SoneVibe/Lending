@@ -564,8 +564,8 @@ const IPFS_GATEWAYS = [
     "https://cloudflare-ipfs.com/ipfs/",            
     "https://ipfs.io/ipfs/", 
     "https://dweb.link/ipfs/", 
-    "https://nftstorage.link/ipfs/"           
-    "https://gateway.pinata.cloud/ipfs/",       
+    "https://nftstorage.link/ipfs/",           
+    "https://gateway.pinata.cloud/ipfs/"       
 ];
 
 // Helper: Limpia prefijos ipfs://
