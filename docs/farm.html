@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>VIBE Farm | Yield Generation</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="icon" type="image/svg+xml" href="icons/vibe.svg">
+  <link rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    /* Estilos para Tabs de Stake/Unstake */
+    .action-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+    .toggle-group { background: rgba(0,0,0,0.3); border-radius: 8px; padding: 3px; display: flex; gap: 5px; }
+    .toggle-btn {
+        background: transparent; border: none; color: var(--text-muted); padding: 5px 15px;
+        border-radius: 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: 0.2s;
+    }
+    .toggle-btn.active { background: rgba(255,255,255,0.1); color: #fff; }
+    .toggle-btn.active.unstake-mode { background: rgba(255, 85, 85, 0.2); color: var(--danger); }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    <nav class="sidebar glass-panel">
+      <div class="logo-area">
+        <svg width="28" height="28" viewBox="0 0 64 64"><circle cx="32" cy="32" r="32" fill="#1a1f35"/><path d="M18 42 L32 18 L46 42 Z" fill="#00e0ff"/></svg>
+        VIBE Finance
+      </div>
+      <a href="index.html" class="nav-link">Dashboard Home</a>
+      <a href="dashboard.html" class="nav-link">Lend/Borrow</a>
+      <a href="swap.html" class="nav-link">Trade & Swap</a>
+      <a href="#" class="nav-link active" style="color:var(--warning); border-color:var(--warning); background:rgba(249,224,97,0.1);">Farm & Earn</a>
+      <a href="markets.html" class="nav-link">Markets Overview</a>
+      <a href="marketplace.html" class="nav-link">NFT Market V3</a>
+       <a href="mint-svusd.html" class="nav-link">Mint SVUSD</a>
+       <!-- NUEVO BOTÓN AQUÍ -->
+  <a href="swapstabilizer.html" class="nav-link">Peg Stabilizer (SVUSD)</a>
+      
+      <div style="flex-grow:1"></div>
+      <div style="padding: 10px; font-size: 0.8rem; color: var(--text-muted);">
+        Network Status:<br>
+        <span id="statusDot" style="color: var(--danger)">●</span> <span id="connStatus">Disconnected</span>
+      </div>
+    </nav>
+
+    <div class="main-content">
+      <header>
+        <div>
+          <h1 style="margin:0; font-size:1.8rem; color:var(--warning);">Yield Farms</h1>
+          <p style="margin:4px 0 0 0; color:var(--text-muted);">Stake LP Tokens to earn LIGHT</p>
+        </div>
+        
+        <!-- HEADER EXACTO DEL LIQUIDATOR -->
+        <div class="nav-group">
+          <select id="networkSelect" class="network-select"><option value="" disabled selected>Loading...</option></select>
+          <div class="btn-account-wrapper">
+             <button id="btnConnect" class="btn-primary">Connect Wallet</button>
+             <div id="accountDropdown" class="account-dropdown">
+                 <div style="padding:12px 12px 6px 12px; font-size:0.8rem; color:var(--text-muted); text-transform:uppercase;">Connected Wallet</div>
+                 <div style="padding:0 12px 12px 12px; font-size:1.1rem; font-weight:600; color:#fff;" id="dropdownAddress">0x00...000</div>
+                 <div class="menu-divider"></div>
+                 <div class="menu-item" id="btnCopyAddress"><span>📋</span> Copy Address</div>
+                 <div class="menu-item" id="btnViewExplorer"><span>🔍</span> View on Explorer</div>
+                 <div class="menu-divider"></div>
+                 <div class="menu-item" id="btnDisconnect" style="color:var(--danger);"><span>🚪</span> Disconnect</div>
+             </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- FARM CARD -->
+      <div class="glass-panel" style="max-width: 600px; margin: 0 auto; border-top: 4px solid var(--warning);">
+        
+        <!-- Header Pool -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <div style="display:flex; align-items:center; gap:15px;">
+                <div style="position:relative; width:48px; height:32px;">
+                    <img src="icons/vibe.svg" style="width:32px; height:32px; border-radius:50%; position:absolute; left:0; z-index:2; border:2px solid #1a1f35;">
+                    <img src="icons/weth.svg" style="width:32px; height:32px; border-radius:50%; position:absolute; left:20px; z-index:1;">
+                </div>
+                <div>
+                    <h3 style="margin:0; font-size:1.2rem;">LIGHT-ETH LP</h3>
+                    <span style="font-size:0.8rem; color:var(--success); background:rgba(0,224,255,0.1); padding:2px 6px; border-radius:4px;">40x Multiplier</span>
+                </div>
+            </div>
+            <div style="text-align:right;">
+                <div style="font-size:0.8rem; color:var(--text-muted);">APR</div>
+                <div style="font-size:1.2rem; font-weight:700; color:var(--warning);">🔥 420%</div>
+            </div>
+        </div>
+
+        <div style="height:1px; background:rgba(255,255,255,0.1); margin:20px 0;"></div>
+
+        <!-- Stats Grid -->
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin-bottom:20px;">
+            <div style="background:rgba(0,0,0,0.2); padding:15px; border-radius:12px;">
+                <div style="font-size:0.8rem; color:var(--text-muted);">My Staked LP</div>
+                <div id="userStaked" style="font-size:1.4rem; font-weight:600;">0.0000</div>
+            </div>
+            <div style="background:rgba(249, 224, 97, 0.05); border:1px solid rgba(249, 224, 97, 0.2); padding:15px; border-radius:12px;">
+                <div style="font-size:0.8rem; color:var(--warning);">Earned LIGHT</div>
+                <div id="userEarned" style="font-size:1.4rem; font-weight:600; color:#fff;">0.0000</div>
+                <button id="btnHarvest" onclick="handleHarvest()" class="btn-primary" style="width:100%; margin-top:10px; padding:6px; font-size:0.85rem; background:var(--warning); color:#000; box-shadow:none;" disabled>Harvest</button>
+            </div>
+        </div>
+
+        <!-- Actions Area (Con Tabs) -->
+        <div>
+            <div class="action-header">
+                <div class="toggle-group">
+                    <button class="toggle-btn active" id="tabStake" onclick="setFarmMode('stake')">Stake</button>
+                    <button class="toggle-btn" id="tabUnstake" onclick="setFarmMode('unstake')">Unstake</button>
+                </div>
+                <span style="font-size:0.8rem; color:var(--text-muted);"><span id="balLabel">Wallet</span>: <span id="walletLP" style="color:#fff;">0.00</span></span>
+            </div>
+
+            <div style="display:flex; gap:10px;">
+                <div class="input-group" style="flex-grow:1; position:relative;">
+                    <input id="stakeAmount" type="number" placeholder="0.0" style="padding-right:60px;">
+                    <button id="btnMax" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); background:rgba(255,255,255,0.1); border:none; color:var(--accent); font-size:0.75rem; padding:4px 8px; border-radius:4px; cursor:pointer;">MAX</button>
+                </div>
+                <button id="btnMainAction" class="btn-primary" style="min-width:120px;">Approve</button>
+            </div>
+        </div>
+
+      </div>
+    </div> 
+  </div>
+
+  <div id="walletModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header"><h2 class="modal-title">Connect Wallet</h2><button class="btn-close" onclick="closeWalletModal()">×</button></div>
+      <div id="walletList" class="wallet-grid"></div>
+      <div style="margin-top:24px; text-align:center; font-size:0.8rem; color:var(--text-muted);">By connecting, you agree to VIBE Terms of Service.</div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.10.0/dist/ethers.umd.min.js"></script>
+  <script src="abis.js"></script>
+  <script src="config.js"></script>
+  <script src="wallet-config.js"></script>
+  <script src="farm.js"></script>
+</body>
+</html>

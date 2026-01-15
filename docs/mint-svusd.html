@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>VIBE Protocol | Mint SVUSD</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="icon" type="image/svg+xml" href="icons/vibe.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  
+  <style>
+    /* Specific styles for the Mint Console */
+    .mint-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+    @media (max-width: 800px) {
+        .mint-container { grid-template-columns: 1fr; }
+    }
+
+    .info-card {
+        background: rgba(0,0,0,0.2);
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 15px;
+        border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .metric-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        font-size: 0.9rem;
+        color: var(--text-muted);
+    }
+    .metric-val { color: #fff; font-weight: 600; }
+
+    .health-bar-bg {
+        height: 8px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 4px;
+        margin-top: 10px;
+        overflow: hidden;
+    }
+    .health-bar-fill {
+        height: 100%;
+        width: 0%;
+        background: var(--success);
+        transition: width 0.5s;
+    }
+
+    .mint-input-group {
+        background: rgba(0,0,0,0.3);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 12px;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+    .mint-input {
+        background: transparent;
+        border: none;
+        color: #fff;
+        font-size: 1.8rem;
+        width: 100%;
+        outline: none;
+        margin-top: 5px;
+    }
+    .badge-svusd {
+        display: inline-flex; align-items: center; gap: 5px;
+        background: rgba(255,255,255,0.1); padding: 4px 10px;
+        border-radius: 20px; font-size: 0.8rem; font-weight: 700;
+    }
+    
+    /* Toggle Row Specifics */
+    .collateral-toggle-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 5px;
+        margin-bottom: 15px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- Sidebar -->
+    <nav class="sidebar glass-panel">
+      <div class="logo-area">
+        <svg width="28" height="28" viewBox="0 0 64 64"><circle cx="32" cy="32" r="32" fill="#1a1f35"/><path d="M18 42 L32 18 L46 42 Z" fill="#00e0ff"/></svg>
+        VIBE Finance
+      </div>
+      <a href="index.html" class="nav-link">Dashboard Home</a>
+      <a href="dashboard.html" class="nav-link">Lend/Borrow</a>
+      <a href="swap.html" class="nav-link">Swap</a>
+      <a href="markets.html" class="nav-link">Markets Overview</a>
+      <a href="marketplace.html" class="nav-link">NFT Market V3</a>
+      
+      <!-- New Link Active -->
+      <a href="#" class="nav-link active" style="color:#00e0ff; border-left-color:#00e0ff; background:rgba(0, 224, 255, 0.1);">Mint SVUSD</a>
+      
+      <a href="swapstabilizer.html" class="nav-link">Peg Stabilizer</a>
+      <a href="vibe-vault.html" class="nav-link">Governance Vault</a>
+      
+      <div style="flex-grow:1"></div>
+      <div style="padding: 10px; font-size: 0.8rem; color: var(--text-muted);">
+        Connection Status:<br>
+        <span id="statusDot" style="color: var(--danger)">●</span> <span id="connStatus">Disconnected</span>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      
+      <header>
+        <div>
+          <h1 style="margin:0; font-size:1.8rem; background: linear-gradient(90deg, #fff, #00e0ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Mint SVUSD</h1>
+          <p style="margin:4px 0 0 0; color:var(--text-muted);">Borrow stablecoins against your collateral</p>
+        </div>
+        
+        <div class="nav-group">
+          <select id="networkSelect" class="network-select"><option value="" disabled selected>Loading...</option></select>
+          <div class="btn-account-wrapper">
+             <button id="btnConnect" class="btn-primary">Connect Wallet</button>
+             <div id="accountDropdown" class="account-dropdown">
+                 <div style="padding:12px 12px 6px 12px; font-size:0.8rem; color:var(--text-muted); text-transform:uppercase;">Connected Wallet</div>
+                 <div style="padding:0 12px 12px 12px; font-size:1.1rem; font-weight:600; color:#fff;" id="dropdownAddress">0x00...000</div>
+                 <div class="menu-divider"></div>
+                 <div class="menu-item" id="btnCopyAddress"><span>📋</span> Copy Address</div>
+                 <div class="menu-item" id="btnViewExplorer"><span>🔍</span> View on Explorer</div>
+                 <div class="menu-divider"></div>
+                 <div class="menu-item" id="btnDisconnect" style="color:var(--danger);"><span>🚪</span> Disconnect</div>
+             </div>
+          </div>
+        </div>
+      </header>
+
+      <div class="mint-container">
+        
+        <!-- LEFT: ACTION PANEL -->
+        <div class="glass-panel">
+            <div style="display:flex; gap:10px; margin-bottom:20px; background:rgba(0,0,0,0.3); padding:4px; border-radius:10px;">
+                <button class="toggle-btn active" id="tabBorrow" onclick="setMode('borrow')" style="flex:1; padding:10px; border:none; border-radius:8px; cursor:pointer; font-weight:600; background:var(--card-bg); color:#fff;">Borrow (Mint)</button>
+                <button class="toggle-btn" id="tabRepay" onclick="setMode('repay')" style="flex:1; padding:10px; border:none; border-radius:8px; cursor:pointer; font-weight:600; color:var(--text-muted); background:transparent;">Repay (Burn)</button>
+            </div>
+
+            <div class="mint-input-group">
+                <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                    <span style="font-size:0.8rem; color:var(--text-muted);">Amount</span>
+                    <span class="badge-svusd"><img src="icons/sonevibe.png" width="16"> SVUSD</span>
+                </div>
+                <div style="display:flex; align-items:center;">
+                    <input id="amountInput" type="number" class="mint-input" placeholder="0.00">
+                    <button id="btnMax" class="btn-ghost" style="font-size:0.7rem; padding:4px 8px;">MAX</button>
+                </div>
+                <div style="text-align:right; font-size:0.8rem; color:var(--text-muted); margin-top:5px;">
+                    <span id="labelBalance">Available to Borrow:</span> <span id="valBalance" style="color:#fff;">0.00</span>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <div class="metric-row">
+                    <span>Variable APR</span>
+                    <span class="metric-val" style="color:var(--warning)" id="valAPR">--%</span>
+                </div>
+                <div class="metric-row">
+                    <span>Exchange Rate</span>
+                    <span class="metric-val">1 SVUSD = $1.00</span>
+                </div>
+            </div>
+
+            <!-- TOGGLE SWITCH ADDED HERE -->
+            <div class="collateral-toggle-row">
+                <span style="font-size:0.9rem; color:var(--text-muted);">Enable as Collateral (Enter Market)</span>
+                <label class="switch">
+                    <input type="checkbox" id="toggleCollateral">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+
+            <button id="btnAction" class="btn-primary" style="width:100%; padding:15px; font-size:1.1rem;">Connect Wallet</button>
+            <div id="txStatus" style="text-align:center; margin-top:10px; min-height:20px; font-size:0.9rem;"></div>
+        </div>
+
+        <!-- RIGHT: ACCOUNT HEALTH -->
+        <div class="glass-panel" style="border-top:4px solid var(--success);">
+            <h3 style="margin-top:0;">Account Health</h3>
+            
+            <div style="text-align:center; padding:20px 0;">
+                <div style="font-size:0.9rem; color:var(--text-muted);">Health Factor</div>
+                <div id="valHealth" style="font-size:2.5rem; font-weight:700; color:var(--success);">∞</div>
+            </div>
+
+            <div class="info-card">
+                <div class="metric-row">
+                    <span>Total Collateral</span>
+                    <span class="metric-val" id="valCollateral">$0.00</span>
+                </div>
+                <div class="metric-row">
+                    <span>Total Debt</span>
+                    <span class="metric-val" id="valDebt">$0.00</span>
+                </div>
+                <div class="metric-row">
+                    <span>Borrow Power Used</span>
+                    <span class="metric-val" id="valPowerUsed">0%</span>
+                </div>
+                <div class="health-bar-bg">
+                    <div id="barPower" class="health-bar-fill"></div>
+                </div>
+            </div>
+
+            <div class="info-card" style="border-left: 3px solid var(--warning);">
+                <div class="metric-row">
+                    <span>Your SVUSD Wallet Balance</span>
+                    <span class="metric-val" id="walletBalance">0.00</span>
+                </div>
+                <div class="metric-row">
+                    <span>Current SVUSD Borrowed</span>
+                    <span class="metric-val" id="borrowedBalance">0.00</span>
+                </div>
+                <!-- NUEVO CAMPO: Total Reserves -->
+                <div class="metric-row">
+                    <span>Total Reserves (Revenue)</span>
+                    <span class="metric-val" style="color:var(--warning);" id="totalReservesVal">0.00</span>
+                </div>
+            </div>
+
+        </div>
+
+      </div>
+
+    </div> 
+  </div>
+
+  <!-- Wallet Modal (Standard) -->
+  <div id="walletModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header"><h2 class="modal-title">Connect Wallet</h2><button class="btn-close" onclick="closeWalletModal()">×</button></div>
+      <div id="walletList" class="wallet-grid"></div>
+      <div style="margin-top:24px; text-align:center; font-size:0.8rem; color:var(--text-muted);">
+        By connecting, you agree to VIBE Terms of Service.
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <!-- Librerías -->
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.10.0/dist/ethers.umd.min.js"></script>
+
+  <!-- Configuración -->
+  <script src="config.js"></script>
+  <script src="wallet-config.js"></script>
+  <script src="svusd-config.js"></script>
+
+  <!-- ABIs Específicos (NUEVO) -->
+  <script src="mint-abis.js"></script> 
+
+  <!-- Lógica Principal -->
+  <script src="mint-svusd.js"></script>
+</body>
+</html>

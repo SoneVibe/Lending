@@ -1,0 +1,176 @@
+/* =========================================
+   VIBE SWAP - RESPONSIVE EXTENSION
+   ========================================= */
+
+/* --- TABLETS & SMALL LAPTOPS (Max 1200px) --- */
+@media (max-width: 1200px) {
+    /* Ajustar la grilla para que el gráfico no se coma el espacio del swap */
+    .pro-dex-grid {
+        grid-template-columns: 1fr 380px; /* Reducir ligeramente el ancho del swap panel */
+        gap: 15px;
+    }
+    
+    .app-container {
+        padding: 15px;
+        gap: 20px;
+    }
+}
+
+/* --- TABLETS PORTRAIT & LARGE PHONES (Max 900px) --- */
+/* Hereda la lógica básica de style.css, pero refinamos los detalles internos */
+@media (max-width: 900px) {
+    
+    /* 1. Header más compacto */
+    header {
+        flex-direction: column;
+        align-items: stretch; /* Estirar elementos al ancho total */
+        gap: 15px;
+    }
+
+    .nav-group {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr auto; /* Select ocupa espacio, Wallet se ajusta */
+        gap: 10px;
+    }
+
+    .network-select {
+        min-width: 0; /* Evita desbordamiento */
+        width: 100%;
+    }
+
+    /* 2. Ajuste del Grid Principal */
+    .pro-dex-grid {
+        display: flex;
+        flex-direction: column-reverse; /* Swap primero, Gráfico (si visible) abajo */
+        gap: 20px;
+    }
+
+    /* Opcional: Si decides mostrar el gráfico en móvil, descomenta esto */
+    /* 
+    .chart-panel { 
+        display: flex !important; 
+        min-height: 300px;
+    } 
+    */
+
+    .swap-container-pro {
+        width: 100%;
+        max-width: 100%; /* Ocupar todo el ancho disponible */
+    }
+}
+
+/* --- MOBILE DEVICES (Max 600px) --- */
+@media (max-width: 600px) {
+
+    /* 1. Contenedor General */
+    .app-container {
+        padding: 10px; /* Ganar espacio en bordes */
+        display: block; /* Romper el grid principal completamente */
+    }
+
+    .main-content {
+        margin-top: 15px;
+    }
+
+    /* 2. Sidebar (Navegación Horizontal) */
+    .sidebar {
+        margin-bottom: 20px;
+        padding: 10px;
+        background: #13161f; /* Fondo más sólido para legibilidad */
+        border: 1px solid var(--card-border);
+    }
+
+    /* 3. Swap Card Internals - El corazón del UX Móvil */
+    .swap-card-pro {
+        padding: 15px; /* Menos padding interno */
+    }
+
+    /* Inputs más amigables al dedo */
+    .token-input-box-pro {
+        padding: 12px;
+    }
+
+    .token-flex {
+        margin-bottom: 4px;
+    }
+    
+    .token-flex label {
+        font-size: 0.8rem;
+    }
+
+    /* Ajustar tamaño de fuente de los números para que no se corten */
+    .swap-input-pro {
+        font-size: 1.6rem; 
+        width: 55%; /* Dar un poco más de espacio al token badge */
+    }
+
+    /* Token Badge (Selector de moneda) más compacto */
+    .token-badge-pro {
+        padding: 5px 10px 5px 6px;
+        font-size: 0.95rem;
+    }
+    
+    .token-badge-pro img {
+        width: 20px;
+        height: 20px;
+    }
+
+    /* Botón de flecha central */
+    .swap-arrow-pro {
+        margin: -10px 0;
+    }
+    
+    .btn-arrow-pro {
+        width: 32px;
+        height: 32px;
+        font-size: 0.8rem;
+    }
+
+    /* 4. Wallet Modal & Token Modal a pantalla completa */
+    .modal-card {
+        width: 100% !important;
+        height: 100% !important;
+        max-height: 100% !important;
+        border-radius: 0 !important;
+        border: none !important;
+        transform: none !important;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .modal-overlay {
+        padding: 0; /* Sin padding en móvil */
+        align-items: flex-start;
+    }
+
+    .modal-header {
+        padding-top: 10px; /* Safe area notch */
+    }
+    
+    #tokenListContainer {
+        padding-bottom: 50px; /* Espacio para scroll final */
+    }
+
+    /* 5. Dropdown de cuenta (ajuste para que no se salga de pantalla) */
+    .account-dropdown {
+        right: -10px; /* Mover un poco a la derecha */
+        width: 220px;
+        top: 120%;
+    }
+}
+
+/* --- SUPER SMALL DEVICES (iPhone SE / Fold) (Max 360px) --- */
+@media (max-width: 360px) {
+    .swap-input-pro {
+        font-size: 1.4rem;
+    }
+    
+    .token-badge-pro span {
+        display: none; /* Ocultar nombre (ETH), solo mostrar icono si es muy pequeño */
+    }
+    
+    .token-badge-pro {
+        padding: 5px;
+    }
+}

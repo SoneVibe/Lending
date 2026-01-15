@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>VIBE Protocol | Peg Stabilizer</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="icon" type="image/svg+xml" href="icons/vibe.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Estilos específicos para el Swap */
+    .swap-card {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    .swap-tabs {
+      display: flex;
+      background: rgba(0,0,0,0.2);
+      border-radius: 12px;
+      padding: 4px;
+      margin-bottom: 20px;
+    }
+    .swap-tab {
+      flex: 1;
+      text-align: center;
+      padding: 10px;
+      cursor: pointer;
+      border-radius: 8px;
+      font-weight: 600;
+      color: var(--text-muted);
+      transition: all 0.3s;
+    }
+    .swap-tab.active {
+      background: var(--card-bg);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    .input-wrapper {
+      background: rgba(0,0,0,0.3);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+      border: 1px solid transparent;
+      transition: border-color 0.3s;
+    }
+    .input-wrapper:focus-within {
+      border-color: var(--primary);
+    }
+    .input-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .token-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,0.1);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+    .swap-input {
+      background: transparent;
+      border: none;
+      color: #fff;
+      font-size: 1.8rem;
+      font-weight: 600;
+      width: 100%;
+      outline: none;
+    }
+    .swap-input::placeholder { color: rgba(255,255,255,0.2); }
+    .balance-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-align: right;
+      cursor: pointer;
+    }
+    .balance-label:hover { color: var(--primary); }
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    .arrow-divider {
+      text-align: center;
+      margin: -10px 0;
+      position: relative;
+      z-index: 1;
+    }
+    .arrow-icon {
+      background: var(--card-bg);
+      border: 1px solid rgba(255,255,255,0.1);
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    <nav class="sidebar glass-panel">
+      <div class="logo-area">
+        <svg width="28" height="28" viewBox="0 0 64 64"><circle cx="32" cy="32" r="32" fill="#1a1f35"/><path d="M18 42 L32 18 L46 42 Z" fill="#00e0ff"/></svg>
+        VIBE Finance
+      </div>
+      <a href="index.html" class="nav-link">Dashboard Home</a>
+      <a href="dashboard.html" class="nav-link">Lend/Borrow</a>
+      <a href="swap.html" class="nav-link">Swap</a>
+      <a href="markets.html" class="nav-link">Markets Overview</a>
+       <a href="mint-svusd.html" class="nav-link">Mint SVUSD</a>
+       <!-- NUEVO BOTÓN AQUÍ -->
+ 
+      <a href="vibe-vault.html" class="nav-link">Governance Vault</a>
+      <a href="liquidator.html" class="nav-link">Liquidator Console</a>
+      <a href="#" class="nav-link active" style="color:var(--success); border-color:var(--success);">Peg Stabilizer</a>
+      
+      <div style="flex-grow:1"></div>
+      <div style="padding: 10px; font-size: 0.8rem; color: var(--text-muted);">
+        Module Status:<br>
+        <span id="statusDot" style="color: var(--danger)">●</span> <span id="connStatus">Disconnected</span>
+      </div>
+    </nav>
+
+    <div class="main-content">
+      <header>
+        <div>
+          <h1 style="margin:0; font-size:1.8rem; color:var(--success);">Peg Stabilizer (HSM)</h1>
+          <p style="margin:4px 0 0 0; color:var(--text-muted);">Swap USDC to SVUSD 1:1 with minimal fees.</p>
+        </div>
+        
+        <div class="nav-group">
+          <select id="networkSelect" class="network-select"><option value="" disabled selected>Loading...</option></select>
+          <div class="btn-account-wrapper">
+             <button id="btnConnect" class="btn-primary">Connect Wallet</button>
+             <div id="accountDropdown" class="account-dropdown">
+                 <div style="padding:12px 12px 6px 12px; font-size:0.8rem; color:var(--text-muted); text-transform:uppercase;">Connected Wallet</div>
+                 <div style="padding:0 12px 12px 12px; font-size:1.1rem; font-weight:600; color:#fff;" id="dropdownAddress">0x00...000</div>
+                 <div class="menu-divider"></div>
+                 <div class="menu-item" id="btnCopyAddress"><span>📋</span> Copy Address</div>
+                 <div class="menu-item" id="btnViewExplorer"><span>🔍</span> View on Explorer</div>
+                 <div class="menu-divider"></div>
+                 <div class="menu-item" id="btnDisconnect" style="color:var(--danger);"><span>🚪</span> Disconnect</div>
+             </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Stats Module -->
+      <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 20px;">
+        <div class="glass-panel">
+          <div class="stat-label">System Status</div>
+          <div class="stat-value" id="systemStatus">--</div>
+        </div>
+        <div class="glass-panel">
+          <div class="stat-label">Reserve Capacity</div>
+          <div class="stat-value" id="reserveCapacity">--</div>
+          <div class="stat-sub" id="reserveAvailable">Available: -- USDC</div>
+        </div>
+        <div class="glass-panel">
+          <div class="stat-label">Current Fees</div>
+          <div class="stat-value" id="feeDisplay">--%</div>
+          <div class="stat-sub">Fixed Rate Swap</div>
+        </div>
+      </div>
+
+      <!-- Swap Interface -->
+      <div class="glass-panel swap-card">
+        <div class="swap-tabs">
+          <div class="swap-tab active" id="tabMint" onclick="setMode('mint')">Mint SVUSD</div>
+          <div class="swap-tab" id="tabRedeem" onclick="setMode('redeem')">Redeem USDC</div>
+        </div>
+
+        <!-- Input From -->
+        <div class="input-wrapper">
+          <div class="input-row">
+            <span style="color:var(--text-muted);">You Pay</span>
+            <div class="token-badge" id="tokenInBadge">
+              <span>💲</span> <span id="tokenInName">USDC</span>
+            </div>
+          </div>
+          <input id="inputAmount" type="number" class="swap-input" placeholder="0.00">
+          <div class="balance-label" id="balanceIn">Balance: --</div>
+        </div>
+
+        <div class="arrow-divider">
+          <div class="arrow-icon">⬇</div>
+        </div>
+
+        <!-- Output To -->
+        <div class="input-wrapper" style="background:rgba(0,0,0,0.2);">
+          <div class="input-row">
+            <span style="color:var(--text-muted);">You Receive</span>
+            <div class="token-badge" id="tokenOutBadge">
+              <span>⚡</span> <span id="tokenOutName">SVUSD</span>
+            </div>
+          </div>
+          <input id="outputAmount" type="text" class="swap-input" placeholder="0.00" disabled style="opacity:0.8;">
+          <div class="balance-label" id="balanceOut">Balance: --</div>
+        </div>
+
+        <!-- Details -->
+        <div style="padding: 10px; background: rgba(0,0,0,0.2); border-radius: 8px; margin-bottom: 20px;">
+          <div class="info-row">
+            <span>Exchange Rate</span>
+            <span>1 USDC = 1 SVUSD</span>
+          </div>
+          <div class="info-row">
+            <span>Fee (<span id="feePercent">0.1</span>%)</span>
+            <span id="feeAmount">0.00</span>
+          </div>
+        </div>
+
+        <button id="btnActionSwap" class="btn-scan" style="width:100%; font-size:1.1rem; padding: 16px;">Connect Wallet</button>
+        <div id="txStatus" style="text-align:center; margin-top:10px; font-size:0.9rem; min-height:20px;"></div>
+
+      </div>
+
+    </div> 
+  </div>
+
+  <div id="walletModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header"><h2 class="modal-title">Connect Wallet</h2><button class="btn-close" onclick="closeWalletModal()">×</button></div>
+      <div id="walletList" class="wallet-grid"></div>
+      <div style="margin-top:24px; text-align:center; font-size:0.8rem; color:var(--text-muted);">By connecting, you agree to VIBE Terms of Service.</div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.10.0/dist/ethers.umd.min.js"></script>
+  <!-- Asegúrate de que abis.js tenga STABILITY_ABI y ERC20_ABI -->
+  <script src="abis.js"></script>
+  <script src="config.js"></script>
+  <script src="wallet-config.js"></script>
+  <script src="swapstabilizer.js"></script>
+</body>
+</html>

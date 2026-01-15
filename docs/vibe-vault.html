@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>VIBE Protocol | Governance Vault</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="icon" type="image/svg+xml" href="icons/vibe.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <div class="app-container">
+    <nav class="sidebar glass-panel">
+      <div class="logo-area">
+        <svg width="28" height="28" viewBox="0 0 64 64"><circle cx="32" cy="32" r="32" fill="#1a1f35"/><path d="M18 42 L32 18 L46 42 Z" fill="#00e0ff"/></svg>
+        VIBE Finance
+      </div>
+      <a href="index.html" class="nav-link">Dashboard Home</a>
+      <a href="dashboard.html" class="nav-link">Lend/Borrow</a>
+      
+      <a href="markets.html" class="nav-link">Markets Overview</a>
+      <a href="marketplace.html" class="nav-link">NFT Market V3</a>
+       <a href="mint-svusd.html" class="nav-link">Mint SVUSD</a>
+       <!-- NUEVO BOTÓN AQUÍ -->
+  <a href="swapstabilizer.html" class="nav-link">Peg Stabilizer (SVUSD)</a>
+       <!-- NUEVO ENLACE AGREGADO AQUI -->
+      <a href="swap.html" class="nav-link">Swap</a>
+      <a href="#" class="nav-link active">Governance Vault</a>
+      <a href="liquidator.html" class="nav-link" style="color:var(--danger);">Liquidator Console</a>
+      <div style="flex-grow:1"></div>
+      <div style="padding: 10px; font-size: 0.8rem; color: var(--text-muted);">
+        Connection Status:<br>
+        <span id="statusDot" style="color: var(--danger)">●</span> <span id="connStatus">Disconnected</span>
+      </div>
+    </nav>
+
+    <div class="main-content">
+      <header>
+        <div>
+          <h1 style="margin:0; font-size:1.8rem;">Governance Vault</h1>
+          <p style="margin:4px 0 0 0; color:var(--text-muted);">Stake & Earn VIBE Rewards</p>
+        </div>
+        
+        <div class="nav-group">
+          <select id="networkSelect" class="network-select"><option value="" disabled selected>Loading...</option></select>
+          <div class="btn-account-wrapper">
+             <button id="btnConnect" class="btn-primary">Connect Wallet</button>
+             <div id="accountDropdown" class="account-dropdown">
+                 <div style="padding:12px 12px 6px 12px; font-size:0.8rem; color:var(--text-muted); text-transform:uppercase;">Connected Wallet</div>
+                 <div style="padding:0 12px 12px 12px; font-size:1.1rem; font-weight:600; color:#fff;" id="dropdownAddress">0x00...000</div>
+                 <div class="menu-divider"></div>
+                 <div class="menu-item" id="btnCopyAddress"><span>📋</span> Copy Address</div>
+                 <div class="menu-item" id="btnViewExplorer"><span>🔍</span> View on Explorer</div>
+                 <div class="menu-divider"></div>
+                 <div class="menu-item" id="btnDisconnect" style="color:var(--danger);"><span>🚪</span> Disconnect</div>
+             </div>
+          </div>
+        </div>
+      </header>
+
+      <div class="vault-grid">
+        <div class="vault-stat-card">
+          <div style="text-transform:uppercase; letter-spacing:1px; font-size:0.85rem; color:rgba(255,255,255,0.6);">Unclaimed Rewards</div>
+          <div class="vault-value"><span id="vaultVibeRewards">0.00</span> <span style="font-size:1rem;">VIBE</span></div>
+          <div style="font-size:0.9rem; color:var(--text-muted); margin-bottom:10px;">
+            Wallet Balance: <span id="vaultVibeWallet" style="color:#fff;">--</span> VIBE
+          </div>
+          <button id="btnVaultClaimVibe" class="btn-claim" disabled>Claim Rewards</button>
+          <div id="vaultVibeStatus" style="margin-top:10px; font-size:0.85rem; min-height:1.2em; color:var(--success);"></div>
+        </div>
+        <div class="glass-panel">
+          <h3 style="margin:0 0 15px 0; color:var(--warning); display:flex; align-items:center; gap:10px;"><span>🔥</span> Current Incentive Rates</h3>
+          <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:20px;">Extra APY paid in VIBE tokens on top of normal lending interest.</p>
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+            <div><h4 style="margin:0 0 10px 0; font-size:0.8rem; text-transform:uppercase; color:var(--text-muted);">Supply APY</h4><div id="supplyApyList" class="apy-list">Loading...</div></div>
+            <div><h4 style="margin:0 0 10px 0; font-size:0.8rem; text-transform:uppercase; color:var(--text-muted);">Borrow APY</h4><div id="borrowApyList" class="apy-list">Loading...</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-panel">
+        <h3 style="margin:0 0 15px 0;">How it works</h3>
+        <ul style="color:var(--text-muted); line-height:1.6; padding-left:20px;">
+          <li>VIBE tokens are distributed every block to suppliers and borrowers.</li>
+          <li>Claiming transfers your accrued VIBE tokens directly to your wallet.</li>
+          <li>Use VIBE tokens to vote on protocol proposals or stake for more rewards.</li>
+        </ul>
+      </div>
+    </div> 
+  </div>
+
+  <div id="walletModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header"><h2 class="modal-title">Connect Wallet</h2><button class="btn-close" onclick="closeWalletModal()">×</button></div>
+      <div id="walletList" class="wallet-grid"></div>
+      <div style="margin-top:24px; text-align:center; font-size:0.8rem; color:var(--text-muted);">By connecting, you agree to VIBE Terms of Service.</div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.10.0/dist/ethers.umd.min.js"></script>
+  <script src="abis.js"></script>
+  <script src="config.js"></script>
+  <script src="wallet-config.js"></script>
+  <script src="main-vault.js"></script>
+</body>
+</html>

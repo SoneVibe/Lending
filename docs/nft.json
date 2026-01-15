@@ -1,0 +1,9 @@
+{
+  "name": "Yoki #1 - Dua Lipa Edition",
+  "description": "Un Yoki muy cool con vibes de Dua Lipa en Soneium testnet. ¡Lista ya!",
+  "image": "ipfs://bafkreic4lzmlmiktbfziyrojqa6hls27aeuzrlsejs32rpllsey4wm34qq",
+  "attributes": [
+    { "trait_type": "Mood", "value": "Vibing" },
+    { "trait_type": "Artist", "value": "Dua Lipa" }
+  ]
+}

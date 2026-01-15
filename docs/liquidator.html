@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>VIBE Protocol | Liquidator Console</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="icon" type="image/svg+xml" href="icons/vibe.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <div class="app-container">
+    <nav class="sidebar glass-panel">
+      <div class="logo-area">
+        <svg width="28" height="28" viewBox="0 0 64 64"><circle cx="32" cy="32" r="32" fill="#1a1f35"/><path d="M18 42 L32 18 L46 42 Z" fill="#00e0ff"/></svg>
+        VIBE Finance
+      </div>
+      <a href="index.html" class="nav-link">Dashboard Home</a>
+      <a href="dashboard.html" class="nav-link">Lend/Borrow</a>
+       <!-- NUEVO ENLACE AGREGADO AQUI -->
+      <a href="swap.html" class="nav-link">Swap</a>
+      <a href="markets.html" class="nav-link">Markets Overview</a>
+      <a href="marketplace.html" class="nav-link">NFT Market V3</a>
+       <a href="mint-svusd.html" class="nav-link">Mint SVUSD</a>
+       <!-- NUEVO BOTÓN AQUÍ -->
+  <a href="swapstabilizer.html" class="nav-link">Peg Stabilizer (SVUSD)</a>
+      <a href="vibe-vault.html" class="nav-link">Governance Vault</a>
+      <a href="#" class="nav-link active" style="color:var(--danger); border-color:var(--danger);">Liquidator Console</a>
+      <div style="flex-grow:1"></div>
+      <div style="padding: 10px; font-size: 0.8rem; color: var(--text-muted);">
+        Liquidator Mode:<br>
+        <span id="statusDot" style="color: var(--danger)">●</span> <span id="connStatus">Disconnected</span>
+      </div>
+    </nav>
+
+    <div class="main-content">
+      <header>
+        <div>
+          <h1 style="margin:0; font-size:1.8rem; color:var(--danger);">Sniper Liquidator</h1>
+          <p style="margin:4px 0 0 0; color:var(--text-muted);">Analyze account health and seize collateral</p>
+        </div>
+        
+        <div class="nav-group">
+          <select id="networkSelect" class="network-select"><option value="" disabled selected>Loading...</option></select>
+          <div class="btn-account-wrapper">
+             <button id="btnConnect" class="btn-primary">Connect Wallet</button>
+             <div id="accountDropdown" class="account-dropdown">
+                 <div style="padding:12px 12px 6px 12px; font-size:0.8rem; color:var(--text-muted); text-transform:uppercase;">Connected Wallet</div>
+                 <div style="padding:0 12px 12px 12px; font-size:1.1rem; font-weight:600; color:#fff;" id="dropdownAddress">0x00...000</div>
+                 <div class="menu-divider"></div>
+                 <div class="menu-item" id="btnCopyAddress"><span>📋</span> Copy Address</div>
+                 <div class="menu-item" id="btnViewExplorer"><span>🔍</span> View on Explorer</div>
+                 <div class="menu-divider"></div>
+                 <div class="menu-item" id="btnDisconnect" style="color:var(--danger);"><span>🚪</span> Disconnect</div>
+             </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Scanner -->
+      <div class="glass-panel">
+        <h3>Target Scanner</h3>
+        <div class="scanner-input-group">
+          <input id="targetInput" class="scanner-input" placeholder="Enter target address (0x...)" autocomplete="off">
+          <button id="btnScan" class="btn-scan">SCAN</button>
+        </div>
+      </div>
+
+      <!-- Results Area -->
+      <div id="resultsArea" class="glass-panel" style="display:none;">
+        <div class="target-stats">
+          <div class="t-stat"><div class="t-stat-label">Health Factor</div><div class="t-stat-val" id="dispHF">--</div></div>
+          <div class="t-stat"><div class="t-stat-label">Total Debt (USD)</div><div class="t-stat-val" id="dispDebt">--</div></div>
+          <div class="t-stat"><div class="t-stat-label">Total Collateral (USD)</div><div class="t-stat-val" id="dispCol">--</div></div>
+          <div class="t-stat" style="border-color:var(--danger); background:rgba(255,85,85,0.1);"><div class="t-stat-label" style="color:var(--danger);">Max Liquidatable</div><div class="t-stat-val" id="dispMaxLiq" style="color:#fff;">--</div></div>
+        </div>
+        <div class="hf-container">
+          <div style="display:flex; justify-content:space-between; font-size:0.75rem; margin-bottom:5px; color:var(--text-muted);"><span>RISK (HF &lt; 1.0)</span><span>SAFE</span></div>
+          <div class="hf-bar-bg"><div class="hf-bar-danger"></div><div class="hf-bar-warn"></div><div class="hf-bar-safe"></div></div>
+          <div id="hfMarker" class="hf-marker" style="left:100%;"></div>
+        </div>
+        <div class="liq-tables-grid">
+          <div><h4 style="color:#fff;">Outstanding Debt (Repay)</h4><div id="debtList">Loading...</div></div>
+          <div><h4 style="color:#fff;">Collateral Assets (Seize)</h4><div id="collateralList">Loading...</div></div>
+        </div>
+        <div id="executionPanel" class="execution-panel">
+          <h3 style="color:var(--danger); margin:0;">Execute Liquidation</h3>
+          <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:10px;">You are about to repay debt to seize collateral + bonus.</p>
+          <div class="execution-controls">
+            <div><label style="font-size:0.75rem;">Repay Asset</label><input id="repayAssetDisplay" class="action-input" disabled style="opacity:0.7; cursor:not-allowed;"></div>
+            <div><label style="font-size:0.75rem;">Seize Asset</label><select id="seizeSelect" class="action-input"><option>Select Collateral...</option></select></div>
+          </div>
+          <div style="margin-top:10px;">
+             <label style="font-size:0.75rem;">Amount to Repay (Max 50%)</label>
+             <div style="display:flex; gap:10px;"><input id="repayAmountInput" type="number" placeholder="0.00" class="action-input"><button id="btnExecuteLiq" class="btn-scan" style="white-space:nowrap;">LIQUIDATE ⚡</button></div>
+             <div id="liqStatus" style="margin-top:8px; font-size:0.8rem;"></div>
+          </div>
+        </div>
+      </div>
+    </div> 
+  </div>
+
+  <div id="walletModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header"><h2 class="modal-title">Connect Wallet</h2><button class="btn-close" onclick="closeWalletModal()">×</button></div>
+      <div id="walletList" class="wallet-grid"></div>
+      <div style="margin-top:24px; text-align:center; font-size:0.8rem; color:var(--text-muted);">By connecting, you agree to VIBE Terms of Service.</div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.10.0/dist/ethers.umd.min.js"></script>
+  <script src="abis.js"></script>
+  <script src="config.js"></script>
+  <script src="wallet-config.js"></script>
+  <script src="liquidator.js"></script>
+</body>
+</html>

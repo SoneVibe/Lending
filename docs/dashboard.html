@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>VIBE Protocol | Pro Dashboard</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+   <link rel="icon" type="image/png" href="icons/sonevibe.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <!-- CSS MASTER IMPORTADO -->
+  <link rel="stylesheet" href="css/style.css">
+  
+  <!-- ESTILOS ESPECIFICOS PARA EL WIDGET -->
+  <style>
+    .token-select-mini {
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 6px 10px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        outline: none;
+        appearance: none; 
+        text-align: center;
+        min-width: 90px;
+        transition: 0.2s;
+    }
+    .token-select-mini:hover { background: rgba(255, 255, 255, 0.2); }
+    .token-select-mini option { background: #1a1f35; color: #fff; }
+    
+    .dash-swap-input {
+        background: transparent; 
+        border: none; 
+        color:#fff; 
+        font-size:1.4rem; 
+        width:100%; 
+        outline:none; 
+        font-weight:600;
+    }
+    .dash-swap-input::placeholder { color: rgba(255,255,255,0.2); }
+    
+    .mini-slippage-btn {
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.1);
+        color: var(--text-muted);
+        border-radius: 12px;
+        padding: 4px 8px;
+        font-size: 0.7rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .mini-slippage-btn:hover {
+        background: rgba(255,255,255,0.1);
+        color: #fff;
+        border-color: var(--success);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- Sidebar -->
+    <nav class="sidebar glass-panel">
+      <div class="logo-area">
+        <svg width="28" height="28" viewBox="0 0 64 64"><circle cx="32" cy="32" r="32" fill="#1a1f35"/><path d="M18 42 L32 18 L46 42 Z" fill="#00e0ff"/></svg>
+        VIBE Finance
+      </div>
+      <a href="index.html" class="nav-link">Dashboard Home</a>
+      <a href="#" class="nav-link active">Lend/Borrow</a>
+       <!-- NUEVO ENLACE AGREGADO AQUI -->
+      <a href="swap.html" class="nav-link">Swap</a>
+      <a href="markets.html" class="nav-link">Markets Overview</a>
+      <a href="marketplace.html" class="nav-link">NFT Market V3</a>
+      <a href="mint-svusd.html" class="nav-link">Mint SVUSD</a>
+       <!-- NUEVO BOTÓN AQUÍ -->
+  <a href="swapstabilizer.html" class="nav-link">Peg Stabilizer (SVUSD)</a>
+  <!-- FIN NUEVO BOTÓN -->
+
+      <a href="vibe-vault.html" class="nav-link">Governance Vault</a>
+      <a href="liquidator.html" class="nav-link" style="color:var(--danger);">Liquidator Console</a>
+      
+      <div style="flex-grow:1"></div>
+      <div style="padding: 10px; font-size: 0.8rem; color: var(--text-muted);">
+        Connection Status:<br>
+        <span id="statusDot" style="color: var(--danger)">●</span> <span id="connStatus">Disconnected</span>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      
+      <header>
+        <div>
+          <h1 style="margin:0; font-size:1.8rem;">Overview</h1>
+          <p style="margin:4px 0 0 0; color:var(--text-muted);">Manage your positions and health factor</p>
+        </div>
+        
+        <div class="nav-group">
+          <select id="networkSelect" class="network-select">
+             <option value="" disabled selected>Loading Networks...</option>
+          </select>
+          
+          <div class="btn-account-wrapper">
+             <button id="btnConnect" class="btn-primary">Connect Wallet</button>
+             <div id="accountDropdown" class="account-dropdown">
+                 <div style="padding:12px 12px 6px 12px; font-size:0.8rem; color:var(--text-muted); text-transform:uppercase;">Connected Wallet</div>
+                 <div style="padding:0 12px 12px 12px; font-size:1.1rem; font-weight:600; color:#fff;" id="dropdownAddress">0x00...000</div>
+                 <div class="menu-divider"></div>
+                 <div class="menu-item" id="btnCopyAddress"><span>📋</span> Copy Address</div>
+                 <div class="menu-item" id="btnViewExplorer"><span>🔍</span> View on Explorer</div>
+                 <div class="menu-divider"></div>
+                 <div class="menu-item" id="btnDisconnect" style="color:var(--danger);"><span>🚪</span> Disconnect</div>
+             </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="glass-panel stat-card" style="border-top: 4px solid var(--success);">
+          <h3>Net Worth</h3>
+          <div class="stat-value" id="netWorthDisplay">$0.00</div>
+          <div style="font-size:0.8rem; color:var(--text-muted); margin-top:4px;">Supply - Borrow</div>
+        </div>
+
+        <div class="glass-panel stat-card">
+          <h3>Net APY</h3>
+          <div class="stat-value" id="netApyDisplay">--%</div>
+          <div style="font-size:0.8rem; color:var(--success); margin-top:4px;">Optimization Active</div>
+        </div>
+        <div class="glass-panel stat-card">
+          <h3>Health Factor</h3>
+          <div class="stat-value" id="healthFactor" style="color:var(--success)">—</div>
+          <div style="font-size:0.8rem; color:var(--text-muted); margin-top:4px;">Liquidation at < 1.0</div>
+        </div>
+        <div class="glass-panel stat-card vibe-card">
+          <h3>Unclaimed Rewards</h3>
+          <div class="stat-value" id="vibeRewards" style="color:var(--warning)">—</div>
+          <button id="claimVibe" class="btn-ghost" style="width:100%; margin-top:8px; font-size:0.85rem; padding:8px;">Claim VIBE</button>
+        </div>
+      </div>
+
+      <!-- PRO SWAP WIDGET FIXED -->
+      <div class="glass-panel" style="position: relative; overflow: visible; z-index: 10;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <h3 style="margin:0; font-size:1.1rem; display:flex; align-items:center; gap:8px;">
+                  <img src="icons/sonevibe.png" alt="SoneVibe" style="width:28px; height:28px; border-radius:50%; box-shadow: 0 0 10px rgba(168, 85, 247, 0.4);"> 
+                  SoneVibe Swap
+            </h3>
+            
+            <!-- Slippage Control -->
+            <button id="dashSlippageBtn" class="mini-slippage-btn" title="Click to cycle slippage">
+                ⚙ 0.5%
+            </button>
+        </div>
+
+        <!-- Input: PAY -->
+        <div style="background:rgba(0,0,0,0.3); padding:12px; border-radius:12px; margin-bottom:5px; border:1px solid rgba(255,255,255,0.05);">
+            <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                <span style="font-size:0.75rem; color:var(--text-muted);">You Pay</span>
+                <span style="font-size:0.75rem; color:var(--text-muted);">Bal: <span id="dashBalIn">0.00</span></span>
+            </div>
+            <div style="display:flex; align-items:center; gap:10px;">
+                <input id="dashAmountIn" type="number" class="dash-swap-input" placeholder="0.0">
+                <select id="dashTokenIn" class="token-select-mini">
+                    <option>ETH</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Switch Arrow -->
+        <div style="text-align:center; height:0; position:relative; z-index:20; top:-14px;">
+            <button id="btnDashSwitch" style="background:var(--card-bg); border:1px solid var(--card-border); color:var(--text-muted); border-radius:50%; width:28px; height:28px; cursor:pointer; box-shadow:0 4px 6px rgba(0,0,0,0.2); transition:0.2s;">↓</button>
+        </div>
+
+        <!-- Input: RECEIVE -->
+        <div style="background:rgba(0,0,0,0.3); padding:12px; border-radius:12px; margin-bottom:15px; border:1px solid rgba(255,255,255,0.05);">
+            <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                <span style="font-size:0.75rem; color:var(--text-muted);">You Receive</span>
+                <span style="font-size:0.75rem; color:var(--text-muted);">Bal: <span id="dashBalOut">0.00</span></span>
+            </div>
+            <div style="display:flex; align-items:center; gap:10px;">
+                <input id="dashAmountOut" type="number" class="dash-swap-input" placeholder="0.0" disabled>
+                <select id="dashTokenOut" class="token-select-mini">
+                    <option>LIGHT</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Info Rows -->
+        <div style="font-size:0.75rem; color:var(--text-muted); padding:0 5px; display:flex; flex-direction:column; gap:4px; margin-bottom:12px;">
+            <div style="display:flex; justify-content:space-between;">
+                <span>Rate</span>
+                <span id="dashRate">--</span>
+            </div>
+            <div style="display:flex; justify-content:space-between;" id="impactRow">
+                <span>Price Impact</span>
+                <span id="dashImpact" style="color:var(--success)">0.00%</span>
+            </div>
+            <div style="display:flex; justify-content:space-between;">
+                 <span>Min Received</span>
+                 <span id="dashMinReceived">--</span>
+            </div>
+        </div>
+
+        <button id="btnDashSwap" class="btn-primary" style="width:100%; font-size:1rem; padding:12px;">Connect Wallet</button>
+        <div style="text-align:center; margin-top:8px;">
+             <span style="font-size:0.75rem; color:var(--text-muted); cursor:pointer; border-bottom:1px dotted var(--text-muted);" onclick="window.location.href='swap.html'">Open Pro Interface ↗</span>
+        </div>
+      </div>
+
+      <!-- Simulation -->
+      <div class="glass-panel sim-panel">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <h2 style="margin:0; font-size:1.2rem;">Liquidity & Simulation</h2>
+          <span class="apy-badge borrow" style="font-size:0.7rem;">PRO FEATURE</span>
+        </div>
+        
+        <div class="health-wrap">
+          <div class="bar-label">
+            <span>Current Collateral Usage</span>
+            <span id="collateralBarText" style="font-weight:bold; color:#fff;">0%</span>
+          </div>
+          <div class="bar-container">
+            <div class="bar-fill" id="collateralBar" style="width:0%; z-index:2; position:relative;"></div>
+            <div class="bar-fill simulated" id="hypotheticalCollateralBar" style="width:0%;"></div>
+          </div>
+          <div class="bar-label" style="justify-content: flex-end;">
+            <span id="hypotheticalCollateralBarText" style="color:var(--warning); opacity:0;">0% (Simulated)</span>
+          </div>
+        </div>
+
+        <form id="hypotheticalForm" class="sim-controls" autocomplete="off">
+          <div class="input-group">
+            <label>Asset</label>
+            <select id="hypAssetSelect"></select>
+          </div>
+          <div class="input-group">
+            <label>Action</label>
+            <select id="hypActionType">
+              <option value="borrow">Borrow (+Debt)</option>
+              <option value="redeem">Redeem (-Collateral)</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label>Amount</label>
+            <input id="hypAmount" type="number" placeholder="0.00" step="0.000001" />
+          </div>
+          <button type="submit" class="btn-simulate">
+            Simulate Impact
+          </button>
+        </form>
+      </div>
+
+      <!-- Markets Table -->
+      <div class="glass-panel">
+        <h2 style="margin:0 0 20px 0; font-size:1.2rem;">Market Positions</h2>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Asset</th>
+                <th>Price</th>
+                <th>Collateral</th>
+                <th>Supply Balance</th>
+                <th>Supply APY</th>
+                <th>Borrow Balance</th>
+                <th>Borrow APY</th>
+                <th>Governance APY</th>
+              </tr>
+            </thead>
+            <tbody id="marketsBody">
+              <tr><td colspan="8" style="text-align:center; padding:30px; color:var(--text-muted);">Connect wallet to view markets</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Action Panel -->
+      <div class="action-panel">
+        <h3 style="margin:0 0 15px 0; font-size:1.2rem; display:flex; align-items:center; gap:8px;">
+          <span style="color:var(--accent)">⚡</span> Quick Trade
+        </h3>
+        
+        <div class="trade-grid">
+            <div class="input-group">
+                <label style="font-size:0.75rem; color:var(--text-muted)">Asset</label>
+                <select id="quickAsset" class="action-input"></select>
+            </div>
+            <div class="input-group">
+                <label style="font-size:0.75rem; color:var(--text-muted)">Action</label>
+                <select id="quickAction" class="action-input">
+                  <option value="mint">Supply (Mint)</option>
+                  <option value="redeem">Withdraw (Redeem)</option>
+                  <option value="borrow">Borrow</option>
+                  <option value="repay">Repay</option>
+                </select>
+            </div>
+            <div class="input-group" style="flex-grow:2;">
+                <label style="font-size:0.75rem; color:var(--text-muted)">Amount</label>
+                <div style="display:flex; gap:10px;">
+                    <input id="quickAmount" type="number" placeholder="0.00" class="action-input" step="0.000001">
+                    <button id="btnQuickExecute" class="action-btn" style="white-space:nowrap;">Execute</button>
+                </div>
+            </div>
+        </div>
+        <div id="quickStatus" class="action-status" style="margin-top:10px; text-align:left;">Ready to trade</div>
+      </div>
+
+      <!-- Vault Mini -->
+      <div class="glass-panel" style="border-top: 4px solid var(--warning);">
+        <h3 class="vibe-title">
+          <img src="icons/vibe.svg" width="20" /> Vault Rewards APY
+        </h3>
+        <div style="display:flex; gap:20px; flex-wrap:wrap; margin-top:15px;" id="vaultApyContainer">
+          <span class="text-muted">Loading incentives...</span>
+        </div>
+      </div>
+
+    </div> 
+  </div>
+
+  <div id="walletModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 class="modal-title">Connect Wallet</h2>
+        <button class="btn-close" onclick="closeWalletModal()">×</button>
+      </div>
+      <div id="walletList" class="wallet-grid"></div>
+      <div style="margin-top:24px; text-align:center; font-size:0.8rem; color:var(--text-muted);">
+        By connecting, you agree to VIBE Terms of Service.
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.10.0/dist/ethers.umd.min.js"></script>
+  <script src="abis.js"></script>
+  <script src="config.js"></script>
+  <script src="wallet-config.js"></script>
+  <script src="dashboard-main.js"></script>
+  <script src="dashboard-swap.js"></script>
+</body>
+</html>

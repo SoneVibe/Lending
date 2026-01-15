@@ -1,0 +1,68 @@
+/* Action Panel (Desktop specific in sidebar) */
+.action-panel {
+  background: rgba(20, 22, 30, 0.6);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  padding: 16px;
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Stats Grid Cards */
+.stat-card h3 {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  margin: 0 0 10px 0;
+  letter-spacing: 0.5px;
+}
+.stat-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+  background: linear-gradient(90deg, #fff, #ccc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Simulation Panel */
+.sim-panel { background: linear-gradient(145deg, rgba(30,34,48,0.6), rgba(20,22,30,0.8)); }
+
+.sim-controls { display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-end; margin-top: 20px; }
+.sim-controls .input-group { flex: 1; min-width: 140px; }
+
+/* Inputs & Selects Pro Style */
+select, input {
+  background: rgba(0, 0, 0, 0.4) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff !important;
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-family: var(--font-main);
+  font-size: 0.9rem;
+  width: 100%;
+  transition: border-color 0.2s;
+}
+select:focus, input:focus { border-color: var(--accent); }
+
+/* Health Bars */
+.bar-container {
+  background: rgba(255,255,255,0.05);
+  height: 10px;
+  border-radius: 5px;
+  overflow: hidden;
+  margin-top: 12px;
+  position: relative;
+}
+.bar-fill {
+  height: 100%;
+  border-radius: 5px;
+  transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Mobile Adjustments */
+@media (max-width: 600px) {
+  .sim-controls .input-group { width: 100%; flex: 100%; }
+  .btn-simulate { width: 100%; }
+}
