@@ -488,7 +488,7 @@ function renderGrid(items, containerId, isMyListing) {
     const currencySym = ACTIVE_MARKET_CONFIG.paymentToken.symbol;
     const placeholder = APP_STATE.currentCollection.imagePlaceholder;
 
-    items.forEach(item => {
+    items.forEach((item,index) => {
         // Formateo de Precios (BigInt -> String)
         const priceFmt = ethers.formatEther(item.price);
         
@@ -529,10 +529,16 @@ function renderGrid(items, containerId, isMyListing) {
                 </div>
             </div>
         `;
+        // ... código anterior del html de la card ...
         grid.appendChild(card);
         
-        // Carga asíncrona de Metadata (Imagen/Nombre real)
-        fetchMetadata(item.tokenId, `img-${containerId}-${item.tokenId}`);
+        // ⚡ TRUCO: STAGGERING (Escalonamiento)
+        // Retrasamos cada petición 150ms multiplicados por su índice.
+        // Ejemplo: Item 1 (0ms), Item 2 (150ms), Item 3 (300ms)...
+        // Esto evita el Error 429 al no disparar 50 peticiones en 1 milisegundo.
+        setTimeout(() => {
+            fetchMetadata(item.tokenId, `img-${containerId}-${item.tokenId}`);
+        }, index * 150); 
     });
 }
 
@@ -540,18 +546,16 @@ function renderGrid(items, containerId, isMyListing) {
  * METADATA FETCHER (Robust IPFS & HTTP handling)
  */
 // ==========================================
-// 🛠️ FETCH METADATA V5 (FIXED & ROBUST)
+// 🛠️ FETCH METADATA V6 (ANTI-429 & LOAD BALANCER)
 // ==========================================
 
-// 1. Base de datos de CIDs rotos y sus correcciones
+// 1. Base de datos de CIDs rotos (Tus fixes manuales)
 const METADATA_FIXES = {
-    // Astar Degens (El contrato 0xd59f...)
     "0xd59fc6bfd9732ab19b03664a45dc29b8421bda9a": {
         imageBase: "QmSQ2FHMTi8MFa88ERS6niseb2ggeGrBvqsLZHgd23L8sF",
         extension: ".png",
         namePrefix: "Astar Degen #"
     },
-    // Si tienes otra colección rota, añade el CID del directorio aquí si lo conoces
     "bafybeiecbnxyn6aqvzqy3xe3wl6pzz7grqzu7wuaxedjosr4bi3qjxgcj4": {
         imageBase: "QmSQ2FHMTi8MFa88ERS6niseb2ggeGrBvqsLZHgd23L8sF",
         extension: ".png",
@@ -559,35 +563,34 @@ const METADATA_FIXES = {
     }
 };
 
-// 2. Gateways IPFS ordenados por prioridad
+// 2. Gateways IPFS (Pinata movido al final para evitar sobrecarga inicial)
 const IPFS_GATEWAYS = [
-    "https://ipfs.io/ipfs/",             
-    "https://gateway.pinata.cloud/ipfs/",
-    "https://cloudflare-ipfs.com/ipfs/", 
-    "https://dweb.link/ipfs/",           
-    "https://nftstorage.link/ipfs/"     
+    "https://cloudflare-ipfs.com/ipfs/", // Muy rápido y robusto
+    "https://ipfs.io/ipfs/",             // El estándar
+    "https://dweb.link/ipfs/",           // Buen fallback
+    "https://gateway.pinata.cloud/ipfs/" // Dejar al final o aleatorio
 ];
 
 // Helper: Limpia prefijos ipfs://
 const cleanIPFS = (url) => {
     if (!url) return "";
-    // Si ya es http, retornamos tal cual
     if (url.startsWith("http")) return url;
     return url.replace(/^ipfs?:\/\/(ipfs\/)?/, "").replace(/^ipfs\//, "");
 };
 
-// Helper: Construye URL
-const getGatewayUrl = (path, gatewayIndex = 0) => {
+// Helper: Construye URL con índice rotatorio
+const getGatewayUrl = (path, index) => {
     if (path.startsWith("http")) return path;
     const cleanPath = cleanIPFS(path);
-    return `${IPFS_GATEWAYS[gatewayIndex % IPFS_GATEWAYS.length]}${cleanPath}`;
+    // Aseguramos que el índice sea válido usando módulo
+    const safeIndex = Math.abs(index) % IPFS_GATEWAYS.length;
+    return `${IPFS_GATEWAYS[safeIndex]}${cleanPath}`;
 };
 
 async function fetchMetadata(tokenId, imgId) {
     const imgEl = getEl(imgId);
     if (!imgEl) return;
 
-    // Loader overlay (buscamos el ID del loader basado en el ID de la imagen)
     const loaderId = imgId.replace('img-', 'loader-');
     const loaderEl = getEl(loaderId);
 
@@ -597,85 +600,83 @@ async function fetchMetadata(tokenId, imgId) {
         let imageUri = null;
         let isBrokenMetadata = false;
 
-        // --- A. DETECCIÓN PREVENTIVA (Fix Hardcodeado) ---
-        // Si sabemos que esta colección está rota por dirección, saltamos el contrato
+        // --- A. DETECCIÓN PREVENTIVA ---
         if (METADATA_FIXES[collectionAddress]) {
-            // console.log(`[#${tokenId}] Known broken Collection. Using Fast Recovery.`);
             isBrokenMetadata = true;
         }
 
-        // --- B. OBTENER URI DEL CONTRATO (Si no está marcado como roto) ---
+        // --- B. OBTENER URI DEL CONTRATO ---
         if (!isBrokenMetadata) {
             try {
                 const isERC1155 = APP_STATE.currentCollection.type === 'ERC1155';
                 const abi = isERC1155 ? window.MARKET_ABIS.ERC1155 : window.MARKET_ABIS.ERC721;
-                // Usamos 'provider' global
                 const contract = new ethers.Contract(collectionAddress, abi, provider);
-
                 uri = isERC1155 ? await contract.uri(tokenId) : await contract.tokenURI(tokenId);
 
-                // Normalizar URI: Reemplazar {id} si existe
                 if (uri && uri.includes("{id}")) {
                     const hexId = BigInt(tokenId).toString(16).padStart(64, '0').toLowerCase();
                     uri = uri.replace("{id}", hexId);
                 }
             } catch (err) {
-                console.warn(`[#${tokenId}] Contract URI read failed, activating recovery.`);
+                console.warn(`[#${tokenId}] Contract URI fail.`);
                 isBrokenMetadata = true;
             }
         }
 
-        // --- C. VERIFICAR CID ROTO EN URI ---
+        // --- C. VERIFICAR CID ROTO ---
         let cidRoot = "";
         if (uri) {
             const cleaned = cleanIPFS(uri);
-            cidRoot = cleaned.split('/')[0]; // Extraer el CID raiz
+            cidRoot = cleaned.split('/')[0];
             if (METADATA_FIXES[cidRoot]) isBrokenMetadata = true;
         }
 
-        // --- D. FETCH DEL JSON (Solo si parece sano) ---
+        // --- D. FETCH DEL JSON (LOAD BALANCED) ---
         let json = null;
         if (uri && !isBrokenMetadata) {
             try {
-                // Timeout agresivo (2.5s)
+                // TRUCO ANTI-429: Elegimos un gateway ALEATORIO para empezar
+                // Así no golpeamos al mismo servidor con 20 peticiones a la vez
+                let startGatewayIndex = Math.floor(Math.random() * IPFS_GATEWAYS.length);
+                
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 2500);
+                const timeoutId = setTimeout(() => controller.abort(), 3500); // 3.5s timeout
 
-                const res = await fetch(getGatewayUrl(uri, 0), { signal: controller.signal });
+                const res = await fetch(getGatewayUrl(uri, startGatewayIndex), { signal: controller.signal });
                 clearTimeout(timeoutId);
 
                 if (res.ok) {
                     json = await res.json();
                     imageUri = json.image || json.image_url || json.animation_url;
                 } else {
-                    throw new Error("HTTP " + res.status);
+                    // Si falla el aleatorio, intentamos ipfs.io directo como fallback
+                    if(res.status === 429) console.warn(`[#${tokenId}] Rate limited (429). Retrying...`);
+                    throw new Error("Gateway failed"); 
                 }
             } catch (e) {
+                // Si falla el fetch, asumimos roto para intentar rescate o placeholder
                 isBrokenMetadata = true;
             }
         }
 
-        // --- E. PROTOCOLO DE RESCATE (FALLBACK) ---
+        // --- E. PROTOCOLO DE RESCATE ---
         if (isBrokenMetadata) {
-            // Buscamos config por Address O por CID
             const fix = METADATA_FIXES[collectionAddress] || METADATA_FIXES[cidRoot];
-            
             if (fix) {
-                // Reconstrucción Manual
                 imageUri = `ipfs://${fix.imageBase}/${tokenId}${fix.extension}`;
-                // Metadata sintética
                 json = { name: `${fix.namePrefix}${tokenId}` };
             }
         }
 
-        // --- F. RENDERIZADO EN CASCADA (WATERFALL) ---
+        // --- F. RENDERIZADO IMAGEN (Waterfall) ---
         if (imageUri) {
-            let gatewayIndex = 0;
+            // Empezamos también con un gateway aleatorio para la imagen
+            let gatewayIndex = Math.floor(Math.random() * IPFS_GATEWAYS.length);
+            let attempts = 0;
 
             const tryLoadImage = () => {
-                if (gatewayIndex >= IPFS_GATEWAYS.length) {
-                    // Fallaron todos -> Placeholder
-                    imgEl.src = APP_STATE.currentCollection.imagePlaceholder || "assets/placeholder.png"; 
+                if (attempts >= IPFS_GATEWAYS.length) {
+                    imgEl.src = APP_STATE.currentCollection.imagePlaceholder || "assets/placeholder.png";
                     if(loaderEl) loaderEl.style.display = 'none';
                     return;
                 }
@@ -685,31 +686,31 @@ async function fetchMetadata(tokenId, imgId) {
             };
 
             imgEl.onload = () => {
-                imgEl.style.opacity = "1"; // Fade in
+                imgEl.style.opacity = "1";
                 if(loaderEl) loaderEl.style.display = 'none';
             };
 
             imgEl.onerror = () => {
-                // Si falla, probar siguiente gateway
+                // Rotar al siguiente gateway
                 gatewayIndex++;
+                attempts++;
                 tryLoadImage();
             };
 
-            // Iniciar carga
             tryLoadImage();
 
         } else {
-            // Nada funcionó
             imgEl.src = APP_STATE.currentCollection.imagePlaceholder || "assets/placeholder.png";
             if(loaderEl) loaderEl.style.display = 'none';
         }
 
     } catch (fatalError) {
-        console.error(`Fatal error handling #${tokenId}:`, fatalError);
+        console.error(`Fatal #${tokenId}:`, fatalError);
         imgEl.src = "assets/placeholder.png";
         if(loaderEl) loaderEl.style.display = 'none';
     }
 }
+
 
 
 // =========================================================
