@@ -561,11 +561,11 @@ const METADATA_FIXES = {
 
 // 2. Gateways IPFS ordenados por prioridad
 const IPFS_GATEWAYS = [
-    "https://cloudflare-ipfs.com/ipfs/",            
-    "https://ipfs.io/ipfs/", 
-    "https://dweb.link/ipfs/", 
-    "https://nftstorage.link/ipfs/",           
-    "https://gateway.pinata.cloud/ipfs/"       
+    "https://ipfs.io/ipfs/",             
+    "https://gateway.pinata.cloud/ipfs/",
+    "https://cloudflare-ipfs.com/ipfs/", 
+    "https://dweb.link/ipfs/",           
+    "https://nftstorage.link/ipfs/"     
 ];
 
 // Helper: Limpia prefijos ipfs://
