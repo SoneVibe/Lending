@@ -488,7 +488,7 @@ function renderGrid(items, containerId, isMyListing) {
     const currencySym = ACTIVE_MARKET_CONFIG.paymentToken.symbol;
     const placeholder = APP_STATE.currentCollection.imagePlaceholder;
 
-    items.forEach((item,index) => {
+    items.forEach((item, index) => {
         // Formateo de Precios (BigInt -> String)
         const priceFmt = ethers.formatEther(item.price);
         
@@ -568,7 +568,7 @@ const IPFS_GATEWAYS = [
     "https://cloudflare-ipfs.com/ipfs/", // Muy rápido y robusto
     "https://ipfs.io/ipfs/",             // El estándar
     "https://dweb.link/ipfs/",           // Buen fallback
-    "https://gateway.pinata.cloud/ipfs/" // Dejar al final o aleatorio
+  //  "https://gateway.pinata.cloud/ipfs/" // Dejar al final o aleatorio
 ];
 
 // Helper: Limpia prefijos ipfs://
