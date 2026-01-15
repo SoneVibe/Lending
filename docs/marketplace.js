@@ -574,9 +574,9 @@ const METADATA_FIXES = {
    Prioridad absoluta: Cloudflare
    ========================= */
 const IPFS_GATEWAYS = [
-    "https://cloudflare-ipfs.com/ipfs/",
     "https://ipfs.io/ipfs/",
-    "https://dweb.link/ipfs/"
+    "https://dweb.link/ipfs/",
+    "https://cloudflare-ipfs.com/ipfs/" 
 ];
 
 /* =========================
