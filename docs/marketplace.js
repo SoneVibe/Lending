@@ -567,8 +567,8 @@ const METADATA_FIXES = {
 const IPFS_GATEWAYS = [
     "https://cloudflare-ipfs.com/ipfs/", // Muy rápido y robusto
     "https://ipfs.io/ipfs/",             // El estándar
-    "https://dweb.link/ipfs/",           // Buen fallback
-  //  "https://gateway.pinata.cloud/ipfs/" // Dejar al final o aleatorio
+    "https://dweb.link/ipfs/"           // Buen fallback
+  
 ];
 
 // Helper: Limpia prefijos ipfs://
