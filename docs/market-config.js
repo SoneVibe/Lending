@@ -71,9 +71,9 @@ const MARKET_CONFIG = {
         },
         collections: [
             {
-                id: "yoki-origins",
-                name: "Yoki Origins (Official)",
-                address: "0x5f2a5818DF3216Aa6ac44632541db8F3EC4e9954", 
+                id: "Astar Degens",
+                name: "Astar Degens (Official)",
+                address: "0xf1cb8D5ac598f03f182e0E1436Ce13583CE16FAb", 
                 type: "ERC1155", 
                 imagePlaceholder: ICONS.vibe
             },
@@ -83,7 +83,15 @@ const MARKET_CONFIG = {
                 address: "0x8a6387C00f5069e71124907F2a0F5bCBca611105",
                 type: "ERC721",
                 imagePlaceholder: ICONS.vibe
+            },           
+            {
+                id: "yoki-origins",
+                name: "Yoki Origins (Official) !on Maintenance mode!",
+                address: "0x5f2a5818DF3216Aa6ac44632541db8F3EC4e9954", 
+                type: "ERC1155", 
+                imagePlaceholder: ICONS.vibe
             }
+
         ]
     },
 
