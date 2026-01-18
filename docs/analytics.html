@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SoneVibe | Analytics Pro</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="icon" type="image/svg+xml" href="icons/vibe.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* === ANALYTICS PRO STYLES === */
+    
+    /* Hero Cards */
+    .analytics-hero {
+        display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 20px; margin-bottom: 30px;
+    }
+    .metric-card {
+        background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 16px; padding: 24px; position: relative; overflow: hidden;
+    }
+    .metric-card::before {
+        content: ''; position: absolute; top:0; left:0; width:100%; height:4px;
+        background: linear-gradient(90deg, var(--primary), transparent);
+    }
+    .metric-value { font-size: 2rem; font-weight: 700; color: #fff; text-shadow: 0 0 20px rgba(0,224,255,0.2); margin: 5px 0; }
+    .metric-label { font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+
+    /* Double Icon Style (Igual que Swap) */
+    .double-icon-container {
+        display: flex; align-items: center; position: relative; width: 50px; height: 32px;
+    }
+    .double-icon-container img {
+        width: 32px; height: 32px; border-radius: 50%; object-fit: cover;
+        border: 2px solid var(--card-bg); background: #1a1f35;
+    }
+    .double-icon-container img:first-child { z-index: 2; }
+    .double-icon-container img:last-child { margin-left: -12px; z-index: 1; }
+
+    /* Table & Progress Bars */
+    .liquidity-bar-bg {
+        width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; margin-top: 8px; overflow: hidden;
+    }
+    .liquidity-bar-fill { height: 100%; background: linear-gradient(90deg, var(--primary), #a855f7); border-radius: 3px; }
+    
+    .token-badge {
+        background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+        padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; color: var(--text-muted); margin-left: 8px;
+    }
+
+    /* Buttons */
+    .action-row { display: flex; gap: 8px; }
+    .btn-xs { padding: 6px 12px; font-size: 0.8rem; }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    <nav class="sidebar glass-panel">
+      <div class="logo-area">
+        <svg width="28" height="28" viewBox="0 0 64 64"><circle cx="32" cy="32" r="32" fill="#1a1f35"/><path d="M18 42 L32 18 L46 42 Z" fill="#00e0ff"/></svg>
+        SoneVibe
+      </div>
+      <a href="index.html" class="nav-link">Dashboard Home</a>
+      <a href="dashboard.html" class="nav-link">Lend/Borrow</a>
+      <a href="swap.html" class="nav-link">Trade & Swap</a>
+      <a href="pools.html" class="nav-link">Liquidity Pools</a>
+      <a href="#" class="nav-link active" style="color:var(--success); border-color:var(--success); background:rgba(0, 224, 255, 0.1);">Analytics Pro</a>
+      <a href="markets.html" class="nav-link">Markets Overview</a>
+      <a href="marketplace.html" class="nav-link">NFT Market V3</a>
+      <a href="mint-svusd.html" class="nav-link">Mint SVUSD</a>
+       <!-- NUEVO BOTÓN AQUÍ -->
+  <a href="swapstabilizer.html" class="nav-link">Peg Stabilizer (SVUSD)</a>
+  <!-- FIN NUEVO BOTÓN -->
+
+      <a href="vibe-vault.html" class="nav-link">Governance Vault</a>
+      <a href="liquidator.html" class="nav-link" style="color:var(--danger);">Liquidator Console</a>
+      
+      <div style="flex-grow:1"></div>
+      <div style="padding: 10px; font-size: 0.8rem; color: var(--text-muted);">
+        Status: <span id="statusDot" style="color: var(--warning)">●</span> <span id="connStatus">Syncing...</span>
+      </div>
+    </nav>
+
+    <div class="main-content">
+      
+      <header>
+        <div>
+          <h1 style="margin:0; font-size:1.8rem;">Pool Analytics</h1>
+          <p style="margin:4px 0 0 0; color:var(--text-muted);">Real-time Liquidity & Oracle Pricing</p>
+        </div>
+        
+        <div class="nav-group">
+          <select id="networkSelect" class="network-select"><option value="" disabled selected>Loading...</option></select>
+          
+<div class="btn-account-wrapper">
+  <!-- Botón: sin onclick inline — la lógica la maneja analytics.js -->
+  <button id="btnConnect" class="btn-primary">Connect Wallet</button>
+
+  <!-- Dropdown de cuenta (igual que en swap.html) -->
+  <div id="accountDropdown" class="account-dropdown">
+    <div style="padding:12px 12px 6px 12px; font-size:0.8rem; color:var(--text-muted); text-transform:uppercase;">
+      Connected Wallet
+    </div>
+    <div style="padding:0 12px 12px 12px; font-size:1.1rem; font-weight:600; color:#fff;" id="dropdownAddress">
+      0x00...000
+    </div>
+
+    <div class="menu-divider"></div>
+
+    <div class="menu-item" id="btnCopyAddress"><span>📋</span> Copy Address</div>
+    <div class="menu-item" id="btnViewExplorer"><span>🔍</span> View on Explorer</div>
+
+    <div class="menu-divider"></div>
+
+    <div class="menu-item" id="btnDisconnect" style="color:var(--danger);"><span>🚪</span> Disconnect</div>
+  </div>
+</div>
+        </div>
+      </header>
+
+      <div class="analytics-hero">
+        <div class="metric-card">
+            <div class="metric-label">Total Liquidity (TVL)</div>
+            <div class="metric-value" id="globalTVL">$...</div>
+            <div class="metric-sub">Across all pairs</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-label">24h Volume</div>
+            <div class="metric-value">$0.00</div>
+            <div class="metric-sub" style="color: var(--text-muted)">Tracking soon...</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-label">Oracle Status</div>
+            <div class="metric-value" id="nativePriceDisplay">--</div>
+            <div class="metric-sub" id="oracleStatus">Waiting for feed...</div>
+        </div>
+      </div>
+
+      <div class="glass-panel">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h2 style="margin:0; font-size:1.2rem;">Top Liquidity Pairs</h2>
+            <div style="font-size:0.8rem; color:var(--text-muted);">Prices via SoneVibe Oracle + On-Chain</div>
+        </div>
+        
+        <div class="table-container">
+          <table style="width:100%; border-collapse:collapse;">
+            <thead>
+              <tr style="text-align:left; border-bottom:1px solid rgba(255,255,255,0.1);">
+                <th style="padding:12px;">Pair</th>
+                <th style="padding:12px;">TVL (USD)</th>
+                <th style="padding:12px;">Token 0 Reserves</th>
+                <th style="padding:12px;">Token 1 Reserves</th>
+                <th style="padding:12px; text-align:right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="analyticsTableBody">
+              <tr>
+                <td colspan="5" style="text-align:center; padding:50px; color:var(--text-muted);">
+                   <div class="loading-spinner"></div> Initializing Analytics Engine...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div> 
+  </div>
+
+  <div id="walletModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 class="modal-title">Connect Wallet</h2>
+        <button class="btn-close" onclick="closeWalletModal()">×</button>
+      </div>
+      <div id="walletList" class="wallet-grid"></div>
+      <div style="margin-top:24px; text-align:center; font-size:0.8rem; color:var(--text-muted);">
+        By connecting, you agree to SoneVibe Terms.
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.10.0/dist/ethers.umd.min.js"></script>
+  <script src="abis.js"></script>
+  <script src="config.js"></script>
+  <script src="wallet-config.js"></script> <script src="analytics.js"></script>
+</body>
+</html>
