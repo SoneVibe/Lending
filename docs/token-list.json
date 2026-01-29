@@ -35,6 +35,14 @@
       "decimals": 18,
       "logoURI": "icons/astr.svg"
     },
+    {
+      "chainId": 420420419,
+      "address": "0xaf905e66038EcE89e03D843B35a11D262053B630",
+      "symbol": "WDOT",
+      "name": "WDOT",
+      "decimals": 18,
+      "logoURI": "icons/dot2.jpg"
+    },
      {
       "chainId": 592,
       "address": "0xAeaaf0e2c81Af264101B9129C00F4440cCF0F720",
