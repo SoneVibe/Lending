@@ -59,6 +59,66 @@
     "blocksPerYear": 15768000,
     "enabled": true
   },
+      "Polkadot Mainnet": {
+    "slug": "Polkadot",
+    "label": "Polkadot Mainnet",
+    "chainId": "420420419",
+    "rpcUrls": ["https://services.polkadothub-rpc.com/mainnet"],
+    "blockExplorerUrls": ["https://blockscout.polkadot.io/"],
+    "nativeCurrency": { "name": "Polkadot", "symbol": "DOT", "decimals": 18 },
+    "master": "",
+    "stabilityModule": "",
+    "router": "0x7532b23DFB30ac22b2a74E3B81cC288de19379BA", 
+    "factory": "0xCe4a761e8673928E40F9C573777590b7d7e2212D", 
+
+        "swapTokens": {
+        "base": { 
+            "symbol": "DOT", 
+            "underlyingAddress": "0xaf905e66038EcE89e03D843B35a11D262053B630", 
+            "decimals": 18, 
+            "icon": "icons/dot2.jpg",
+            "isNative": true
+        },
+        "quote": { 
+            "symbol": "LIGHT", 
+            "address": "", 
+            "decimals": 18, 
+            "icon": "icons/sonevibe.png",
+            "isNative": false
+        }
+    },
+    "cTokens": [
+      {
+        "symbol": "cASTR",
+        "underlyingSymbol": "ASTR",
+        "icon": "icons/astr.svg",
+        "address": "0x7CA06966B0c07C5e35aA180643E98bB3057EBb27",
+        "underlying": "0x2CAE934a1e84F693fbb78CA5ED3B0A6893259441",
+        "underlyingDecimals": 18,
+        "skipAllowance": false
+      },
+      {
+        "symbol": "cUSDSC",
+        "underlyingSymbol": "USDSC",
+        "icon": "icons/usdsc.svg",
+        "address": "0xDB3e66b87c42C7F3599fbdcBFe08DfF0689A6D77",
+        "underlying": "0x3f99231dD03a9F0E7e3421c92B7b90fbe012985a",
+        "underlyingDecimals": 6,
+        "skipAllowance": false
+      },
+      {
+        "symbol": "cUSDC",
+        "underlyingSymbol": "USDC",
+        "icon": "icons/usdc.svg",
+        "address": "0x96ae93Df119c131469b38e3d558899F23678dCFb",
+        "underlying": "0xbA9986D2381edf1DA03B0B9c1f8b00dc4AacC369",
+        "underlyingDecimals": 6,
+        "skipAllowance": false
+      }
+    ],
+    "blocksPerYear": 15768000,
+    "enabled": true
+  },
     "Astar Mainnet": {
     "slug": "astar",
     "label": "Astar Mainnet",
