@@ -43,6 +43,22 @@
       "decimals": 18,
       "logoURI": "icons/dot2.jpg"
     },
+    {
+      "chainId": 56,
+      "address": "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
+      "symbol": "WBNB",
+      "name": "WBNB",
+      "decimals": 18,
+      "logoURI": "icons/bnb.png"
+    },
+    {
+      "chainId": 56,
+      "address": "0x55d398326f99059fF775485246999027B3197955",
+      "symbol": "USDT",
+      "name": "USDT",
+      "decimals": 18,
+      "logoURI": "icons/tether.svg"
+    },
      {
       "chainId": 592,
       "address": "0xAeaaf0e2c81Af264101B9129C00F4440cCF0F720",
