@@ -178,6 +178,8 @@
     ],
     "blocksPerYear": 69000000,
     "enabled": true
+      },
+  
     "Astar Mainnet": {
     "slug": "astar",
     "label": "Astar Mainnet",
