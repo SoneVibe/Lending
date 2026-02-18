@@ -119,7 +119,7 @@
     "blocksPerYear": 15768000,
     "enabled": true
   },
-    "BNB Mainnet": {
+      "BNB Mainnet": {
     "slug": "BNB",
     "label": "BNB Mainnet",
     "chainId": "56",
@@ -178,7 +178,7 @@
     ],
     "blocksPerYear": 69000000,
     "enabled": true
-      },
+  },
   
     "Astar Mainnet": {
     "slug": "astar",
