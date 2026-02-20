@@ -36,6 +36,14 @@
       "logoURI": "icons/astr.svg"
     },
     {
+      "chainId": 1868,
+      "address": "0x0BAde9E6156131A8bcFD04840103F54c4F2BA518",
+      "symbol": "SVIBE",
+      "name": "SVIBE",
+      "decimals": 18,
+      "logoURI": "icons/sonevibe.png"
+    },
+    {
       "chainId": 420420419,
       "address": "0xaf905e66038EcE89e03D843B35a11D262053B630",
       "symbol": "WDOT",
