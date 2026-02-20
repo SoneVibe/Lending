@@ -84,6 +84,14 @@
       "logoURI": "icons/dot2.jpg"
     },
     {
+      "chainId": 592,
+      "address": "0xffFffFfF0000000000000001000000000000000e",
+      "symbol": "HDX",
+      "name": "HDX",
+      "decimals": 12,
+      "logoURI": "icons/hdx.svg"
+    },
+    {
       "chainId": 1946,
       "address": "0xed82c5856Cb9189379357887D58b933Ba7B04F88",
       "symbol": "LIGHT",
