@@ -80,10 +80,10 @@
             "isNative": true
         },
         "quote": { 
-            "symbol": "LIGHT", 
-            "address": "", 
-            "decimals": 18, 
-            "icon": "icons/sonevibe.png",
+            "symbol": "USDT", 
+            "address": "0xbeE14ad0949eBB63b90E04b8fD0a78AF2F0f3354", 
+            "decimals": 6, 
+            "icon": "icons/tether.svg",
             "isNative": false
         }
     },
