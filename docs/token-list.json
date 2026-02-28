@@ -75,6 +75,14 @@
       "decimals": 18,
       "logoURI": "icons/tether.svg"
     },
+    {
+      "chainId": 56,
+      "address": "0x3EE2200Efb3400fAbB9AacF31297cBdD1d435D47",
+      "symbol": "ADA",
+      "name": "ADA",
+      "decimals": 18,
+      "logoURI": "icons/ada.svg"
+    },
      {
       "chainId": 592,
       "address": "0xAeaaf0e2c81Af264101B9129C00F4440cCF0F720",
