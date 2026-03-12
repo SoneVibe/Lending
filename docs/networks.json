@@ -119,6 +119,66 @@
     "blocksPerYear": 15768000,
     "enabled": true
   },
+   "Polkadot Hub TestNet": {
+    "slug": "Polkadot Hub TestNet",
+    "label": "Polkadot Hub TestNet",
+    "chainId": "420420417",
+    "rpcUrls": ["https://eth-rpc-testnet.polkadot.io/"],
+    "blockExplorerUrls": ["https://blockscout-testnet.polkadot.io/"],
+    "nativeCurrency": { "name": "PAS", "symbol": "PAS", "decimals": 18 },
+    "master": "0xCe4a761e8673928E40F9C573777590b7d7e2212D",
+    "stabilityModule": "0x02caF2C6bedF15970Fbab828B696D5C804d442dE",
+    "router": "0xB1012229aD22678588EF481547aC1A36BEBB9b86", 
+    "factory": "0xbeE14ad0949eBB63b90E04b8fD0a78AF2F0f3354", 
+
+        "swapTokens": {
+        "base": { 
+            "symbol": "DOT", 
+            "underlyingAddress": "0x9b9219B3834b3E3307267EAa1E38FABCF165fC2e", 
+            "decimals": 18, 
+            "icon": "icons/dot2.jpg",
+            "isNative": true
+        },
+        "quote": { 
+            "symbol": "LIGHT", 
+            "address": "0x91cdBcD7545Ab8d39560B435afb42cad6e90CE1f", 
+            "decimals": 18, 
+            "icon": "icons/sonevibe.png",
+            "isNative": false
+        }
+    },
+    "cTokens": [
+      {
+        "symbol": "cDOT",
+        "underlyingSymbol": "DOT",
+        "icon": "icons/dot2.jpg",
+        "address": "0x44dF8ED3917c12DE14062Ad57f70eD48E479c9aa",
+        "underlying": "0x9b9219B3834b3E3307267EAa1E38FABCF165fC2e",
+        "underlyingDecimals": 18,
+        "skipAllowance": false
+      },
+      {
+        "symbol": "cASTR",
+        "underlyingSymbol": "ASTR",
+        "icon": "icons/astr.svg",
+        "address": "0xccEc3df1f9dE884AF707D4Af225C44cb4c0d5097",
+        "underlying": "0x9BBE2548D15e23D14f3E1a87BefA6Adc27BF2B98",
+        "underlyingDecimals": 18,
+        "skipAllowance": false
+      },
+      {
+        "symbol": "cUSDC",
+        "underlyingSymbol": "USDC",
+        "icon": "icons/usdc.svg",
+        "address": "0x28E392758c412D0d2FE65C177DfD07Ff307F965C",
+        "underlying": "0xb235E8d3098502a526A08F8eE4C3613dab3338Ac",
+        "underlyingDecimals": 6,
+        "skipAllowance": false
+      }
+    ],
+    "blocksPerYear": 15768000,
+    "enabled": true
+       },
       "BNB Mainnet": {
     "slug": "BNB",
     "label": "BNB Mainnet",
