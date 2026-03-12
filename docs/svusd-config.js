@@ -11,6 +11,14 @@
                 stabilityModule: "0x7F1aF1382899263aF50Bc6d3601bdaB1E17Ba20D"
             }
         },
+        "420420417": { // Polkadot Testnet
+            chainId: "420420417",
+            contracts: {
+                svusd: "0x6F835FDC5629Ff3Bc79E9E7de13D014eA7F7Cb4B",
+                cSvusd: "0x3fc792024874eD7244856D839659864de869d013",
+                stabilityModule: "0x02caF2C6bedF15970Fbab828B696D5C804d442dE"
+            }
+        },
         "1946": { // Minato Testnet
             chainId: "1946",
             contracts: {
