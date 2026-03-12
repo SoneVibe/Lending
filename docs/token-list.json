@@ -59,6 +59,30 @@
       "decimals": 6,
       "logoURI": "icons/tether.svg"
     },
+           {
+      "chainId": 420420417,
+      "address": "0x9b9219B3834b3E3307267EAa1E38FABCF165fC2e",
+      "symbol": "WDOT",
+      "name": "WDOT",
+      "decimals": 18,
+      "logoURI": "icons/dot2.jpg"
+    },
+       {
+      "chainId": 420420417,
+      "address": "0x6F835FDC5629Ff3Bc79E9E7de13D014eA7F7Cb4B",
+      "symbol": "SVUSD",
+      "name": "SVUSD",
+      "decimals": 18,
+      "logoURI": "icons/sonevibe.png"
+    },
+       {
+      "chainId": 420420417,
+      "address": "0xb235E8d3098502a526A08F8eE4C3613dab3338Ac",
+      "symbol": "USDC",
+      "name": "USDC",
+      "decimals": 6,
+      "logoURI": "icons/usdc.svg"
+    },
     {
       "chainId": 56,
       "address": "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
