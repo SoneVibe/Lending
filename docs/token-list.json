@@ -84,6 +84,14 @@
       "logoURI": "icons/usdc.svg"
     },
     {
+      "chainId": 420420417,
+      "address": "0xAa438ff8a7C30aE37132Bb20A981a83d460073F8",
+      "symbol": "USDT",
+      "name": "USDT",
+      "decimals": 6,
+      "logoURI": "icons/tether.svg"
+    },
+    {
       "chainId": 56,
       "address": "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
       "symbol": "WBNB",
