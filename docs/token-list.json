@@ -92,6 +92,14 @@
       "logoURI": "icons/tether.svg"
     },
     {
+      "chainId": 420420417,
+      "address": "0x9BBE2548D15e23D14f3E1a87BefA6Adc27BF2B98",
+      "symbol": "ASTR",
+      "name": "ASTR",
+      "decimals": 18,
+      "logoURI": "icons/astr.svg"
+    },
+    {
       "chainId": 56,
       "address": "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
       "symbol": "WBNB",
