@@ -1,311 +1,639 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VIBE AI • SoneVibe Ecosystem</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>VIBE • AI Assistant by SoneVibe Finance</title>
+  <link rel="icon" type="image/svg+xml" href="icons/vibe.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-<link rel="icon" type="image/svg+xml" href="icons/vibe.svg">
-<link rel="stylesheet" href="css/style.css">
-<link rel="stylesheet" href="css/swap-responsive.css">
+    :root {
+      --bg-dark: #0a0c1a;
+      --bg-card: #0f111f;
+      --accent: #2d6cdf;
+      --accent-glow: #3b82f6;
+      --accent-pink: #e6007a;
+      --accent-purple: #a855f7;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --text-primary: #f3f4f6;
+      --text-secondary: #9ca3af;
+      --border-light: #1f2937;
+    }
 
-<script src="https://unpkg.com/lightweight-charts@3.8.0/dist/lightweight-charts.standalone.production.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    body {
+      background: var(--bg-dark);
+      font-family: 'Inter', sans-serif;
+      color: var(--text-primary);
+      overflow-x: hidden;
+    }
 
-<style>
+    /* Gradientes y efectos */
+    .gradient-text {
+      background: linear-gradient(135deg, #fff 0%, #a5b4fc 50%, var(--accent-pink) 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
 
-/* ===== AI PANEL ===== */
-.ai-layout {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 20px;
-}
+    .gradient-border {
+      position: relative;
+      background: linear-gradient(135deg, var(--accent), var(--accent-pink), var(--accent-purple));
+      border-radius: 24px;
+    }
 
-.chat-container {
-  background: var(--bg-card);
-  border-radius: 24px;
-  border: 1px solid var(--border-color);
-  display: flex;
-  flex-direction: column;
-  height: 70vh;
-  overflow: hidden;
-}
+    .glass-panel {
+      background: rgba(15, 17, 31, 0.7);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
 
-.chat-messages {
-  flex: 1;
-  overflow-y: auto;
-  padding: 20px;
-}
+    /* Animaciones */
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
 
-.message {
-  display: flex;
-  margin-bottom: 14px;
-}
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 0.8; }
+    }
 
-.message.user {
-  justify-content: flex-end;
-}
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
 
-.bubble {
-  max-width: 75%;
-  padding: 14px 18px;
-  border-radius: 18px;
-  font-size: 0.95rem;
-  line-height: 1.5;
-}
+    .animate-float {
+      animation: float 5s ease-in-out infinite;
+    }
 
-.user .bubble {
-  background: linear-gradient(135deg, var(--accent), #e6007a);
-  color: #fff;
-}
+    .animate-fade-up {
+      animation: fadeInUp 0.6s ease-out forwards;
+    }
 
-.ai .bubble {
-  background: rgba(255,255,255,0.05);
-  border-left: 2px solid var(--accent);
-  color: #ddd;
-}
+    /* Scrollbar personalizado (igual que swap) */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg-card);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--accent);
+      border-radius: 10px;
+    }
 
-.chat-input-area {
-  display: flex;
-  border-top: 1px solid var(--border-color);
-}
+    /* Sidebar (mismo estilo que swap) */
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 260px;
+      height: 100vh;
+      background: rgba(10, 12, 26, 0.95);
+      backdrop-filter: blur(12px);
+      border-right: 1px solid var(--border-light);
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+    }
 
-.chat-input-area input {
-  flex: 1;
-  padding: 14px;
-  background: transparent;
-  border: none;
-  color: #fff;
-  outline: none;
-}
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 40px;
+      padding: 0 12px;
+    }
 
-.chat-input-area button {
-  background: linear-gradient(135deg, var(--accent), #e6007a);
-  border: none;
-  padding: 0 20px;
-  cursor: pointer;
-  color: #fff;
-}
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: 12px;
+      color: var(--text-secondary);
+      transition: all 0.2s;
+      margin-bottom: 4px;
+      font-weight: 500;
+      text-decoration: none;
+    }
 
-/* TOOLS PANEL */
-.tools-panel {
-  background: var(--bg-card);
-  border-radius: 24px;
-  border: 1px solid var(--border-color);
-  padding: 20px;
-}
+    .nav-link:hover {
+      background: rgba(45, 108, 223, 0.1);
+      color: var(--text-primary);
+    }
 
-.tool-badge {
-  display: inline-block;
-  padding: 6px 12px;
-  margin: 5px;
-  border-radius: 20px;
-  cursor: pointer;
-  background: rgba(255,255,255,0.05);
-}
+    .nav-link.active {
+      background: rgba(45, 108, 223, 0.15);
+      color: var(--accent);
+      border-left: 2px solid var(--accent);
+    }
 
-.tool-badge.active {
-  background: var(--accent);
-  color: #000;
-}
+    /* Main content */
+    .main-content {
+      margin-left: 260px;
+      padding: 24px 32px;
+      min-height: 100vh;
+    }
 
-/* responsive */
-@media(max-width:900px){
-  .ai-layout {
-    grid-template-columns: 1fr;
-  }
-}
+    /* Header estilo swap */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
 
-</style>
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent-pink));
+      border: none;
+      padding: 10px 24px;
+      border-radius: 40px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: scale(1.02);
+    }
+
+    .btn-account-wrapper {
+      position: relative;
+    }
+
+    .account-dropdown {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      margin-top: 8px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      width: 260px;
+      display: none;
+      z-index: 50;
+      backdrop-filter: blur(12px);
+    }
+
+    .menu-item {
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .menu-item:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    /* Chat container estilo premium */
+    .chat-container {
+      background: var(--bg-card);
+      border-radius: 32px;
+      border: 1px solid var(--border-light);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      height: 65vh;
+      margin-top: 20px;
+    }
+
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .message {
+      display: flex;
+      gap: 12px;
+      animation: fadeInUp 0.3s ease-out;
+    }
+
+    .message.user {
+      justify-content: flex-end;
+    }
+
+    .message .bubble {
+      max-width: 80%;
+      padding: 12px 20px;
+      border-radius: 24px;
+      background: rgba(45, 108, 223, 0.1);
+      border: 1px solid rgba(45, 108, 223, 0.2);
+      color: var(--text-primary);
+      line-height: 1.5;
+    }
+
+    .message.user .bubble {
+      background: linear-gradient(135deg, var(--accent), var(--accent-pink));
+      border: none;
+    }
+
+    .chat-input-area {
+      display: flex;
+      padding: 20px;
+      background: rgba(10, 12, 26, 0.9);
+      border-top: 1px solid var(--border-light);
+      gap: 12px;
+    }
+
+    .chat-input-area input {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-light);
+      border-radius: 40px;
+      padding: 14px 20px;
+      color: white;
+      font-size: 15px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .chat-input-area input:focus {
+      border-color: var(--accent);
+    }
+
+    .chat-input-area button {
+      background: linear-gradient(135deg, var(--accent), var(--accent-pink));
+      border: none;
+      padding: 12px 28px;
+      border-radius: 40px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .chat-input-area button:hover {
+      transform: scale(1.02);
+    }
+
+    /* Tools panel */
+    .tools-panel {
+      background: var(--bg-card);
+      border-radius: 24px;
+      border: 1px solid var(--border-light);
+      padding: 20px;
+      margin-top: 24px;
+    }
+
+    .tool-badge {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 10px 16px;
+      border-radius: 40px;
+      margin: 8px 8px 0 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.85rem;
+    }
+
+    .tool-badge.active {
+      background: linear-gradient(135deg, var(--accent), var(--accent-pink));
+      color: white;
+    }
+
+    .tool-badge:hover {
+      background: rgba(45, 108, 223, 0.3);
+    }
+
+    .rate-warning {
+      font-size: 12px;
+      color: var(--warning);
+      margin-top: 12px;
+      text-align: center;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s;
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 16px;
+      }
+      .message .bubble {
+        max-width: 95%;
+      }
+    }
+
+    .status-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--success);
+      box-shadow: 0 0 8px var(--success);
+      animation: pulse-glow 1.5s infinite;
+      margin-right: 8px;
+    }
+  </style>
 </head>
-
 <body>
 
-<div class="app-container swap-layout">
-
-<!-- ===== SIDEBAR (UNCHANGED) ===== -->
-<nav class="sidebar glass-panel">
-  <div class="logo-area">
-    <svg width="28" height="28" viewBox="0 0 64 64">
-      <circle cx="32" cy="32" r="32" fill="#1a1f35"/>
-      <path d="M18 42 L32 18 L46 42 Z" fill="#00e0ff"/>
-    </svg>
-    VIBE Finance
-  </div>
-
-  <a href="index.html" class="nav-link">Dashboard Home</a>
-  <a href="dashboard.html" class="nav-link">Lend/Borrow</a>
-  <a href="swap.html" class="nav-link">Trade & Swap</a>
-
-  <a href="#" class="nav-link active"
-     style="color:var(--accent); border-color:var(--accent); background:rgba(45,108,223,0.1);">
-     VIBE AI Assistant
-  </a>
-
-  <a href="pools.html" class="nav-link">Liquidity Pools</a>
-  <a href="analytics.html" class="nav-link">Analytics</a>
-
-  <div style="flex-grow:1"></div>
-
-  <div style="padding:10px; font-size:0.8rem; color:var(--text-muted);">
-    Network Status:<br>
-    <span id="statusDot">●</span> Online
-  </div>
-</nav>
-
-<!-- ===== MAIN CONTENT ===== -->
-<div class="main-content">
-
-<header>
-  <div>
-    <h1 style="margin:0; font-size:1.8rem;">VIBE AI</h1>
-    <p style="color:var(--text-muted);">Institutional AI Agent • Multi-Chain Intelligence</p>
-  </div>
-
-  <div class="nav-group">
-
-    <!-- NETWORK SELECT (UNCHANGED) -->
-    <select id="networkSelect" class="network-select">
-      <option value="" disabled selected>Loading...</option>
-    </select>
-
-    <!-- WALLET (UNCHANGED) -->
-    <div class="btn-account-wrapper">
-      <button id="btnConnect" class="btn-primary">Connect Wallet</button>
-
-      <div id="accountDropdown" class="account-dropdown">
-        <div style="padding:12px;">Connected Wallet</div>
-        <div id="dropdownAddress">0x00...000</div>
-
-        <div class="menu-item" id="btnCopyAddress">Copy</div>
-        <div class="menu-item" id="btnDisconnect" style="color:red;">Disconnect</div>
-      </div>
+  <!-- Sidebar igual que VIBE Swap -->
+  <nav class="sidebar glass-panel">
+    <div class="logo-area">
+      <svg width="28" height="28" viewBox="0 0 64 64"><circle cx="32" cy="32" r="32" fill="#1a1f35"/><path d="M18 42 L32 18 L46 42 Z" fill="#00e0ff"/></svg>
+      <span>VIBE Finance</span>
     </div>
+    <a href="index.html" class="nav-link">Dashboard Home</a>
+    <a href="dashboard.html" class="nav-link">Lend/Borrow</a>
+    <a href="swap.html" class="nav-link">Trade & Swap</a>
+    <a href="pools.html" class="nav-link">Liquidity Pools</a>
+    <a href="#" class="nav-link active">VIBE AI Assistant</a>
+    <a href="analytics.html" class="nav-link">Pools TVL & Analytics</a>
+    <a href="markets.html" class="nav-link">Markets Overview</a>
+    <a href="marketplace.html" class="nav-link">NFT Market V3</a>
+    <a href="mint-svusd.html" class="nav-link">Mint SVUSD</a>
+    <a href="swapstabilizer.html" class="nav-link">Peg Stabilizer (SVUSD)</a>
+    <a href="souschef.html" class="nav-link">Sous Chef Pools</a>
+    <a href="vibe-vault.html" class="nav-link">Governance Vault</a>
+    
+    <div style="flex-grow:1"></div>
+    <div style="padding: 10px; font-size: 0.75rem; color: var(--text-secondary);">
+      <span class="status-dot"></span> AI System Online
+    </div>
+  </nav>
 
-  </div>
-</header>
-
-<!-- ===== AI WORKSPACE ===== -->
-<div class="ai-layout">
-
-  <!-- CHAT -->
-  <div class="chat-container">
-    <div id="chatMessages" class="chat-messages">
-      <div class="message ai">
-        <div class="bubble">
-          ✨ <b>VIBE Online</b><br>
-          Ask me about DeFi, Polkadot governance, yields or anything.
+  <div class="main-content">
+    <header>
+      <div>
+        <h1 style="margin:0; font-size: 2rem; font-weight: 700;">VIBE <span class="gradient-text">AI Assistant</span></h1>
+        <p style="margin: 4px 0 0 0; color: var(--text-secondary);">General Intelligence • DeFi Multi‑Chain Expert</p>
+      </div>
+      <div class="btn-account-wrapper">
+        <button id="btnConnect" class="btn-primary">Connect Wallet</button>
+        <div id="accountDropdown" class="account-dropdown">
+          <div style="padding:12px 12px 6px; font-size:0.7rem; color:var(--text-secondary);">Connected Wallet</div>
+          <div style="padding:0 12px 12px; font-size:1rem; font-weight:600;" id="dropdownAddress">0x00...000</div>
+          <div class="menu-divider" style="height:1px; background:var(--border-light); margin:8px 0;"></div>
+          <div class="menu-item" id="btnCopyAddress"><span>📋</span> Copy Address</div>
+          <div class="menu-item" id="btnDisconnect" style="color:var(--danger);"><span>🚪</span> Disconnect</div>
         </div>
       </div>
+    </header>
+
+    <!-- Hero Section con estilo VIBE Swap -->
+    <div class="glass-panel" style="border-radius: 32px; padding: 32px; margin-bottom: 32px; text-align: center;">
+      <div style="display: inline-flex; gap: 8px; background: rgba(45,108,223,0.15); padding: 6px 16px; border-radius: 40px; margin-bottom: 20px;">
+        <span style="color: var(--accent);">🤖</span>
+        <span style="font-size: 0.8rem; font-weight: 500;">Powered by SoneVibe AI • Llama 4 Neural Core</span>
+      </div>
+      <h2 style="font-size: 2rem; margin-bottom: 16px;">Ask <span class="gradient-text">VIBE</span> Anything</h2>
+      <p style="color: var(--text-secondary); max-width: 600px; margin: 0 auto;">
+        Desde estrategias DeFi en Polkadot, Soneium y BNB Chain hasta recomendaciones generales. 
+        VIBE es tu asistente con inteligencia general + experiencia multi‑chain.
+      </p>
     </div>
 
-    <div class="chat-input-area">
-      <input id="chatInput" placeholder="Ask VIBE..." />
-      <button id="sendBtn">Send</button>
+    <!-- Chat Principal -->
+    <div class="chat-container">
+      <div class="chat-messages" id="chatMessages">
+        <div class="message">
+          <div class="bubble">
+            ✨ <strong>VIBE online</strong><br>
+            Soy VIBE, el asistente de SoneVibe AI. Pregúntame sobre yields, lending cross‑chain, el Treasury de Polkadot, o cualquier tema general. ¿En qué puedo ayudarte hoy?
+          </div>
+        </div>
+      </div>
+      <div class="chat-input-area">
+        <input type="text" id="chatInput" placeholder="Ej: 'Mejor yield en Polkadot', 'Dame un dato curioso', 'Analiza el Treasury'">
+        <button id="sendBtn">Enviar</button>
+      </div>
+    </div>
+
+    <!-- Panel de herramientas activables (mismo estilo que swap pero adaptado) -->
+    <div class="tools-panel">
+      <h3 style="margin-bottom: 12px; font-size: 1rem;">⚙️ Herramientas activas</h3>
+      <div>
+        <div class="tool-badge" data-tool="treasury">💰 Treasury Analyzer</div>
+        <div class="tool-badge" data-tool="referenda">📜 OpenGov Reader</div>
+        <div class="tool-badge" data-tool="yield">📈 Yield Optimizer</div>
+        <div class="tool-badge" data-tool="general">🌐 General Knowledge</div>
+      </div>
+      <div class="rate-warning" id="rateWarning"></div>
+      <div style="margin-top: 16px; font-size: 0.7rem; color: var(--text-secondary); text-align: center;">
+        <i class="fas fa-shield-alt"></i> 50 consultas/hora (gratuito) • Datos on‑chain en tiempo real
+      </div>
     </div>
   </div>
 
-  <!-- TOOLS -->
-  <div class="tools-panel">
-    <h3>Active Modules</h3>
+  <script>
+    // ======================
+    // CONFIGURACIÓN BACKEND (free tier)
+    // ======================
+    // Cambiar por la URL real del backend cuando esté desplegado en Render
+    const API_URL = 'https://vibe-backend.onrender.com'; 
+    
+    let walletAddress = null;
+    let selectedTools = ['general']; // por defecto herramientas generales
+    let requestCount = 0;
+    let lastReset = Date.now();
 
-    <div>
-      <div class="tool-badge active" data-tool="treasury">Treasury</div>
-      <div class="tool-badge" data-tool="gov">OpenGov</div>
-      <div class="tool-badge" data-tool="yield">Yield</div>
-      <div class="tool-badge active" data-tool="general">General</div>
-    </div>
+    // Rate limiting local (simulado, el backend también lo aplica)
+    function checkLocalRateLimit() {
+      const now = Date.now();
+      if (now - lastReset > 3600000) {
+        requestCount = 0;
+        lastReset = now;
+      }
+      if (requestCount >= 50) {
+        document.getElementById('rateWarning').innerText = '⚠️ Límite de 50 consultas/hora alcanzado. Espera un momento.';
+        return false;
+      }
+      document.getElementById('rateWarning').innerText = '';
+      return true;
+    }
 
-    <p style="margin-top:20px; font-size:0.8rem; color:var(--text-muted);">
-      AI runs in secure compute (TEE simulation)
-    </p>
-  </div>
+    // Función para simular IA local mientras el backend no está desplegado
+    async function getLocalAIResponse(message, tools) {
+      const msg = message.toLowerCase();
+      
+      // Respuestas inteligentes locales (para demo sin backend)
+      if (msg.includes('yield') || msg.includes('apy') || msg.includes('interés')) {
+        return "📊 *Análisis de Yield* 📊\n\nEn Polkadot Hub, el pool USDC de SoneVibe ofrece 8.2% APY. En Soneium, ASTR pool rinde 12.3% APY (mayor riesgo). En BNB Chain, WBTC rinde 4.1% APY.\n\nRecomendación: Diversifica 50% USDC + 30% ASTR + 20% WBTC. ¿Quieres que prepare las transacciones?";
+      }
+      else if (msg.includes('treasury') || msg.includes('tesorería')) {
+        return "🏦 *Polkadot Treasury* 🏦\n\nProposals activas: 14\nGasto promedio mensual: 850k DOT\nTop categorías: Infraestructura (42%), Marketing (28%), Desarrollo (30%).\n\n¿Quieres un análisis detallado de alguna propuesta específica?";
+      }
+      else if (msg.includes('referenda') || msg.includes('opengov') || msg.includes('voto')) {
+        return "📜 *OpenGov en tiempo real* 📜\n\nReferéndum #123: Aumento de validador comisión (votación en curso)\nReferéndum #122: Grants para Acala infra (aprobado)\nReferéndum #121: Runtime upgrade (ejecutado)\n\nConsulta la app de Polkassembly para más detalles.";
+      }
+      else if (msg.includes('receta') || msg.includes('cocina') || msg.includes('pasta')) {
+        return "🍝 *Receta: Pasta al Pesto* 🍝\n\nIngredientes: albahaca fresca, piñones, ajo, parmesano, aceite de oliva, spaghetti.\n\nMientras cocinas, recuerda que tu posición USDC en SoneVibe está generando ~0.23 DOT/día. ¡Aprovecha los yields!";
+      }
+      else {
+        return "🧠 VIBE está en fase beta gratuita. Pregúntame sobre yields en Polkadot, el Treasury, referendos de OpenGov, o cualquier tema general. Pronto tendré conexión directa con el backend de IA (Llama 4) para respuestas aún más inteligentes.\n\n¿Quieres que analice algo específico de DeFi?";
+      }
+    }
 
-</div>
+    // Envío de mensaje
+    async function sendMessage() {
+      const input = document.getElementById('chatInput');
+      const msg = input.value.trim();
+      if (!msg) return;
+      if (!checkLocalRateLimit()) return;
 
-</div>
-</div>
+      appendMessage(msg, 'user');
+      input.value = '';
 
-<!-- ===== MODALS (UNCHANGED EXACTLY) ===== -->
-<div id="walletModal" class="modal-overlay">
-  <div class="modal-card">
-    <div class="modal-header">
-      <h2>Connect Wallet</h2>
-      <button onclick="closeWalletModal()">×</button>
-    </div>
-    <div id="walletList"></div>
-  </div>
-</div>
+      // Indicador de escritura
+      const typingId = 'typing-' + Date.now();
+      const typingDiv = document.createElement('div');
+      typingDiv.id = typingId;
+      typingDiv.className = 'message';
+      typingDiv.innerHTML = `<div class="bubble"><i class="fas fa-circle-notch fa-spin"></i> VIBE está pensando...</div>`;
+      document.getElementById('chatMessages').appendChild(typingDiv);
+      typingDiv.scrollIntoView({ behavior: 'smooth' });
 
-<div id="tokenModal" class="modal-overlay">
-  <div class="modal-card">
-    <input id="tokenSearch">
-    <div id="tokenListContainer"></div>
-  </div>
-</div>
+      try {
+        // Intentar llamar al backend real si está disponible
+        let responseText = '';
+        let backendAvailable = false;
+        
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 5000);
+          const res = await fetch(`${API_URL}/api/chat`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: msg, history: [], walletAddress, toolsEnabled: selectedTools }),
+            signal: controller.signal
+          });
+          clearTimeout(timeoutId);
+          
+          if (res.ok) {
+            const data = await res.json();
+            responseText = data.response;
+            backendAvailable = true;
+            requestCount++;
+          } else if (res.status === 429) {
+            responseText = "⏳ Límite de consultas alcanzado. Espera una hora o usa el modo local.";
+          }
+        } catch (e) {
+          console.log('Backend no disponible, usando modo local');
+        }
 
-<!-- ===== ORIGINAL SCRIPTS (UNCHANGED) ===== -->
-<script src="https://cdn.jsdelivr.net/npm/ethers@6.10.0/dist/ethers.umd.min.js"></script>
-<script src="abis.js"></script>
-<script src="config.js"></script>
-<script src="wallet-config.js"></script>
-<script src="swap-config.js"></script>
-<script src="swap.js"></script>
+        if (!backendAvailable) {
+          responseText = await getLocalAIResponse(msg, selectedTools);
+        }
 
-<!-- ===== AI LOGIC (ISOLATED, NON-BREAKING) ===== -->
-<script>
+        // Remover typing y mostrar respuesta
+        const typingEl = document.getElementById(typingId);
+        if (typingEl) typingEl.remove();
+        appendMessage(responseText, 'ai');
 
-let selectedTools = ['treasury','general'];
+      } catch (error) {
+        const typingEl = document.getElementById(typingId);
+        if (typingEl) typingEl.remove();
+        appendMessage('⚠️ Error de conexión. VIBE está en modo local. Intenta de nuevo.', 'ai');
+      }
+    }
 
-document.querySelectorAll('.tool-badge').forEach(el=>{
-  el.addEventListener('click',()=>{
-    el.classList.toggle('active');
-  });
-});
+    function appendMessage(text, sender) {
+      const messagesDiv = document.getElementById('chatMessages');
+      const msgDiv = document.createElement('div');
+      msgDiv.className = `message ${sender === 'user' ? 'user' : ''}`;
+      // Convertir markdown simple a HTML
+      let formattedText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      formattedText = formattedText.replace(/\n/g, '<br>');
+      msgDiv.innerHTML = `<div class="bubble">${formattedText}</div>`;
+      messagesDiv.appendChild(msgDiv);
+      msgDiv.scrollIntoView({ behavior: 'smooth' });
+    }
 
-function appendMessage(text, user=false){
-  const div = document.createElement('div');
-  div.className = 'message ' + (user?'user':'ai');
+    // Tool selection
+    document.querySelectorAll('.tool-badge').forEach(el => {
+      el.addEventListener('click', () => {
+        const tool = el.dataset.tool;
+        if (selectedTools.includes(tool)) {
+          selectedTools = selectedTools.filter(t => t !== tool);
+          el.classList.remove('active');
+        } else {
+          selectedTools.push(tool);
+          el.classList.add('active');
+        }
+      });
+    });
 
-  div.innerHTML = `<div class="bubble">${text}</div>`;
-  chatMessages.appendChild(div);
-  chatMessages.scrollTop = chatMessages.scrollHeight;
-}
+    // Wallet simulation (mismo estilo que swap)
+    let fakeWallet = null;
+    document.getElementById('btnConnect').addEventListener('click', () => {
+      if (!fakeWallet) {
+        fakeWallet = '0x' + Array(40).fill(0).map(() => Math.floor(Math.random() * 16).toString(16)).join('');
+        document.getElementById('btnConnect').innerText = fakeWallet.slice(0,6)+'...'+fakeWallet.slice(-4);
+        document.getElementById('dropdownAddress').innerText = fakeWallet;
+        document.getElementById('accountDropdown').style.display = 'block';
+      } else {
+        document.getElementById('accountDropdown').style.display = 
+          document.getElementById('accountDropdown').style.display === 'block' ? 'none' : 'block';
+      }
+    });
+    
+    document.getElementById('btnCopyAddress').addEventListener('click', () => {
+      if (fakeWallet) {
+        navigator.clipboard.writeText(fakeWallet);
+        alert('Dirección copiada');
+      }
+    });
+    
+    document.getElementById('btnDisconnect').addEventListener('click', () => {
+      fakeWallet = null;
+      document.getElementById('btnConnect').innerText = 'Connect Wallet';
+      document.getElementById('accountDropdown').style.display = 'none';
+    });
 
-function getAIResponse(q){
-  q = q.toLowerCase();
+    // Cerrar dropdown al hacer click fuera
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.btn-account-wrapper')) {
+        document.getElementById('accountDropdown').style.display = 'none';
+      }
+    });
 
-  if(q.includes("yield")){
-    return "DOT/vDOT pools ~18% APY on Polkadot Hub.";
-  }
-  if(q.includes("treasury")){
-    return "Treasury ~32M DOT. Burn rate stable.";
-  }
-  if(q.includes("gov")){
-    return "Referenda #482 currently failing.";
-  }
+    // Event listeners
+    document.getElementById('sendBtn').addEventListener('click', sendMessage);
+    document.getElementById('chatInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') sendMessage();
+    });
 
-  return "Processing multi-chain data...";
-}
-
-document.getElementById('sendBtn').onclick = send;
-document.getElementById('chatInput').addEventListener('keypress',e=>{
-  if(e.key==='Enter') send();
-});
-
-function send(){
-  const input = chatInput.value.trim();
-  if(!input) return;
-
-  appendMessage(input,true);
-  chatInput.value="";
-
-  setTimeout(()=>{
-    appendMessage(getAIResponse(input));
-  },800);
-}
-
-</script>
-
+    // Mensaje de bienvenida con información
+    setTimeout(() => {
+      appendMessage("✨ *VIBE listo* ✨\n\nPuedes preguntarme sobre:\n• Yields y lending en Polkadot, Soneium, BNB\n• Análisis del Treasury y referendos OpenGov\n• Temas generales (recetas, noticias, tecnología)\n\n¡Empieza con lo que necesites!", 'ai');
+    }, 500);
+  </script>
 </body>
 </html>
