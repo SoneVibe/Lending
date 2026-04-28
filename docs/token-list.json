@@ -21,6 +21,14 @@
     },
     {
       "chainId": 1868,
+      "address": "0x0555E30da8f98308EdB960aa94C0Db47230d2B9c",
+      "symbol": "WBTC",
+      "name": "Wrapped Bitcoin",
+      "decimals": 8,
+      "logoURI": "icons/vibe.svg"
+    },
+    {
+      "chainId": 1868,
       "address": "0xbA9986D2381edf1DA03B0B9c1f8b00dc4AacC369",
       "symbol": "USDC",
       "name": "USD Coin",
