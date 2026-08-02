@@ -125,6 +125,22 @@
     },
     {
       "chainId": 56,
+      "address": "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c",
+      "symbol": "BTCB",
+      "name": "BTCB",
+      "decimals": 18,
+      "logoURI": "icons/wbtc.svg"
+    },
+    {
+      "chainId": 56,
+      "address": "0x2170Ed0880ac9A755fd29B2688956BD959F933F8",
+      "symbol": "ETH",
+      "name": "ETH",
+      "decimals": 18,
+      "logoURI": "icons/weth.svg"
+    },
+    {
+      "chainId": 56,
       "address": "0x3EE2200Efb3400fAbB9AacF31297cBdD1d435D47",
       "symbol": "ADA",
       "name": "ADA",
