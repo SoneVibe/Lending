@@ -5,11 +5,11 @@
   "tokens": [
     {
       "chainId": 1868,
-      "address": "0x957E619104a03552d767430F2F9a2D17C847310d",
+      "address": "0x84998bf491C80a79B99540666569F360d5Acae6E",
       "symbol": "LIGHT",
       "name": "Vibe Light Token",
       "decimals": 18,
-      "logoURI": "icons/unknown.svg"
+      "logoURI": "icons/sonevibe.png"
     },
     {
       "chainId": 1868,
