@@ -22,8 +22,8 @@
         "quote": { 
             "symbol": "LIGHT", 
             "address": "0x84998bf491C80a79B99540666569F360d5Acae6E", 
-            "decimals": 6, 
-            "icon": "icons/sonevibe.png",
+            "decimals": 18, 
+            "icon": "icons/vibe.svg",
             "isNative": false
         }
     },
