@@ -45,6 +45,14 @@
     },
     {
       "chainId": 1868,
+      "address": "0x3f99231dD03a9F0E7e3421c92B7b90fbe012985a",
+      "symbol": "USDSC",
+      "name": "USDSC",
+      "decimals": 6,
+      "logoURI": "icons/usdsc.svg"
+    },
+    {
+      "chainId": 1868,
       "address": "0x0BAde9E6156131A8bcFD04840103F54c4F2BA518",
       "symbol": "SVIBE",
       "name": "SVIBE",
@@ -146,6 +154,22 @@
       "name": "ADA",
       "decimals": 18,
       "logoURI": "icons/ada.svg"
+    },
+    {
+      "chainId": 56,
+      "address": "0x8d0D000Ee44948FC98c9B98A4FA4921476f08B0d",
+      "symbol": "USD1",
+      "name": "USD1",
+      "decimals": 18,
+      "logoURI": "icons/usd1.svg"
+    },
+    {
+      "chainId": 56,
+      "address": "0x47474747477b199288bF72a1D702f7Fe0Fb1DEeA",
+      "symbol": "WLFI",
+      "name": "WLFI",
+      "decimals": 18,
+      "logoURI": "icons/wlfi.svg"
     },
      {
       "chainId": 592,
