@@ -2,95 +2,284 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>VIBE Finance | The Future of Lending</title>
+  <title>SoneVibe | Swap, Earn & Borrow on Soneium</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description" content="SoneVibe is the DeFi hub of Soneium: swap tokens, provide liquidity, lend, borrow and mint SVUSD. Every number on this page is read live from the blockchain.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="SoneVibe — Swap, Earn & Borrow on Soneium">
+  <meta property="og:description" content="DEX, lending, SVUSD stablecoin and NFT market. Live on-chain stats, open contracts.">
+  <meta property="og:url" content="https://sonevibe.github.io/Lending/">
+  <meta property="og:image" content="https://sonevibe.github.io/Lending/icons/sonevibe.png">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:site" content="@Sonevibe">
+  <meta name="twitter:creator" content="@Real_Dennis_S_F">
   <link rel="icon" type="image/svg+xml" href="icons/vibe.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
+  <style>
+    :root { --purple: #a855f7; --lp-max: 1180px; }
+    html { scroll-behavior: smooth; }
+    body { background: #07080f; }
+    .lp-wrap { max-width: var(--lp-max); margin: 0 auto; padding: 0 24px; }
+    .lp-glow { position: fixed; inset: 0; pointer-events: none; z-index: -1;
+      background: radial-gradient(900px 500px at 80% -10%, rgba(0,224,255,.14), transparent 60%),
+                  radial-gradient(700px 500px at -10% 30%, rgba(168,85,247,.12), transparent 60%); }
+
+    /* nav */
+    .lp-nav { position: sticky; top: 0; z-index: 50; backdrop-filter: blur(14px); background: rgba(7,8,15,.7); border-bottom: 1px solid rgba(255,255,255,.06); }
+    .lp-nav .lp-wrap { display: flex; align-items: center; justify-content: space-between; height: 68px; gap: 20px; }
+    .lp-brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.25rem; color: #fff; letter-spacing: -.02em; }
+    .lp-links { display: flex; gap: 26px; font-size: .92rem; color: var(--text-muted); }
+    .lp-links a:hover { color: #fff; }
+    .lp-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 22px; border-radius: 12px; font-weight: 700; font-size: .95rem; transition: transform .15s, box-shadow .15s, background .15s; white-space: nowrap; }
+    .lp-btn.primary { background: linear-gradient(135deg, #00e0ff, #2d6cdf); color: #051018; box-shadow: 0 8px 30px rgba(0,224,255,.25); }
+    .lp-btn.primary:hover { transform: translateY(-2px); box-shadow: 0 12px 36px rgba(0,224,255,.35); }
+    .lp-btn.ghost { border: 1px solid rgba(255,255,255,.16); color: #fff; background: rgba(255,255,255,.03); }
+    .lp-btn.ghost:hover { background: rgba(255,255,255,.08); }
+
+    /* hero */
+    .lp-hero { padding: 90px 0 50px; text-align: center; }
+    .lp-live { display: inline-flex; align-items: center; gap: 10px; padding: 7px 14px; border-radius: 999px; background: rgba(0,224,255,.08); border: 1px solid rgba(0,224,255,.22); color: var(--success); font-size: .82rem; font-weight: 600; }
+    .lp-live i { width: 8px; height: 8px; border-radius: 50%; background: var(--success); animation: lpPulse 1.8s infinite; }
+    .lp-live span { color: var(--text-muted); font-weight: 500; font-variant-numeric: tabular-nums; }
+    @keyframes lpPulse { 0% { box-shadow: 0 0 0 0 rgba(0,224,255,.6); } 70% { box-shadow: 0 0 0 8px rgba(0,224,255,0); } 100% { box-shadow: 0 0 0 0 rgba(0,224,255,0); } }
+    .lp-hero h1 { font-size: clamp(2.4rem, 6vw, 4.4rem); line-height: 1.05; letter-spacing: -.035em; margin: 26px auto 18px; max-width: 900px; font-weight: 800; }
+    .lp-hero h1 em { font-style: normal; background: linear-gradient(90deg, #00e0ff, var(--purple)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .lp-hero p { font-size: 1.15rem; color: var(--text-muted); max-width: 640px; margin: 0 auto 34px; line-height: 1.6; }
+    .lp-cta { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+
+    /* stats */
+    .lp-stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1px; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.07); border-radius: 20px; overflow: hidden; margin-top: 60px; }
+    .lp-stat { background: #0c0e19; padding: 24px 22px; text-align: left; }
+    .lp-stat .k { font-size: .74rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); }
+    .lp-stat .v { font-size: 1.7rem; font-weight: 800; margin: 8px 0 4px; color: #fff; font-variant-numeric: tabular-nums; min-height: 2.1rem; }
+    .lp-stat .s { font-size: .78rem; color: var(--text-muted); min-height: 1rem; }
+    .lp-stat.loading .v { width: 70%; border-radius: 8px; color: transparent; background: linear-gradient(90deg, rgba(255,255,255,.04), rgba(255,255,255,.1), rgba(255,255,255,.04)); background-size: 200% 100%; animation: lpShimmer 1.2s infinite; }
+    @keyframes lpShimmer { to { background-position: -200% 0; } }
+    .lp-verified { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-top: 12px; font-size: .8rem; color: var(--text-muted); }
+    .lp-verified a { color: var(--success); }
+
+    /* sections */
+    .lp-section { padding: 90px 0 0; }
+    .lp-eyebrow { color: var(--success); font-weight: 700; font-size: .8rem; letter-spacing: 1.5px; text-transform: uppercase; }
+    .lp-section h2 { font-size: clamp(1.8rem, 3.6vw, 2.6rem); letter-spacing: -.03em; margin: 10px 0 12px; }
+    .lp-section .lead { color: var(--text-muted); max-width: 620px; line-height: 1.6; margin: 0 0 36px; }
+
+    .lp-products { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .lp-card { position: relative; padding: 26px; border-radius: 20px; background: linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.015)); border: 1px solid rgba(255,255,255,.07); transition: transform .2s, border-color .2s; display: flex; flex-direction: column; }
+    .lp-card:hover { transform: translateY(-4px); border-color: rgba(0,224,255,.35); }
+    .lp-card .ic { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; background: rgba(0,224,255,.1); color: var(--success); margin-bottom: 18px; }
+    .lp-card .ic svg { width: 22px; height: 22px; }
+    .lp-card h3 { margin: 0 0 8px; font-size: 1.15rem; }
+    .lp-card p { margin: 0 0 18px; color: var(--text-muted); font-size: .92rem; line-height: 1.55; flex: 1; }
+    .lp-card .go { color: var(--success); font-weight: 600; font-size: .9rem; }
+    .lp-tag { position: absolute; top: 22px; right: 22px; font-size: .68rem; font-weight: 700; padding: 3px 8px; border-radius: 6px; background: rgba(255,255,255,.06); color: var(--text-muted); }
+
+    .lp-pools { display: grid; gap: 10px; }
+    .lp-pool { display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr; align-items: center; gap: 14px; padding: 18px 22px; border-radius: 16px; background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.06); transition: background .15s, border-color .15s; font-variant-numeric: tabular-nums; }
+    .lp-pool:hover { background: rgba(255,255,255,.06); border-color: rgba(0,224,255,.3); }
+    .lp-pool-pair { display: flex; align-items: center; gap: 12px; }
+    .lp-icons { display: flex; } .lp-icons img { width: 30px; height: 30px; border-radius: 50%; border: 2px solid #0c0e19; background: #1a1f35; object-fit: cover; }
+    .lp-icons img + img { margin-left: -10px; }
+    .lp-k { display: block; font-size: .7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 2px; }
+    .lp-apr { color: var(--success); font-weight: 700; }
+    .lp-empty { color: var(--text-muted); padding: 30px; text-align: center; border: 1px dashed rgba(255,255,255,.1); border-radius: 16px; }
+    .lp-skel { height: 66px; border-radius: 16px; background: linear-gradient(90deg, rgba(255,255,255,.03), rgba(255,255,255,.07), rgba(255,255,255,.03)); background-size: 200% 100%; animation: lpShimmer 1.2s infinite; }
+
+    .lp-split { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .lp-panel { padding: 28px; border-radius: 20px; background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.07); }
+    .lp-panel h3 { margin: 0 0 6px; }
+    .lp-panel .sub { color: var(--text-muted); font-size: .9rem; margin: 0 0 18px; }
+    .lp-facts { display: grid; gap: 12px; margin: 0; padding: 0; list-style: none; }
+    .lp-facts li { display: flex; gap: 12px; color: var(--text-muted); font-size: .92rem; line-height: 1.5; }
+    .lp-facts li b { color: #fff; font-weight: 600; }
+    .lp-facts li::before { content: '✓'; color: var(--success); font-weight: 800; }
+    .lp-contract { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 11px 0; border-bottom: 1px solid rgba(255,255,255,.06); font-size: .88rem; }
+    .lp-contract:last-child { border-bottom: 0; }
+    .lp-addr { display: flex; align-items: center; gap: 8px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .lp-addr a { color: var(--success); }
+    .lp-addr button { font: inherit; font-family: var(--font-main); font-size: .72rem; padding: 3px 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,.14); background: none; color: var(--text-muted); cursor: pointer; }
+    .lp-addr button:hover { color: #fff; }
+    .lp-chips { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+    .lp-chip { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 999px; border: 1px solid rgba(255,255,255,.1); background: rgba(255,255,255,.03); font-size: .85rem; color: var(--text-muted); }
+    .lp-chip.on { color: #fff; border-color: rgba(0,224,255,.4); background: rgba(0,224,255,.08); }
+    .lp-chip i { width: 7px; height: 7px; border-radius: 50%; background: var(--success); }
+    .lp-risk { margin-top: 18px; padding: 14px 16px; border-radius: 12px; background: rgba(249,224,97,.07); border: 1px solid rgba(249,224,97,.25); color: #e9dca0; font-size: .85rem; line-height: 1.5; }
+
+    .lp-final { margin: 90px 0 0; padding: 56px 30px; border-radius: 28px; text-align: center; background: linear-gradient(135deg, rgba(0,224,255,.12), rgba(168,85,247,.12)); border: 1px solid rgba(0,224,255,.2); }
+    .lp-final h2 { font-size: clamp(1.8rem, 3.6vw, 2.5rem); margin: 0 0 12px; letter-spacing: -.03em; }
+    .lp-final p { color: var(--text-muted); margin: 0 auto 28px; max-width: 520px; }
+
+    .lp-footer { margin-top: 90px; padding: 44px 0 36px; border-top: 1px solid rgba(255,255,255,.06); color: var(--text-muted); font-size: .88rem; }
+    .lp-footer .lp-wrap { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 30px; }
+    .lp-footer h4 { color: #fff; font-size: .85rem; margin: 0 0 14px; }
+    .lp-footer a { display: block; margin-bottom: 10px; } .lp-footer a:hover { color: #fff; }
+    .lp-footer .fine { grid-column: 1 / -1; padding-top: 24px; border-top: 1px solid rgba(255,255,255,.06); font-size: .78rem; line-height: 1.6; }
+
+    @media (max-width: 1000px) {
+      .lp-stats { grid-template-columns: repeat(2, 1fr); } .lp-stats .lp-stat:last-child { grid-column: 1 / -1; }
+      .lp-products { grid-template-columns: 1fr 1fr; } .lp-split { grid-template-columns: 1fr; }
+      .lp-footer .lp-wrap { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 760px) {
+      .lp-links { display: none; }
+      .lp-hero { padding: 56px 0 30px; }
+      .lp-products { grid-template-columns: 1fr; }
+      .lp-pool { grid-template-columns: 1fr 1fr; } .lp-pool-pair { grid-column: 1 / -1; }
+      .lp-stat .v { font-size: 1.35rem; }
+      .lp-cta .lp-btn { flex: 1; }
+      .lp-contract { flex-direction: column; align-items: flex-start; gap: 4px; }
+    }
+  </style>
 </head>
 <body>
+  <div class="lp-glow" aria-hidden="true"></div>
 
-  <!-- Navigation -->
-  <nav class="landing-nav">
-    <div class="logo-area">
-      <svg width="32" height="32" viewBox="0 0 64 64">
-        <circle cx="32" cy="32" r="32" fill="#1a1f35"/>
-        <path d="M18 42 L32 18 L46 42 Z" fill="#00e0ff"/>
-      </svg>
-      VIBE Finance
+  <nav class="lp-nav">
+    <div class="lp-wrap">
+      <a class="lp-brand" href="index.html">
+        <svg width="30" height="30" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="32" fill="#1a1f35"/><path d="M18 42 L32 18 L46 42 Z" fill="#00e0ff"/></svg>
+        SoneVibe
+      </a>
+      <div class="lp-links">
+        <a href="swap.html">Swap</a>
+        <a href="pools.html">Pools</a>
+        <a href="dashboard.html">Lend</a>
+        <a href="analytics.html">Analytics</a>
+        <a href="marketplace.html">NFTs</a>
+        <a href="docs.html">Docs</a>
+      </div>
+      <a href="swap.html" class="lp-btn primary">Launch App</a>
     </div>
-    <div class="landing-links">
-      <a href="markets.html">Markets</a>
-      <!-- En <nav class="landing-links"> -->
-
-      <!-- UPDATED LINK HERE -->
-      <a href="docs.html">Docs</a>
-    </div>
-    <a href="dashboard.html" class="btn-launch">Launch App</a>
   </nav>
 
-  <!-- Hero -->
-  <section class="hero">
-    <div style="margin-bottom:20px; display:inline-block; padding:6px 12px; background:rgba(0, 224, 255, 0.1); color:var(--success); border-radius:20px; font-size:0.8rem; font-weight:600;">
-      Now Live on Soneium Mainnet 
-    </div>
-    <h1>Decentralized Lending <br> Reimagined.</h1>
-    <p class="subtitle">
-      Supply assets to earn interest and use them as collateral to borrow. 
-      Experience the next generation of DeFi with superior capital efficiency and governance rewards.
-    </p>
-    
-    <div style="display:flex; justify-content:center; gap:20px; flex-wrap:wrap;">
-      <a href="dashboard.html" class="btn-launch" style="padding:16px 40px; font-size:1.1rem;">Launch App</a>
-      
-    </div>
-  </section>
+  <main class="lp-wrap">
+    <section class="lp-hero">
+      <div class="lp-live"><i></i> Live on Soneium Mainnet <span id="liveBlock"></span></div>
+      <h1>Swap, earn and borrow.<br><em>All on Soneium.</em></h1>
+      <p>SoneVibe brings a DEX, lending markets, the SVUSD stablecoin and an NFT market into one app. Every number below is read live from the blockchain — no placeholders, no black boxes.</p>
+      <div class="lp-cta">
+        <a href="swap.html" class="lp-btn primary">Start trading →</a>
+        <a href="analytics.html" class="lp-btn ghost">Explore live analytics</a>
+      </div>
 
-  <!-- Stats -->
-  <section class="stats-strip">
-    <div class="stat-item">
-      <div class="stat-num">$42M+</div>
-      <div class="stat-label">Total Supplied</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-num">12K+</div>
-      <div class="stat-label">Active Users</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-num">5</div>
-      <div class="stat-label">Markets Supported</div>
-    </div>
-  </section>
+      <div class="lp-stats" aria-live="polite">
+        <div class="lp-stat loading" id="stTvl"><div class="k">DEX liquidity</div><div class="v">—</div><div class="s"></div></div>
+        <div class="lp-stat loading" id="stVol"><div class="k">Volume 24h</div><div class="v">—</div><div class="s"></div></div>
+        <div class="lp-stat loading" id="stSwaps"><div class="k">Swaps · 7 days</div><div class="v">—</div><div class="s"></div></div>
+        <div class="lp-stat loading" id="stPairs"><div class="k">Trading pairs</div><div class="v">—</div><div class="s"></div></div>
+        <div class="lp-stat loading" id="stLend"><div class="k">Lending supplied</div><div class="v">—</div><div class="s"></div></div>
+      </div>
+      <div class="lp-verified">
+        <span>✓ Verified on-chain from Soneium contracts · <span id="liveUpdated">Loading…</span></span>
+        <a href="analytics.html">Full analytics →</a>
+      </div>
+    </section>
 
-  <!-- Features -->
-  <section class="features">
-    <div class="feature-card">
-      <div class="icon-box">💰</div>
-      <h3>Earn Interest</h3>
-      <p>Deposit your crypto assets like WBTC, USDC, and ASTR to earn passive income through dynamic algorithmic rates.</p>
-    </div>
-    <div class="feature-card">
-      <div class="icon-box">⚡</div>
-      <h3>Instant Borrowing</h3>
-      <p>Access liquidity instantly without selling your assets. Use your deposits as collateral with high LTV ratios.</p>
-    </div>
-    <div class="feature-card">
-      <div class="icon-box">🏛️</div>
-      <h3>VIBE Governance</h3>
-      <p>Earn VIBE tokens by participating in the protocol. Stake in the Vault to vote on future upgrades and parameters.</p>
-    </div>
-  </section>
+    <section class="lp-section" id="products">
+      <div class="lp-eyebrow">Products</div>
+      <h2>One app for your whole DeFi flow</h2>
+      <p class="lead">Trade, put idle assets to work and borrow against them without leaving SoneVibe.</p>
+      <div class="lp-products">
+        <a class="lp-card" href="swap.html">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 7h13l-4-4M17 17H4l4 4"/></svg></div>
+          <h3>Swap</h3><p>Trade Soneium tokens at a flat 0.25% fee with multi-hop routing and slippage protection.</p><span class="go">Trade now →</span>
+        </a>
+        <a class="lp-card" href="pools.html">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12c3-4 6-4 9 0s6 4 9 0M3 18c3-4 6-4 9 0s6 4 9 0M3 6c3-4 6-4 9 0s6 4 9 0"/></svg></div>
+          <h3>Liquidity pools</h3><p>Provide liquidity and earn 5/6 of every swap fee, automatically reinvested in your position.</p><span class="go">Add liquidity →</span>
+        </a>
+        <a class="lp-card" href="dashboard.html">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v20M17 6H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+          <h3>Lend & borrow</h3><p>Supply ASTR, USDC and more to earn interest, or borrow against your collateral with a live health factor.</p><span class="go">Open markets →</span>
+        </a>
+        <a class="lp-card" href="mint-svusd.html">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9 12h6M12 9v6"/></svg></div>
+          <h3>SVUSD stablecoin</h3><p>Mint an over-collateralized dollar and keep it on peg through the stability module.</p><span class="go">Mint SVUSD →</span>
+        </a>
+        <a class="lp-card" href="marketplace.html">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="m3 16 5-5 4 4 3-3 6 6"/></svg></div>
+          <h3>NFT market</h3><p>List, buy and trade NFTs on Soneium from the same wallet you use for DeFi.</p><span class="go">Browse NFTs →</span>
+        </a>
+        <a class="lp-card" href="vibe-vault.html">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 10h18M5 10v8M9 10v8M15 10v8M19 10v8M2 21h20M12 3l9 5H3z"/></svg></div>
+          <h3>Governance vault</h3><p>Stake to take part in protocol decisions and help steer future markets and parameters.</p><span class="go">Open vault →</span>
+        </a>
+      </div>
+    </section>
 
-  <footer>
-    <p>&copy; 2025 VIBE Protocol. All rights reserved.</p>
-    <div style="margin-top:10px; opacity:0.6;">
-      <a href="#" style="color:inherit; margin:0 10px;">Terms</a>
-      <a href="#" style="color:inherit; margin:0 10px;">Privacy</a>
-      <a href="#" style="color:inherit; margin:0 10px;">Audit</a>
+    <section class="lp-section" id="pools">
+      <div class="lp-eyebrow">Top pools</div>
+      <h2>Where liquidity is working right now</h2>
+      <p class="lead">Fee APR is based on the last 7 days of real swap fees earned by liquidity providers.</p>
+      <div class="lp-pools" id="topPools"><div class="lp-skel"></div><div class="lp-skel"></div><div class="lp-skel"></div></div>
+    </section>
+
+    <section class="lp-section" id="transparency">
+      <div class="lp-eyebrow">Transparency</div>
+      <h2>Don't trust. Verify.</h2>
+      <p class="lead">Contracts, fees and data sources are public. Check every address on the block explorer.</p>
+      <div class="lp-split">
+        <div class="lp-panel">
+          <h3>How it works</h3>
+          <p class="sub">The rules every user should know before depositing.</p>
+          <ul class="lp-facts">
+            <li><span><b>0.25% swap fee.</b> 5/6 goes to liquidity providers, 1/6 to the protocol treasury.</span></li>
+            <li><span><b>Oracle-priced lending.</b> Collateral is valued by the SoneVibe oracle; positions below a health factor of 1.0 can be liquidated.</span></li>
+            <li><span><b>Self-custody.</b> Your assets stay in smart contracts you interact with directly from your wallet.</span></li>
+            <li><span><b>Live data.</b> Stats on this page and in Analytics are read from the chain, not from a private database.</span></li>
+          </ul>
+          <div class="lp-chips" id="networks"></div>
+        </div>
+        <div class="lp-panel">
+          <h3>Soneium contracts</h3>
+          <p class="sub">Click to open on Blockscout or copy the full address.</p>
+          <div id="contracts"></div>
+          <div class="lp-risk">DeFi carries risk, including smart-contract bugs, oracle failures and impermanent loss. Only deposit what you can afford to lose.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="lp-final">
+      <h2>Ready to put your assets to work?</h2>
+      <p>Connect your wallet and make your first swap on Soneium in under a minute.</p>
+      <div class="lp-cta">
+        <a href="swap.html" class="lp-btn primary">Launch App</a>
+        <a href="https://x.com/Sonevibe" target="_blank" rel="noopener" class="lp-btn ghost">Follow @Sonevibe</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="lp-footer">
+    <div class="lp-wrap">
+      <div>
+        <a class="lp-brand" href="index.html" style="margin-bottom:12px">
+          <svg width="26" height="26" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="32" fill="#1a1f35"/><path d="M18 42 L32 18 L46 42 Z" fill="#00e0ff"/></svg>
+          SoneVibe
+        </a>
+        <p style="margin:0; max-width:280px; line-height:1.6">The DeFi hub of Soneium: swap, earn, borrow and mint SVUSD.</p>
+      </div>
+      <div>
+        <h4>Products</h4>
+        <a href="swap.html">Swap</a><a href="pools.html">Pools</a><a href="dashboard.html">Lend & Borrow</a><a href="mint-svusd.html">SVUSD</a><a href="marketplace.html">NFT Market</a>
+      </div>
+      <div>
+        <h4>Resources</h4>
+        <a href="analytics.html">Analytics</a><a href="markets.html">Markets</a><a href="docs.html">Docs</a><a href="docsvusd.html">SVUSD Docs</a><a href="https://github.com/sonevibe/Lending" target="_blank" rel="noopener">GitHub</a>
+      </div>
+      <div>
+        <h4>Community</h4>
+        <a href="https://x.com/Sonevibe" target="_blank" rel="noopener">X · @Sonevibe</a>
+        <a href="https://x.com/Real_Dennis_S_F" target="_blank" rel="noopener">X · @Real_Dennis_S_F (CEO)</a>
+      </div>
+      <div class="fine">© <span id="year">2026</span> SoneVibe. Nothing on this site is financial advice. APR figures are historical, variable and not guaranteed. Using DeFi protocols involves risk of loss.</div>
     </div>
   </footer>
 
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.10.0/dist/ethers.umd.min.js"></script>
+  <script src="config.js"></script>
+  <script src="landing.js"></script>
 </body>
 </html>
