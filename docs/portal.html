@@ -37,7 +37,6 @@
     .pt-wbtn:hover { border-color: rgba(0,224,255,.45); }
     .pt-wbtn.primary { background: linear-gradient(135deg, #00e0ff, #2d6cdf); color: #051018; border-color: transparent; }
     .pt-wbtn .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 8px var(--ok); }
-    .pt-wbtn img { width: 16px; height: 16px; border-radius: 4px; }
 
     /* hero */
     .pt-hero { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 30px; align-items: end; padding: 42px 0 26px; }
@@ -234,6 +233,63 @@
     .pt-toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(20px); opacity: 0; z-index: 120; padding: 11px 16px; border-radius: 12px; background: #151829; border: 1px solid var(--line2); font-size: .85rem; transition: opacity .2s, transform .2s; pointer-events: none; max-width: calc(100vw - 32px); }
     .pt-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+    /* icons */
+    .ci-in { width: 100%; height: 100%; border-radius: 50%; overflow: hidden; display: grid; place-items: center; box-shadow: inset 0 0 0 1px rgba(255,255,255,.08); }
+    .ci-in > svg, .ci-in > img { width: 100%; height: 100%; display: block; object-fit: cover; border-radius: 0; }
+    .ci-in b { font-size: .62rem; font-weight: 800; color: #fff; letter-spacing: -.02em; text-shadow: 0 1px 2px rgba(0,0,0,.35); }
+    .ci.sm .ci-in b { font-size: .5rem; }
+    .ci .tag.img { right: -3px; bottom: -3px; width: 14px; height: 14px; padding: 0; border-radius: 50%; overflow: hidden; background: #627EEA; border: 1.5px solid #0f1120; }
+    .ci .tag.img img { width: 100%; height: 100%; display: block; }
+    .wi { display: inline-grid; place-items: center; border-radius: 28%; overflow: hidden; flex: none; background: #1b1f36; }
+    .wi > svg, .wi > img { width: 100%; height: 100%; display: block; object-fit: cover; }
+    .av { display: inline-block; border-radius: 50%; flex: none; box-shadow: inset 0 0 0 1px rgba(255,255,255,.15); }
+
+    /* wallet buttons + menu */
+    .pt-wbtn { padding: 7px 12px 7px 8px; }
+    .pt-wbtn.on { background: rgba(255,255,255,.05); }
+    .pt-wbtn[aria-expanded="true"] { border-color: rgba(0,224,255,.55); background: rgba(0,224,255,.07); }
+    .pt-wbtn .st { width: 7px; height: 7px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 8px var(--ok); flex: none; }
+    .pt-wbtn .st.warn { background: var(--warn); box-shadow: 0 0 8px var(--warn); }
+    .pt-wbtn .chev { display: inline-flex; opacity: .55; margin-left: -2px; }
+    .pt-wbtn.busy { opacity: .8; pointer-events: none; }
+    .pt-wbtn .spin { width: 14px; height: 14px; }
+    .wm-backdrop { position: fixed; inset: 0; z-index: 104; display: none; }
+    .wm-backdrop.open { display: block; }
+    .wm { position: fixed; z-index: 105; width: 344px; max-width: calc(100vw - 20px); background: linear-gradient(180deg, #121529, #0e1020); border: 1px solid var(--line2); border-radius: 20px; box-shadow: 0 28px 80px rgba(0,0,0,.65), 0 0 0 1px rgba(0,224,255,.04); padding: 16px; display: none; }
+    .wm.open { display: block; animation: wmIn .16s ease-out; }
+    @keyframes wmIn { from { opacity: 0; transform: translateY(-6px) scale(.985); } }
+    .wm-head { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+    .wm-head b { display: block; font-size: 1rem; }
+    .wm-head span { display: flex; align-items: center; gap: 6px; font-size: .76rem; color: var(--text-muted); margin-top: 2px; }
+    .wm-head .pt-x { margin-left: auto; align-self: flex-start; }
+    i.live { width: 7px; height: 7px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 8px var(--ok); display: inline-block; }
+    i.live.warn { background: var(--warn); box-shadow: 0 0 8px var(--warn); }
+    .wm-label { display: flex; align-items: center; justify-content: space-between; font-size: .68rem; font-weight: 800; letter-spacing: 1.1px; text-transform: uppercase; color: var(--text-muted); margin: 0 2px 8px; }
+    .wm-label .pt-tag { letter-spacing: 0; text-transform: none; }
+    .wm-accts { display: grid; gap: 4px; max-height: 232px; overflow: auto; margin: 0 -4px; padding: 0 4px; scrollbar-width: thin; }
+    .wm-acct { width: 100%; display: flex; align-items: center; gap: 11px; padding: 10px 11px; border-radius: 13px; border: 1px solid transparent; background: none; color: #fff; text-align: left; cursor: pointer; transition: background .12s, border-color .12s; }
+    .wm-acct:hover { background: rgba(255,255,255,.045); }
+    .wm-acct.sel { border-color: rgba(0,224,255,.3); background: rgba(0,224,255,.06); }
+    .wm-acct.static { cursor: default; margin-bottom: 4px; }
+    .wm-acct b { display: block; font-size: .88rem; }
+    .wm-acct span { display: block; font-family: var(--mono); font-size: .72rem; color: var(--text-muted); margin-top: 1px; }
+    .wm-acct.static span { font-family: Inter, sans-serif; }
+    .wm-check { margin-left: auto; color: var(--cyan); display: inline-flex; }
+    .wm-bals { margin-top: 12px; padding: 4px 12px; border-radius: 13px; background: rgba(0,0,0,.25); border: 1px solid var(--line); }
+    .wm-bal { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 8px 0; font-size: .8rem; color: var(--text-muted); border-top: 1px solid var(--line); }
+    .wm-bal:first-child { border-top: 0; }
+    .wm-bal > span { display: inline-flex; align-items: center; gap: 8px; }
+    .wm-bal b { color: #fff; font-variant-numeric: tabular-nums; }
+    .wm-switch { width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 8px; padding: 11px; border-radius: 12px; border: 1px solid rgba(249,224,97,.35); background: rgba(249,224,97,.07); color: #f6ea9c; font-weight: 700; font-size: .84rem; cursor: pointer; }
+    .wm-switch:hover { background: rgba(249,224,97,.13); }
+    .wm-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-top: 12px; }
+    .wm-actions button, .wm-actions a { display: flex; align-items: center; justify-content: center; gap: 7px; padding: 10px 8px; border-radius: 12px; border: 1px solid var(--line2); background: rgba(255,255,255,.03); color: #dfe3ff; font-size: .8rem; font-weight: 600; cursor: pointer; transition: border-color .12s, background .12s, color .12s; }
+    .wm-actions button:hover, .wm-actions a:hover { border-color: rgba(0,224,255,.4); color: #fff; background: rgba(0,224,255,.05); }
+    .wm-actions .danger { color: #ff9aa4; border-color: rgba(255,93,108,.28); background: rgba(255,93,108,.05); }
+    .wm-actions .danger:hover { border-color: rgba(255,93,108,.7); color: #fff; background: rgba(255,93,108,.14); }
+    .pt-dialog-sub { color: var(--text-muted); font-size: .8rem; margin: -6px 20px 10px; }
+    .pt-li .wi { border-radius: 10px; }
+
     @media (max-width: 1020px) {
       .pt-grid { grid-template-columns: minmax(0, 1fr); }
       .pt-hero { grid-template-columns: minmax(0, 1fr); }
@@ -252,6 +308,12 @@
       .pt-wbtn .lbl { display: none; }
       .pt-hero { padding-top: 26px; }
       .pt-addr label { width: 76px; }
+      .pt-wbtn { padding: 7px 9px 7px 7px; gap: 6px; }
+      .pt-wbtn .chev { display: none; }
+      .wm-backdrop.open { background: rgba(3,4,10,.6); backdrop-filter: blur(3px); }
+      .wm { left: 10px !important; right: 10px !important; top: auto !important; bottom: 10px; width: auto; max-width: none; border-radius: 22px; padding: 18px; }
+      .wm.open { animation: wmUp .2s ease-out; }
+      @keyframes wmUp { from { opacity: 0; transform: translateY(24px); } }
       .pt-bal { font-size: .76rem; }
       .pt-bal td .a { gap: 6px; }
     }
@@ -270,8 +332,8 @@
         <a href="swap.html">Swap</a><a href="pools.html">Pools</a><a href="dashboard.html">Lend</a><a class="on" href="portal.html">Portal</a><a href="analytics.html">Analytics</a><a href="docs.html">Docs</a>
       </div>
       <div class="pt-conn">
-        <button class="pt-wbtn" id="btnSub" type="button"><img src="icons/dot.svg" alt=""><span class="lbl">Polkadot wallet</span></button>
-        <button class="pt-wbtn" id="btnEvm" type="button"><img src="icons/metamask.svg" alt=""><span class="lbl">EVM wallet</span></button>
+        <button class="pt-wbtn" id="btnSub" type="button" aria-haspopup="dialog" aria-expanded="false"><span class="lbl">Polkadot wallet</span></button>
+        <button class="pt-wbtn" id="btnEvm" type="button" aria-haspopup="dialog" aria-expanded="false"><span class="lbl">EVM wallet</span></button>
       </div>
     </div>
   </nav>
@@ -401,10 +463,13 @@
   <div class="pt-modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <div class="pt-dialog">
       <div class="pt-dialog-h"><span id="modalTitle"></span><button class="pt-x" id="modalX" type="button" aria-label="Close">×</button></div>
+      <div class="pt-dialog-sub" id="modalSub"></div>
       <input class="pt-search" id="modalSearch" placeholder="Search" autocomplete="off">
       <div class="pt-list" id="modalList"></div>
     </div>
   </div>
+  <div class="wm-backdrop" id="wmBackdrop"></div>
+  <div class="wm" id="walletMenu" role="dialog" aria-label="Wallet"></div>
   <div class="pt-toast" id="toast" role="status"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.10.0/dist/ethers.umd.min.js"></script>
@@ -419,6 +484,7 @@
   </script>
   <script src="https://cdn.jsdelivr.net/npm/@polkadot/api@17.0.1/bundle-polkadot-api.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@polkadot/extension-dapp@0.64.1/bundle-polkadot-extension-dapp.js"></script>
+  <script src="portal-icons.js"></script>
   <script src="portal-config.js"></script>
   <script src="portal-xcm.js"></script>
   <script src="portal.js"></script>

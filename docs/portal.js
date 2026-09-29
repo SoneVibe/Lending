@@ -18,7 +18,7 @@
 
   const S = {
     from: 'assethub', to: 'hubevm', asset: 'DOT', amount: '', recipient: '', recipientTouched: false,
-    sub: { accounts: [], address: null, mapped: null },
+    sub: { accounts: [], address: null, mapped: null, source: null },
     evm: { address: null },
     apis: {}, apiP: {}, apiState: { assethub: 'idle', astar: 'idle' },
     bal: {}, balLoading: false,
@@ -60,17 +60,41 @@
   }
 
   /* ---------------- icons ---------------- */
-  const CHAIN_ICON = { assethub: 'icons/dot.svg', hubevm: 'icons/dot.svg', astar: 'icons/astr.svg', astarevm: 'icons/astr.svg', ethereum: 'icons/eth.svg' };
+  const IC = window.SV_ICONS || { tokens: {}, chains: {}, wallets: {} };
+  const CHAIN_SVG = { assethub: 'polkadot', hubevm: 'polkadot', soneium: 'soneium' };
+  const CHAIN_IMG = { astar: 'icons/astr.svg', astarevm: 'icons/astr.svg', ethereum: 'icons/eth.svg' };
   function chainIcon(id, sm) {
     const c = cfg.chains[id];
     const tag = c.kind === 'evm' ? '<span class="tag">EVM</span>' : '';
-    const img = CHAIN_ICON[id] ? `<img src="${CHAIN_ICON[id]}" alt="">` : esc(c.short.slice(0, 2).toUpperCase());
-    return `<span class="ci${sm ? ' sm' : ''}" style="background:${c.color}">${img}${tag}</span>`;
+    const inner = IC.chains[CHAIN_SVG[id]] || (CHAIN_IMG[id] ? `<img src="${CHAIN_IMG[id]}" alt="">` : `<b>${esc(c.short.slice(0, 2).toUpperCase())}</b>`);
+    return `<span class="ci${sm ? ' sm' : ''}"><span class="ci-in" style="background:${c.color}">${inner}</span>${tag}</span>`;
   }
   function assetIcon(key, sm) {
     const a = cfg.assets[key];
-    const img = a.icon ? `<img src="${a.icon}" alt="" onerror="this.remove()">` : '';
-    return `<span class="ci${sm ? ' sm' : ''}" style="background:${a.color}">${img || esc(a.symbol.slice(0, 2).toUpperCase())}</span>`;
+    const svg = IC.tokens[key.replace(/\.e$/, '')];
+    const inner = svg || (a.icon ? `<img src="${a.icon}" alt="">` : `<b>${esc(a.symbol.replace(/^[a-z]/, '').slice(0, 2).toUpperCase())}</b>`);
+    const bg = svg ? 'transparent' : a.icon ? a.color : `linear-gradient(135deg, ${a.color}, #1b1f36)`;
+    const badge = a.origin === 'ethereum' && !sm ? '<span class="tag img" title="Bridged from Ethereum"><img src="icons/eth.svg" alt=""></span>' : '';
+    return `<span class="ci${sm ? ' sm' : ''}"><span class="ci-in" style="background:${bg}">${inner}</span>${badge}</span>`;
+  }
+  const SVG = {
+    copy: '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg>',
+    ext: '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>',
+    swap: '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h13l-3-3M17 17H4l3 3"/></svg>',
+    power: '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v8M6.3 6.8a8 8 0 1 0 11.4 0"/></svg>',
+    check: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+    chev: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>'
+  };
+  function avatar(addr, px = 30) {
+    const h = window.polkadotUtilCrypto.blake2AsU8a(String(addr).toLowerCase(), 64);
+    const a = Math.round((h[0] / 255) * 360), b = (a + 60 + Math.round((h[1] / 255) * 120)) % 360;
+    return `<span class="av" style="width:${px}px;height:${px}px;background:radial-gradient(circle at 30% 25%, hsl(${b} 90% 70%), transparent 55%),linear-gradient(135deg, hsl(${a} 75% 55%), hsl(${b} 70% 38%))"></span>`;
+  }
+  const safeImg = (src) => (/^(data:image\/|https:\/\/|icons\/)/.test(src || '') ? src : '');
+  function walletIcon(w, px) {
+    const img = safeImg(w.img);
+    const inner = img ? `<img src="${esc(img)}" alt="">` : IC.wallets[w.icon] || IC.wallets.generic || '';
+    return `<span class="wi" style="width:${px}px;height:${px}px">${inner}</span>`;
   }
 
   /* ---------------- chain connections ---------------- */
@@ -170,53 +194,186 @@
   const srcIsEvm = () => cfg.chains[S.from].kind === 'evm';
   function sourceAddress() { return srcIsEvm() ? S.evm.address : S.sub.address; }
 
-  async function connectSub(silent) {
+  /* ---------------- wallets ---------------- */
+  const SUB_SRC_KEY = 'SV_PORTAL_SUB_SRC';
+  const EVM_KEY = 'SV_PORTAL_EVM';
+  const SUB_WALLETS = {
+    talisman: { name: 'Talisman', icon: 'talisman', url: 'https://talisman.xyz/download' },
+    'subwallet-js': { name: 'SubWallet', icon: 'subwallet', url: 'https://www.subwallet.app/download.html' },
+    'polkadot-js': { name: 'Polkadot.js', icon: 'polkadotjs', url: 'https://polkadot.js.org/extension/' },
+    nova: { name: 'Nova Wallet', icon: 'nova', url: 'https://novawallet.io/' }
+  };
+  const isNova = () => !!(window.walletExtension && window.walletExtension.isNovaWallet);
+  function subMeta(source) {
+    if (source === 'polkadot-js' && isNova()) return SUB_WALLETS.nova;
+    return SUB_WALLETS[source] || { name: source ? source.replace(/[-_]js$/, '').replace(/^\w/, (c) => c.toUpperCase()) : 'Polkadot wallet', icon: 'generic' };
+  }
+
+  function subChoices() {
+    const inj = window.injectedWeb3 || {};
+    const list = Object.keys(inj).map((k) => ({ id: k, ...subMeta(k), installed: true }));
+    ['talisman', 'subwallet-js', 'polkadot-js'].forEach((k) => { if (!inj[k]) list.push({ id: k, ...SUB_WALLETS[k], installed: false }); });
+    if (!isNova()) list.push({ id: 'nova', ...SUB_WALLETS.nova, installed: false, mobile: true });
+    return list;
+  }
+
+  function chooseSub() {
+    closeMenu();
+    const items = subChoices().map((w) => ({
+      value: w.id, search: w.name,
+      html: `${walletIcon(w, 36)}<div class="n"><b>${esc(w.name)}</b><span>${w.installed ? 'Detected in this browser' : w.mobile ? 'Mobile — open this page in the Nova browser' : 'Not installed'}</span></div><div class="v">${w.installed ? '<span class="pt-tag ok">Connect</span>' : '<span class="pt-sub">Install ↗</span>'}</div>`
+    }));
+    openModal('Connect a Polkadot wallet', items, (v) => {
+      const w = subChoices().find((x) => x.id === v);
+      if (!w) return;
+      if (!w.installed) window.open(w.url, '_blank', 'noopener'); else connectSub(false, v);
+    }, '', 'For Asset Hub and Astar. Your keys never leave your wallet.');
+  }
+
+  async function connectSub(silent, source) {
     const ext = window.polkadotExtensionDapp;
     if (!ext) { if (!silent) toast('Wallet library failed to load'); return; }
-    const exts = await ext.web3Enable('SoneVibe Portal');
-    if (!exts.length) {
-      if (!silent) toast('No Polkadot wallet found. Install Talisman, SubWallet or Nova Wallet.');
-      return;
-    }
-    const accs = (await ext.web3Accounts()).filter((a) => a.type !== 'ethereum');
-    if (!accs.length) { if (!silent) toast('Your wallet has no Polkadot accounts shared with this site.'); return; }
-    S.sub.accounts = accs;
-    const saved = localStorage.getItem(SUB_KEY);
-    const pick = accs.find((a) => a.address === saved) || accs[0];
-    await selectSub(pick.address);
-    try { ext.web3AccountsSubscribe((list) => { S.sub.accounts = list.filter((a) => a.type !== 'ethereum'); renderAccounts(); }); } catch { /* optional */ }
+    source = source || localStorage.getItem(SUB_SRC_KEY) || '';
+    setBtnBusy('btnSub', !silent);
+    try {
+      const exts = await ext.web3Enable('SoneVibe Portal');
+      const e = exts.find((x) => x.name === source) || (!source ? exts[0] : null);
+      if (!e) {
+        if (!silent) toast(exts.length ? `${subMeta(source).name} did not authorize this site. Open it and approve SoneVibe Portal.` : 'No Polkadot wallet found. Install Talisman, SubWallet or Nova Wallet.');
+        return;
+      }
+      const accs = (await ext.web3Accounts({ extensions: [e.name] })).filter((a) => a.type !== 'ethereum');
+      if (!accs.length) { if (!silent) toast(`${subMeta(e.name).name} has no Polkadot accounts shared with this site.`); return; }
+      if (S.sub.unsub) { try { S.sub.unsub(); } catch { /* ignore */ } }
+      S.sub.accounts = accs; S.sub.source = e.name;
+      localStorage.setItem(SUB_SRC_KEY, e.name);
+      const saved = localStorage.getItem(SUB_KEY);
+      const pick = accs.find((a) => a.address === saved) || accs[0];
+      if (!silent) toast(`${subMeta(e.name).name} connected`);
+      await selectSub(pick.address);
+      try {
+        S.sub.unsub = await ext.web3AccountsSubscribe((list) => {
+          const l = list.filter((a) => a.type !== 'ethereum');
+          if (!S.sub.source) return;
+          S.sub.accounts = l;
+          if (l.length && !l.some((a) => a.address === S.sub.address)) selectSub(l[0].address);
+          else { renderAccounts(); refreshMenu(); }
+        }, { extensions: [e.name] });
+      } catch { /* optional */ }
+    } finally { setBtnBusy('btnSub', false); }
   }
 
   async function selectSub(address) {
     S.sub.address = address; S.sub.mapped = null;
     localStorage.setItem(SUB_KEY, address);
     if (!S.recipientTouched) S.recipient = '';
-    render(); loadBalances();
+    render(); refreshMenu(); loadBalances();
     try {
       const ah = await getApi('assethub');
       S.sub.mapped = await E.isMapped(ah, E.toAccountId(address));
     } catch { S.sub.mapped = null; }
-    render();
+    render(); refreshMenu();
   }
 
-  async function connectEvm(silent) {
-    const eth = window.ethereum;
-    if (!eth) { if (!silent) toast('No EVM wallet found. Install MetaMask, Talisman or SubWallet.'); return; }
+  function clearBal(chains) { Object.keys(S.bal).forEach((k) => { if (chains.includes(k.split(':')[0])) delete S.bal[k]; }); }
+
+  function disconnectSub() {
+    if (S.sub.unsub) { try { S.sub.unsub(); } catch { /* ignore */ } }
+    const name = subMeta(S.sub.source).name;
+    S.sub = { accounts: [], address: null, mapped: null, source: null };
+    localStorage.removeItem(SUB_SRC_KEY); localStorage.removeItem(SUB_KEY);
+    clearBal(['assethub', 'astar']);
+    if (!S.recipientTouched) S.recipient = '';
+    closeMenu(); render(); scheduleQuote();
+    toast(`${name} disconnected`);
+  }
+
+  /* EVM wallets are discovered with EIP-6963 so every installed wallet shows with its own name and logo. */
+  const EVM_PROVIDERS = new Map();
+  window.addEventListener('eip6963:announceProvider', (e) => {
+    const d = e.detail;
+    if (d && d.info && d.provider) EVM_PROVIDERS.set(d.info.rdns || d.info.uuid, d);
+  });
+  window.dispatchEvent(new Event('eip6963:requestProvider'));
+
+  function evmChoices() {
+    const list = [...EVM_PROVIDERS.values()].map((d) => ({ id: d.info.rdns || d.info.uuid, name: d.info.name, img: d.info.icon, provider: d.provider, installed: true }));
+    if (!list.length && window.ethereum) {
+      const mm = !!window.ethereum.isMetaMask;
+      list.push({ id: 'injected', name: mm ? 'MetaMask' : 'Browser wallet', img: mm ? 'icons/metamask.svg' : '', provider: window.ethereum, installed: true });
+    }
+    if (!list.some((w) => /metamask/i.test(w.id + w.name))) list.push({ id: 'io.metamask', name: 'MetaMask', img: 'icons/metamask.svg', installed: false, url: 'https://metamask.io/download/' });
+    if (!list.some((w) => /talisman/i.test(w.id + w.name))) list.push({ id: 'xyz.talisman', name: 'Talisman', icon: 'talisman', installed: false, url: 'https://talisman.xyz/download' });
+    return list;
+  }
+
+  function chooseEvm() {
+    closeMenu();
+    window.dispatchEvent(new Event('eip6963:requestProvider'));
+    setTimeout(() => {
+      const items = evmChoices().map((w) => ({
+        value: w.id, search: w.name,
+        html: `${walletIcon(w, 36)}<div class="n"><b>${esc(w.name)}</b><span>${w.installed ? 'Detected in this browser' : 'Not installed'}</span></div><div class="v">${w.installed ? '<span class="pt-tag ok">Connect</span>' : '<span class="pt-sub">Install ↗</span>'}</div>`
+      }));
+      openModal('Connect an EVM wallet', items, (v) => {
+        const w = evmChoices().find((x) => x.id === v);
+        if (!w) return;
+        if (!w.installed) window.open(w.url, '_blank', 'noopener'); else connectEvm(false, v);
+      }, '', 'For Polkadot Hub EVM and Astar EVM.');
+    }, 60);
+  }
+
+  const boundProviders = new WeakSet();
+  async function connectEvm(silent, id) {
+    const saved = localStorage.getItem(EVM_KEY);
+    if (silent && saved === 'off') return;
+    id = id || (saved !== 'off' ? saved : '') || '';
+    const choices = evmChoices().filter((w) => w.installed);
+    const w = choices.find((x) => x.id === id) || (silent && !id ? choices[0] : null) || (!silent && !id ? choices[0] : null);
+    if (!w) { if (!silent) toast('No EVM wallet found. Install MetaMask, Talisman or SubWallet.'); return; }
+    const eth = w.provider;
+    setBtnBusy('btnEvm', !silent);
     try {
       const accs = await eth.request({ method: silent ? 'eth_accounts' : 'eth_requestAccounts' });
       if (!accs || !accs.length) return;
-      S.evm.address = ethers.getAddress(accs[0]);
+      S.evm = { address: ethers.getAddress(accs[0]), provider: eth, wallet: { id: w.id, name: w.name, img: w.img, icon: w.icon }, chainId: null };
+      localStorage.setItem(EVM_KEY, w.id);
       if (!S.recipientTouched) S.recipient = '';
+      if (!silent) toast(`${w.name} connected`);
       render(); loadBalances();
-      if (!connectEvm._bound) {
-        connectEvm._bound = true;
-        eth.on && eth.on('accountsChanged', (a) => { S.evm.address = a && a[0] ? ethers.getAddress(a[0]) : null; if (!S.recipientTouched) S.recipient = ''; render(); loadBalances(); });
+      try { S.evm.chainId = await eth.request({ method: 'eth_chainId' }); } catch { /* ignore */ }
+      renderWalletButtons(); refreshMenu();
+      if (!boundProviders.has(eth) && eth.on) {
+        boundProviders.add(eth);
+        eth.on('accountsChanged', (a) => {
+          if (S.evm.provider !== eth) return;
+          if (!a || !a[0]) { disconnectEvm(true); return; }
+          S.evm.address = ethers.getAddress(a[0]); clearBal(['hubevm']);
+          if (!S.recipientTouched) S.recipient = '';
+          render(); refreshMenu(); loadBalances();
+        });
+        eth.on('chainChanged', (c) => { if (S.evm.provider !== eth) return; S.evm.chainId = c; renderWalletButtons(); refreshMenu(); });
       }
-    } catch (e) { if (!silent) toast(e.code === 4001 ? 'Connection rejected' : 'Could not connect wallet'); }
+    } catch (e) { if (!silent) toast(e.code === 4001 ? 'Connection rejected in your wallet' : 'Could not connect wallet'); }
+    finally { setBtnBusy('btnEvm', false); }
   }
 
+  async function disconnectEvm(fromWallet) {
+    const eth = S.evm.provider; const name = (S.evm.wallet && S.evm.wallet.name) || 'Wallet';
+    if (eth && !fromWallet) { try { await eth.request({ method: 'wallet_revokePermissions', params: [{ eth_accounts: {} }] }); } catch { /* not supported everywhere */ } }
+    S.evm = { address: null };
+    localStorage.setItem(EVM_KEY, 'off');
+    clearBal(['hubevm']);
+    if (!S.recipientTouched) S.recipient = '';
+    closeMenu(); render(); scheduleQuote();
+    toast(`${name} disconnected`);
+  }
+
+  const onHub = () => (S.evm.chainId || '').toLowerCase() === cfg.chains.hubevm.addChain.chainId;
+
   async function ensureHubChain() {
-    const eth = window.ethereum;
+    const eth = S.evm.provider;
+    if (!eth) throw new Error('Connect an EVM wallet first');
     const want = cfg.chains.hubevm.addChain.chainId;
     const cur = await eth.request({ method: 'eth_chainId' });
     if (cur.toLowerCase() === want) return;
@@ -227,6 +384,82 @@
         await eth.request({ method: 'wallet_addEthereumChain', params: [cfg.chains.hubevm.addChain] });
       } else throw e;
     }
+    S.evm.chainId = want;
+  }
+
+  function setBtnBusy(id, on) {
+    const b = $(id); if (!b) return;
+    b.classList.toggle('busy', !!on);
+    if (on) b.innerHTML = '<span class="spin"></span><span class="lbl">Connecting…</span>';
+    else renderWalletButtons();
+  }
+
+  /* ---------------- wallet menu ---------------- */
+  let menuKind = null;
+  function openMenu(kind) {
+    if (menuKind === kind) return closeMenu();
+    menuKind = kind;
+    refreshMenu();
+    $('wmBackdrop').classList.add('open');
+    $('walletMenu').classList.add('open');
+    $(kind === 'sub' ? 'btnSub' : 'btnEvm').setAttribute('aria-expanded', 'true');
+  }
+  function closeMenu() {
+    if (!menuKind) return;
+    $(menuKind === 'sub' ? 'btnSub' : 'btnEvm').setAttribute('aria-expanded', 'false');
+    menuKind = null;
+    $('walletMenu').classList.remove('open'); $('wmBackdrop').classList.remove('open');
+  }
+  function placeMenu() {
+    const m = $('walletMenu'); const b = $(menuKind === 'sub' ? 'btnSub' : 'btnEvm').getBoundingClientRect();
+    m.style.top = Math.round(b.bottom + 10) + 'px';
+    m.style.right = Math.max(10, Math.round(window.innerWidth - b.right)) + 'px';
+  }
+  function balRow(label, key, chain) {
+    const v = S.bal[chain + ':' + key]; const a = cfg.assets[key];
+    return `<div class="wm-bal"><span>${assetIcon(key, true)}${esc(label)}</span><b>${v === undefined ? '<span class="sk"></span>' : v === null ? '—' : fmt(v, a.decimals, 4) + ' ' + esc(a.symbol)}</b></div>`;
+  }
+  function refreshMenu() {
+    if (!menuKind) return;
+    const m = $('walletMenu');
+    if (menuKind === 'sub') {
+      if (!S.sub.address) return closeMenu();
+      const meta = subMeta(S.sub.source);
+      const ss = E.ss58(E.toAccountId(S.sub.address), 0);
+      const accts = S.sub.accounts.map((acc) => {
+        const sel = acc.address === S.sub.address;
+        const a0 = E.ss58(E.toAccountId(acc.address), 0);
+        return `<button class="wm-acct${sel ? ' sel' : ''}" data-wm-acct="${esc(acc.address)}" role="menuitemradio" aria-checked="${sel}">${avatar(a0)}<div><b>${esc(acc.meta.name || 'Account')}</b><span>${esc(short(a0, 8))}</span></div>${sel ? `<i class="wm-check">${SVG.check}</i>` : ''}</button>`;
+      }).join('');
+      const mapTag = S.sub.mapped === null ? '' : S.sub.mapped ? '<span class="pt-tag ok">EVM mapped</span>' : '<span class="pt-tag warn">EVM not mapped</span>';
+      m.innerHTML = `<div class="wm-head">${walletIcon(meta, 38)}<div><b>${esc(meta.name)}</b><span><i class="live"></i>Connected · Polkadot</span></div><button class="pt-x" data-wm="close" aria-label="Close">×</button></div>
+        <div class="wm-label">${S.sub.accounts.length > 1 ? `Accounts · ${S.sub.accounts.length}` : 'Account'} ${mapTag}</div>
+        <div class="wm-accts" role="menu">${accts}</div>
+        <div class="wm-bals">${balRow('Asset Hub', 'DOT', 'assethub')}${balRow('Asset Hub', 'USDT', 'assethub')}${S.bal['astar:ASTR'] !== undefined ? balRow('Astar', 'ASTR', 'astar') : ''}</div>
+        <div class="wm-actions">
+          <button data-wm="copy" data-v="${esc(ss)}">${SVG.copy}Copy address</button>
+          <a href="${cfg.chains.assethub.explorerAcct}${esc(ss)}" target="_blank" rel="noopener">${SVG.ext}Subscan</a>
+          <button data-wm="switch-sub">${SVG.swap}Change wallet</button>
+          <button data-wm="disconnect-sub" class="danger">${SVG.power}Disconnect</button>
+        </div>`;
+    } else {
+      if (!S.evm.address) return closeMenu();
+      const w = S.evm.wallet || { name: 'Wallet' };
+      const net = S.evm.chainId === null || S.evm.chainId === undefined ? '' : onHub()
+        ? '<span><i class="live"></i>Connected · Polkadot Hub</span>'
+        : '<span><i class="live warn"></i>Connected · other network</span>';
+      m.innerHTML = `<div class="wm-head">${walletIcon(w, 38)}<div><b>${esc(w.name)}</b>${net || '<span><i class="live"></i>Connected</span>'}</div><button class="pt-x" data-wm="close" aria-label="Close">×</button></div>
+        <div class="wm-acct sel static">${avatar(S.evm.address.toLowerCase())}<div><b>${esc(short(S.evm.address, 6))}</b><span>EVM address</span></div></div>
+        ${S.evm.chainId && !onHub() ? `<button class="wm-switch" data-wm="switch-net">${chainIcon('hubevm', true)} Switch to Polkadot Hub</button>` : ''}
+        <div class="wm-bals">${balRow('Hub EVM', 'DOT', 'hubevm')}${balRow('Hub EVM', 'USDT', 'hubevm')}</div>
+        <div class="wm-actions">
+          <button data-wm="copy" data-v="${esc(S.evm.address)}">${SVG.copy}Copy address</button>
+          <a href="${cfg.chains.hubevm.explorerAcct}${esc(S.evm.address)}" target="_blank" rel="noopener">${SVG.ext}Blockscout</a>
+          <button data-wm="switch-evm">${SVG.swap}Change wallet</button>
+          <button data-wm="disconnect-evm" class="danger">${SVG.power}Disconnect</button>
+        </div>`;
+    }
+    placeMenu();
   }
 
   /** Account on `chain` whose balance we show for the connected user. */
@@ -393,12 +626,20 @@
   }
 
   function renderWalletButtons() {
-    $('btnSub').innerHTML = S.sub.address
-      ? `<img src="icons/dot.svg" alt=""><span class="dot"></span><span class="lbl">${esc(short(E.ss58(E.toAccountId(S.sub.address), 0), 5))}</span>`
-      : '<img src="icons/dot.svg" alt=""><span class="lbl">Polkadot wallet</span>';
-    $('btnEvm').innerHTML = S.evm.address
-      ? `<img src="icons/metamask.svg" alt=""><span class="dot"></span><span class="lbl">${esc(short(S.evm.address, 5))}</span>`
-      : '<img src="icons/metamask.svg" alt=""><span class="lbl">EVM wallet</span>';
+    const bs = $('btnSub'), be = $('btnEvm');
+    if (!bs.classList.contains('busy')) {
+      bs.classList.toggle('on', !!S.sub.address);
+      bs.innerHTML = S.sub.address
+        ? `${walletIcon(subMeta(S.sub.source), 20)}<span class="lbl">${esc(short(E.ss58(E.toAccountId(S.sub.address), 0), 5))}</span><i class="st"></i><span class="chev">${SVG.chev}</span>`
+        : `<span class="wi" style="width:20px;height:20px">${IC.chains.polkadot || ''}</span><span class="lbl">Polkadot wallet</span>`;
+    }
+    if (!be.classList.contains('busy')) {
+      be.classList.toggle('on', !!S.evm.address);
+      const warn = S.evm.address && S.evm.chainId && !onHub();
+      be.innerHTML = S.evm.address
+        ? `${walletIcon(S.evm.wallet || {}, 20)}<span class="lbl">${esc(short(S.evm.address, 5))}</span><i class="st${warn ? ' warn' : ''}" title="${warn ? 'Other network' : 'Polkadot Hub'}"></i><span class="chev">${SVG.chev}</span>`
+        : `${walletIcon({ img: 'icons/metamask.svg' }, 20)}<span class="lbl">EVM wallet</span>`;
+    }
   }
 
   function renderChains() {
@@ -573,7 +814,7 @@
       const opts = S.sub.accounts.map((acc) => `<option value="${esc(acc.address)}"${acc.address === S.sub.address ? ' selected' : ''}>${esc(acc.meta.name || 'Account')} · ${esc(short(E.ss58(E.toAccountId(acc.address), 0), 5))} (${esc(acc.meta.source)})</option>`).join('');
       const mapTag = S.sub.mapped === null ? '<span class="sk"></span>' : S.sub.mapped ? '<span class="pt-tag ok">Mapped</span>' : '<span class="pt-tag warn">Not mapped</span>';
       html += `<div class="pt-box">
-        <div class="pt-box-h">${chainIcon('assethub', true)} Polkadot account <span class="pt-sub">${mapTag}</span></div>
+        <div class="pt-box-h">${walletIcon(subMeta(S.sub.source), 22)} ${esc(subMeta(S.sub.source).name)} <span class="pt-sub">${mapTag}</span></div>
         ${S.sub.accounts.length > 1 ? `<select class="pt-select" id="subSel" aria-label="Polkadot account">${opts}</select>` : ''}
         <div class="pt-addr"><label>Asset Hub</label><span>${esc(E.ss58(id, 0))}</span><button class="pt-copy" data-copy="${esc(E.ss58(id, 0))}" aria-label="Copy">⧉</button></div>
         <div class="pt-addr"><label>Astar</label><span>${esc(E.ss58(id, 5))}</span><button class="pt-copy" data-copy="${esc(E.ss58(id, 5))}" aria-label="Copy">⧉</button></div>
@@ -587,7 +828,7 @@
     }
     if (S.evm.address) {
       html += `<div class="pt-box">
-        <div class="pt-box-h">${chainIcon('hubevm', true)} EVM account</div>
+        <div class="pt-box-h">${walletIcon(S.evm.wallet || {}, 22)} ${esc((S.evm.wallet && S.evm.wallet.name) || 'EVM wallet')} <span class="pt-sub">${onHub() ? '<span class="pt-tag ok">Polkadot Hub</span>' : S.evm.chainId ? '<span class="pt-tag warn">Other network</span>' : ''}</span></div>
         <div class="pt-addr"><label>Address</label><span>${esc(S.evm.address)}</span><button class="pt-copy" data-copy="${esc(S.evm.address)}" aria-label="Copy">⧉</button></div>
         <div class="pt-addr"><label>Deposit (SS58)</label><span id="evmDeposit"><span class="sk"></span></span><button class="pt-copy" id="evmDepositCopy" aria-label="Copy">⧉</button></div>
         <div class="pt-hint">Send DOT or USDt from an exchange or any Polkadot wallet to this Asset Hub address — it shows up in MetaMask on Polkadot Hub.</div>
@@ -688,7 +929,7 @@
       let hash;
       if (plan.kind === 'substrate') {
         const api = S.apis[plan.chain];
-        const injector = await window.polkadotExtensionDapp.web3FromAddress(S.sub.address);
+        const injector = await window.polkadotExtensionDapp.web3FromSource(S.sub.source);
         hash = await new Promise((resolve, reject) => {
           let unsub;
           plan.tx.signAndSend(S.sub.address, { signer: injector.signer }, (res) => {
@@ -699,7 +940,7 @@
         });
       } else {
         await ensureHubChain();
-        const signer = await new ethers.BrowserProvider(window.ethereum).getSigner();
+        const signer = await new ethers.BrowserProvider(S.evm.provider).getSigner();
         const req = { to: plan.to, data: plan.data, value: plan.value };
         if (S.quote.gas) req.gasLimit = (S.quote.gas * 15n) / 10n;
         const tx = await signer.sendTransaction(req);
@@ -764,7 +1005,7 @@
     btn.disabled = true; const label = btn.textContent;
     try {
       await ensureHubChain();
-      const signer = await new ethers.BrowserProvider(window.ethereum).getSigner();
+      const signer = await new ethers.BrowserProvider(S.evm.provider).getSigner();
       const me = await signer.getAddress();
       if (key === 'DOT') {
         btn.innerHTML = '<span class="spin"></span> Wrapping…';
@@ -791,7 +1032,7 @@
     const a = cfg.assets[key];
     try {
       await ensureHubChain();
-      await window.ethereum.request({ method: 'wallet_watchAsset', params: { type: 'ERC20', options: { address: a.on.hubevm.address, symbol: a.symbol.replace(/[^A-Za-z0-9]/g, '').slice(0, 11), decimals: a.decimals } } });
+      await S.evm.provider.request({ method: 'wallet_watchAsset', params: { type: 'ERC20', options: { address: a.on.hubevm.address, symbol: a.symbol.replace(/[^A-Za-z0-9]/g, '').slice(0, 11), decimals: a.decimals } } });
     } catch { toast('Your wallet did not add the token'); }
   }
 
@@ -799,7 +1040,7 @@
     btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Mapping…';
     try {
       const ah = await getApi('assethub');
-      const injector = await window.polkadotExtensionDapp.web3FromAddress(S.sub.address);
+      const injector = await window.polkadotExtensionDapp.web3FromSource(S.sub.source);
       await new Promise((resolve, reject) => {
         ah.tx.revive.mapAccount().signAndSend(S.sub.address, { signer: injector.signer }, (res) => {
           if (res.dispatchError) reject(new Error(decodeDispatchError(ah, res.dispatchError)));
@@ -812,9 +1053,10 @@
 
   /* ---------------- modal ---------------- */
   let modalPick = null, modalItems = [];
-  function openModal(title, items, onPick, placeholder) {
+  function openModal(title, items, onPick, placeholder, subtitle) {
     modalItems = items; modalPick = onPick;
     $('modalTitle').textContent = title;
+    $('modalSub').textContent = subtitle || ''; $('modalSub').style.display = subtitle ? '' : 'none';
     $('modalSearch').value = ''; $('modalSearch').placeholder = placeholder || 'Search';
     $('modalSearch').style.display = items.length > 8 ? '' : 'none';
     drawModal('');
@@ -940,12 +1182,27 @@
     $('cta').onclick = () => {
       const act = $('cta').dataset.action;
       if (act === 'partner') window.open(currentLane().partner.url, '_blank', 'noopener');
-      else if (act === 'connect-sub') connectSub();
-      else if (act === 'connect-evm') connectEvm();
+      else if (act === 'connect-sub') chooseSub();
+      else if (act === 'connect-evm') chooseEvm();
       else if (act === 'send') send();
     };
-    $('btnSub').onclick = () => connectSub();
-    $('btnEvm').onclick = () => connectEvm();
+    $('btnSub').onclick = () => (S.sub.address ? openMenu('sub') : chooseSub());
+    $('btnEvm').onclick = () => (S.evm.address ? openMenu('evm') : chooseEvm());
+    $('wmBackdrop').onclick = closeMenu;
+    window.addEventListener('resize', () => menuKind && placeMenu());
+    $('walletMenu').addEventListener('click', async (e) => {
+      const acc = e.target.closest('[data-wm-acct]');
+      if (acc) { if (acc.dataset.wmAcct !== S.sub.address) { await selectSub(acc.dataset.wmAcct); toast('Account switched'); } return; }
+      const b = e.target.closest('[data-wm]'); if (!b) return;
+      const a = b.dataset.wm;
+      if (a === 'close') closeMenu();
+      else if (a === 'copy') copy(b.dataset.v);
+      else if (a === 'switch-sub') chooseSub();
+      else if (a === 'switch-evm') chooseEvm();
+      else if (a === 'disconnect-sub') disconnectSub();
+      else if (a === 'disconnect-evm') disconnectEvm();
+      else if (a === 'switch-net') { try { await ensureHubChain(); renderWalletButtons(); refreshMenu(); } catch (err) { toast(err.code === 4001 ? 'Rejected in your wallet' : 'Could not switch network'); } }
+    });
     $('refresh').onclick = () => loadBalances();
     $('clearHist').onclick = () => saveHist([]);
     $('modalX').onclick = closeModal;
@@ -955,7 +1212,7 @@
       closeModal(); modalPick && modalPick(li.dataset.v);
     });
     $('modalSearch').addEventListener('input', (e) => drawModal(e.target.value));
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeModal(); closeMenu(); } });
 
     document.addEventListener('click', (e) => {
       const c = e.target.closest('[data-copy]'); if (c) { copy(c.dataset.copy); return; }
@@ -972,8 +1229,8 @@
       const act = e.target.closest('[data-act]');
       if (act) {
         const v = act.dataset.act;
-        if (v === 'connect-sub') connectSub();
-        if (v === 'connect-evm') connectEvm();
+        if (v === 'connect-sub') chooseSub();
+        if (v === 'connect-evm') chooseEvm();
         if (v === 'new') { $('progress').innerHTML = ''; render(); }
       }
       if (e.target.id === 'mapBtn') mapAccount(e.target);
@@ -997,8 +1254,8 @@
     checkEvmRpc();
     getApi('assethub').then(() => { render(); loadBalances(); scheduleQuote(); }, () => render());
     if (needsAstar(S.from, S.to)) getApi('astar').then(() => { render(); scheduleQuote(); }, () => {});
-    if (localStorage.getItem(SUB_KEY)) connectSub(true);
-    connectEvm(true);
+    if (localStorage.getItem(SUB_SRC_KEY) || localStorage.getItem(SUB_KEY)) setTimeout(() => connectSub(true), 300);
+    setTimeout(() => connectEvm(true), 250);
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
