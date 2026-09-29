@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>SoneVibe Portal | Bridge DOT, USDt & USDC across Polkadot Hub, Astar, Soneium and Ethereum</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description" content="SoneVibe Portal: move DOT, USDt, USDC and Snowbridge assets between Polkadot Asset Hub, Polkadot Hub EVM and Astar in one click. Routes to Soneium and Ethereum included.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="SoneVibe Portal">
+  <meta property="og:description" content="The hub between Soneium, Ethereum, Polkadot and Astar. Bridge DOT, USDt and USDC with native XCM — no wrapped IOUs.">
+  <meta property="og:url" content="https://sonevibe.github.io/Lending/portal.html">
+  <meta property="og:image" content="https://sonevibe.github.io/Lending/icons/sonevibe.png">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:site" content="@Sonevibe">
+  <link rel="icon" type="image/svg+xml" href="icons/vibe.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    :root { --pt-max: 1240px; --cyan: #00e0ff; --pink: #e6007a; --purple: #a855f7; --line: rgba(255,255,255,.07); --line2: rgba(255,255,255,.12); --panel: rgba(17,19,32,.82); --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace; --ok: #22c55e; --warn: #f9e061; --bad: #ff5d6c; }
+    body { background: #07080f; }
+    .pt-glow { position: fixed; inset: 0; pointer-events: none; z-index: -1;
+      background: radial-gradient(760px 420px at 80% -8%, rgba(230,0,122,.13), transparent 60%), radial-gradient(700px 460px at -6% 30%, rgba(0,224,255,.10), transparent 60%), radial-gradient(600px 400px at 50% 110%, rgba(168,85,247,.08), transparent 60%); }
+    .pt-wrap { max-width: var(--pt-max); margin: 0 auto; padding: 0 24px; }
+    button { font: inherit; }
+
+    /* nav */
+    .pt-nav { position: sticky; top: 0; z-index: 60; backdrop-filter: blur(14px); background: rgba(7,8,15,.8); border-bottom: 1px solid var(--line); }
+    .pt-nav .pt-wrap { display: flex; align-items: center; gap: 20px; height: 64px; }
+    .pt-brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.15rem; color: #fff; }
+    .pt-brand small { font-weight: 700; font-size: .72rem; padding: 3px 8px; border-radius: 6px; color: #fff; background: linear-gradient(135deg, rgba(230,0,122,.35), rgba(0,224,255,.25)); border: 1px solid var(--line2); }
+    .pt-links { display: flex; gap: 22px; margin-left: auto; font-size: .9rem; color: var(--text-muted); }
+    .pt-links a:hover, .pt-links a.on { color: #fff; }
+    .pt-conn { display: flex; gap: 8px; }
+    .pt-wbtn { display: inline-flex; align-items: center; gap: 8px; padding: 9px 14px; border-radius: 11px; font-weight: 700; font-size: .85rem; cursor: pointer; white-space: nowrap; border: 1px solid var(--line2); background: rgba(255,255,255,.04); color: #fff; transition: border-color .15s, background .15s; }
+    .pt-wbtn:hover { border-color: rgba(0,224,255,.45); }
+    .pt-wbtn.primary { background: linear-gradient(135deg, #00e0ff, #2d6cdf); color: #051018; border-color: transparent; }
+    .pt-wbtn .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 8px var(--ok); }
+    .pt-wbtn img { width: 16px; height: 16px; border-radius: 4px; }
+
+    /* hero */
+    .pt-hero { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 30px; align-items: end; padding: 42px 0 26px; }
+    .pt-eyebrow { color: var(--cyan); font-weight: 700; font-size: .78rem; letter-spacing: 1.4px; text-transform: uppercase; }
+    .pt-hero h1 { font-size: clamp(2rem, 4.6vw, 3.1rem); letter-spacing: -.035em; line-height: 1.05; margin: 12px 0 12px; }
+    .pt-hero h1 span { background: linear-gradient(90deg, #ff4fa6, #00e0ff); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .pt-hero p { color: var(--text-muted); font-size: 1.05rem; line-height: 1.6; max-width: 640px; margin: 0; }
+    .pt-orbit { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+    .pt-pill { display: inline-flex; align-items: center; gap: 7px; font-size: .78rem; font-weight: 600; color: #cfd3ea; padding: 6px 11px 6px 7px; border-radius: 999px; background: rgba(255,255,255,.035); border: 1px solid var(--line); }
+    .pt-status { display: inline-flex; align-items: center; gap: 7px; font-size: .78rem; color: var(--text-muted); }
+    .pt-status i { width: 7px; height: 7px; border-radius: 50%; background: #666; }
+    .pt-status.ok i { background: var(--ok); box-shadow: 0 0 8px var(--ok); }
+    .pt-status.wait i { background: var(--warn); animation: pulse 1.2s infinite; }
+    .pt-status.bad i { background: var(--bad); }
+    @keyframes pulse { 50% { opacity: .35; } }
+
+    /* layout */
+    .pt-grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: 22px; align-items: start; padding-bottom: 30px; }
+    .pt-card { background: var(--panel); border: 1px solid var(--line); border-radius: 22px; padding: 22px; box-shadow: 0 20px 60px rgba(0,0,0,.35); }
+    .pt-card h2 { font-size: 1.05rem; margin: 0; display: flex; align-items: center; gap: 10px; }
+    .pt-card-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 16px; }
+    .pt-sub { color: var(--text-muted); font-size: .82rem; }
+    .pt-side { display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; min-width: 0; }
+
+    /* chain row */
+    .pt-chains { display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; align-items: stretch; }
+    .pt-chainbtn { text-align: left; cursor: pointer; padding: 12px 14px; border-radius: 16px; border: 1px solid var(--line); background: rgba(255,255,255,.03); color: #fff; display: flex; flex-direction: column; gap: 8px; min-width: 0; transition: border-color .15s, background .15s; }
+    .pt-chainbtn:hover { border-color: rgba(0,224,255,.4); background: rgba(255,255,255,.05); }
+    .pt-chainbtn small { font-size: .72rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: .8px; }
+    .pt-chainbtn .row { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: .98rem; min-width: 0; }
+    .pt-chainbtn .row span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .pt-chainbtn .chev { margin-left: auto; opacity: .5; font-size: .8rem; }
+    .pt-flip { align-self: center; width: 40px; height: 40px; border-radius: 12px; border: 1px solid var(--line2); background: #10121f; color: #fff; cursor: pointer; font-size: 1.05rem; transition: transform .25s, border-color .15s; }
+    .pt-flip:hover { border-color: var(--cyan); transform: rotate(180deg); }
+    .ci { width: 28px; height: 28px; border-radius: 50%; flex: none; display: grid; place-items: center; font-size: .68rem; font-weight: 800; color: #0b0c15; position: relative; overflow: visible; }
+    .ci img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+    .ci .tag { position: absolute; right: -6px; bottom: -4px; font-size: .5rem; font-weight: 800; background: #0b0c15; color: #fff; border: 1px solid var(--line2); border-radius: 5px; padding: 0 3px; line-height: 1.4; }
+    .ci.sm { width: 20px; height: 20px; font-size: .55rem; }
+    .ci.sm .tag { display: none; }
+
+    /* amount */
+    .pt-field { margin-top: 14px; padding: 14px; border-radius: 16px; background: rgba(0,0,0,.25); border: 1px solid var(--line); transition: border-color .15s; }
+    .pt-field:focus-within { border-color: rgba(0,224,255,.45); }
+    .pt-field-top { display: flex; justify-content: space-between; align-items: center; font-size: .78rem; color: var(--text-muted); margin-bottom: 8px; gap: 10px; }
+    .pt-amount { display: flex; align-items: center; gap: 10px; }
+    .pt-amount input { flex: 1; min-width: 0; background: none; border: 0; outline: none; color: #fff; font: inherit; font-size: 1.9rem; font-weight: 700; letter-spacing: -.02em; }
+    .pt-amount input, .pt-recipient input { background: transparent !important; border: 0 !important; box-shadow: none !important; padding: 0 !important; border-radius: 0 !important; }
+    .pt-amount input::placeholder { color: #3a3f58; }
+    .pt-assetbtn { display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px 8px 8px; border-radius: 999px; border: 1px solid var(--line2); background: rgba(255,255,255,.06); color: #fff; font-weight: 700; cursor: pointer; flex: none; }
+    .pt-assetbtn:hover { border-color: var(--cyan); }
+    .pt-max { font-size: .72rem; font-weight: 800; letter-spacing: .5px; color: var(--cyan); background: rgba(0,224,255,.08); border: 1px solid rgba(0,224,255,.25); border-radius: 7px; padding: 2px 7px; cursor: pointer; }
+    .pt-max:disabled { opacity: .4; cursor: default; }
+    .pt-quick { display: flex; gap: 6px; margin-top: 10px; }
+    .pt-quick button { font-size: .72rem; font-weight: 700; color: #cfd3ea; background: rgba(255,255,255,.04); border: 1px solid var(--line); border-radius: 8px; padding: 4px 9px; cursor: pointer; }
+    .pt-quick button:hover { border-color: var(--line2); color: #fff; }
+
+    .pt-recipient input { width: 100%; background: none; border: 0; outline: none; color: #fff; font-family: var(--mono); font-size: .86rem; }
+    .pt-recipient input::placeholder { color: #4a506e; font-family: Inter, sans-serif; }
+    .pt-link { color: var(--cyan); cursor: pointer; background: none; border: 0; padding: 0; font-size: .78rem; font-weight: 600; }
+    .pt-hint { font-size: .76rem; margin-top: 8px; color: var(--text-muted); display: flex; gap: 6px; align-items: flex-start; }
+    .pt-hint.bad { color: var(--bad); }
+    .pt-hint.ok { color: var(--ok); }
+
+    /* summary */
+    .pt-summary { margin-top: 14px; border-radius: 16px; border: 1px solid var(--line); overflow: hidden; }
+    .pt-summary .r { display: flex; justify-content: space-between; gap: 12px; padding: 10px 14px; font-size: .85rem; border-top: 1px solid var(--line); }
+    .pt-summary .r:first-child { border-top: 0; }
+    .pt-summary .r span:first-child { color: var(--text-muted); }
+    .pt-summary .r b { font-weight: 700; text-align: right; }
+    .pt-summary .r.big b { font-size: 1rem; color: #fff; }
+    .pt-route { display: inline-flex; align-items: center; gap: 6px; font-size: .74rem; font-weight: 700; padding: 3px 8px; border-radius: 999px; background: rgba(34,197,94,.1); color: #6ee7a3; border: 1px solid rgba(34,197,94,.25); }
+    .pt-route.partner { background: rgba(168,85,247,.1); color: #d0a8ff; border-color: rgba(168,85,247,.3); }
+    .pt-route.blocked { background: rgba(255,93,108,.1); color: #ff9aa4; border-color: rgba(255,93,108,.3); }
+
+    .pt-alert { margin-top: 12px; padding: 11px 13px; border-radius: 12px; font-size: .82rem; line-height: 1.5; display: flex; gap: 9px; border: 1px solid; }
+    .pt-alert.warn { background: rgba(249,224,97,.06); border-color: rgba(249,224,97,.25); color: #f3e7a6; }
+    .pt-alert.info { background: rgba(0,224,255,.05); border-color: rgba(0,224,255,.2); color: #bfefff; }
+    .pt-alert.bad { background: rgba(255,93,108,.07); border-color: rgba(255,93,108,.3); color: #ffc0c6; }
+    .pt-alert b { color: #fff; }
+    .pt-alert a { color: var(--cyan); }
+
+    .pt-cta { width: 100%; margin-top: 16px; padding: 16px; border-radius: 16px; border: 0; font-weight: 800; font-size: 1.02rem; cursor: pointer; color: #051018; background: linear-gradient(135deg, #00e0ff, #2d6cdf); box-shadow: 0 10px 30px rgba(0,224,255,.18); transition: filter .15s, transform .1s; display: flex; align-items: center; justify-content: center; gap: 10px; }
+    .pt-cta:hover:not(:disabled) { filter: brightness(1.08); }
+    .pt-cta:active:not(:disabled) { transform: scale(.995); }
+    .pt-cta:disabled { cursor: not-allowed; background: rgba(255,255,255,.06); color: #6d7391; box-shadow: none; }
+    .pt-cta.partner { background: linear-gradient(135deg, #c084fc, #7c3aed); color: #fff; }
+    .spin { width: 16px; height: 16px; border-radius: 50%; border: 2px solid currentColor; border-right-color: transparent; animation: spin .8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* progress */
+    .pt-progress { margin-top: 16px; padding: 16px; border-radius: 16px; border: 1px solid var(--line2); background: rgba(0,0,0,.25); }
+    .pt-steps { display: grid; gap: 12px; }
+    .pt-step { display: grid; grid-template-columns: 26px 1fr; gap: 12px; align-items: start; font-size: .88rem; }
+    .pt-step .b { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-size: .75rem; font-weight: 800; border: 1px solid var(--line2); color: var(--text-muted); }
+    .pt-step.active .b { border-color: var(--cyan); color: var(--cyan); }
+    .pt-step.done .b { background: var(--ok); border-color: var(--ok); color: #04130a; }
+    .pt-step.fail .b { background: var(--bad); border-color: var(--bad); color: #fff; }
+    .pt-step p { margin: 3px 0 0; color: var(--text-muted); font-size: .78rem; }
+    .pt-step a { color: var(--cyan); }
+    .pt-after { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+
+    /* account panel */
+    .pt-acct { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+    .pt-box { padding: 14px; border-radius: 16px; border: 1px solid var(--line); background: rgba(255,255,255,.02); }
+    .pt-box-h { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: .9rem; margin-bottom: 10px; }
+    .pt-box-h .pt-sub { margin-left: auto; font-weight: 500; }
+    .pt-addr { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 10px; background: rgba(0,0,0,.25); font-family: var(--mono); font-size: .78rem; color: #dfe3ff; margin-top: 6px; }
+    .pt-addr span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; }
+    .pt-addr label { font-family: Inter, sans-serif; color: var(--text-muted); font-size: .72rem; font-weight: 600; flex: none; width: 92px; }
+    .pt-copy { flex: none; background: none; border: 0; color: var(--text-muted); cursor: pointer; font-size: .8rem; padding: 2px 4px; border-radius: 6px; }
+    .pt-copy:hover { color: #fff; background: rgba(255,255,255,.06); }
+    .pt-select { width: 100%; background: rgba(0,0,0,.3); color: #fff; border: 1px solid var(--line2); border-radius: 10px; padding: 8px 10px; font: inherit; font-size: .85rem; }
+    .pt-tag { font-size: .7rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; border: 1px solid; }
+    .pt-tag.ok { color: #6ee7a3; border-color: rgba(34,197,94,.3); background: rgba(34,197,94,.08); }
+    .pt-tag.warn { color: #f3e7a6; border-color: rgba(249,224,97,.3); background: rgba(249,224,97,.06); }
+    .pt-empty { text-align: center; padding: 20px 10px; color: var(--text-muted); font-size: .85rem; line-height: 1.55; }
+    .pt-empty b { color: #fff; display: block; margin-bottom: 4px; font-size: .95rem; }
+    .pt-small-btn { font-size: .78rem; font-weight: 700; padding: 7px 11px; border-radius: 9px; border: 1px solid var(--line2); background: rgba(255,255,255,.05); color: #fff; cursor: pointer; }
+    .pt-small-btn:hover { border-color: var(--cyan); }
+    .pt-small-btn.accent { border-color: rgba(0,224,255,.35); color: var(--cyan); }
+    .pt-small-btn:disabled { opacity: .5; cursor: default; }
+
+    /* balances table */
+    .pt-bal-wrap { overflow-x: auto; }
+    .pt-bal { width: 100%; min-width: 0; border-collapse: collapse; font-size: .82rem; }
+    .pt-bal th { text-align: right; font-weight: 600; color: var(--text-muted); font-size: .7rem; text-transform: uppercase; letter-spacing: .6px; padding: 6px 4px; }
+    .pt-bal th:first-child, .pt-bal td:first-child { text-align: left; }
+    .pt-bal td { padding: 8px 4px; border-top: 1px solid var(--line); text-align: right; font-variant-numeric: tabular-nums; }
+    .pt-bal td .a { display: flex; align-items: center; gap: 8px; font-weight: 700; }
+    .pt-bal .z { color: #4d536f; }
+    .sk { display: inline-block; height: 10px; width: 48px; border-radius: 5px; background: linear-gradient(90deg, rgba(255,255,255,.04), rgba(255,255,255,.1), rgba(255,255,255,.04)); background-size: 200% 100%; animation: sk 1.2s infinite; }
+    @keyframes sk { to { background-position: -200% 0; } }
+
+    /* history */
+    .pt-hist { display: grid; gap: 8px; }
+    .pt-hrow { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; padding: 10px; border-radius: 12px; border: 1px solid var(--line); font-size: .82rem; }
+    .pt-hrow .t { color: var(--text-muted); font-size: .72rem; }
+    .pt-hrow a { color: var(--cyan); font-size: .75rem; }
+
+    /* modal */
+    .pt-modal { position: fixed; inset: 0; z-index: 100; display: none; align-items: center; justify-content: center; padding: 20px; background: rgba(3,4,10,.7); backdrop-filter: blur(6px); }
+    .pt-modal.open { display: flex; }
+    .pt-dialog { width: 100%; max-width: 460px; max-height: min(640px, 90vh); display: flex; flex-direction: column; background: #0f1120; border: 1px solid var(--line2); border-radius: 22px; box-shadow: 0 30px 80px rgba(0,0,0,.6); }
+    .pt-dialog-h { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px 12px; font-weight: 800; }
+    .pt-x { background: none; border: 0; color: var(--text-muted); font-size: 1.3rem; cursor: pointer; line-height: 1; }
+    .pt-x:hover { color: #fff; }
+    .pt-search { margin: 0 20px 10px; padding: 11px 13px; border-radius: 12px; background: rgba(0,0,0,.35); border: 1px solid var(--line2); color: #fff; font: inherit; font-size: .9rem; outline: none; }
+    .pt-search:focus { border-color: rgba(0,224,255,.5); }
+    .pt-list { overflow: auto; padding: 4px 10px 14px; }
+    .pt-li { width: 100%; display: flex; align-items: center; gap: 12px; padding: 11px 10px; border-radius: 12px; border: 0; background: none; color: #fff; text-align: left; cursor: pointer; }
+    .pt-li:hover, .pt-li.sel { background: rgba(255,255,255,.05); }
+    .pt-li .n { flex: 1; min-width: 0; }
+    .pt-li .n b { display: block; font-size: .92rem; }
+    .pt-li .n span { display: block; font-size: .75rem; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .pt-li .v { text-align: right; font-size: .85rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .pt-li .v span { display: block; font-size: .7rem; font-weight: 600; }
+    .pt-li[disabled] { opacity: .45; cursor: default; }
+    .pt-grp { font-size: .68rem; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: var(--text-muted); padding: 12px 10px 4px; }
+
+    /* routes map */
+    .pt-sec { padding: 34px 0; border-top: 1px solid var(--line); }
+    .pt-sec h2 { font-size: 1.55rem; letter-spacing: -.02em; margin: 0 0 6px; }
+    .pt-sec > .pt-wrap > p { color: var(--text-muted); margin: 0 0 20px; max-width: 760px; line-height: 1.6; }
+    .pt-matrix-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 18px; background: rgba(255,255,255,.015); }
+    .pt-matrix { border-collapse: collapse; width: 100%; min-width: 760px; font-size: .8rem; }
+    .pt-matrix th, .pt-matrix td { padding: 12px 10px; border-bottom: 1px solid var(--line); text-align: center; }
+    .pt-matrix th { color: var(--text-muted); font-weight: 600; font-size: .74rem; }
+    .pt-matrix th .ci { margin: 0 auto 6px; }
+    .pt-matrix td:first-child, .pt-matrix th:first-child { text-align: left; white-space: nowrap; }
+    .pt-matrix tr:last-child td { border-bottom: 0; }
+    .pt-matrix .cell { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; padding: 6px 8px; border-radius: 10px; border: 1px solid transparent; background: none; color: inherit; }
+    .pt-matrix .cell:hover { border-color: var(--line2); background: rgba(255,255,255,.04); }
+    .pt-matrix .cell b { font-size: .75rem; }
+    .pt-matrix .cell span { font-size: .68rem; color: var(--text-muted); }
+    .pt-matrix .native b { color: #6ee7a3; }
+    .pt-matrix .partner b { color: #d0a8ff; }
+    .pt-matrix .none { color: #3c4160; }
+    .pt-legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: .78rem; color: var(--text-muted); margin-top: 12px; }
+    .pt-legend i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; }
+
+    .pt-how { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .pt-how .pt-box h3 { font-size: .98rem; margin: 0 0 6px; }
+    .pt-how .pt-box p { margin: 0; color: var(--text-muted); font-size: .86rem; line-height: 1.6; }
+    .pt-faq details { border-bottom: 1px solid var(--line); padding: 14px 0; }
+    .pt-faq summary { cursor: pointer; font-weight: 700; font-size: .95rem; list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+    .pt-faq summary::after { content: '+'; color: var(--text-muted); }
+    .pt-faq details[open] summary::after { content: '–'; }
+    .pt-faq p { color: #c7cbe0; font-size: .9rem; line-height: 1.65; margin: 10px 0 0; max-width: 820px; }
+    .pt-faq code, .pt-sec code { font-family: var(--mono); font-size: .82em; padding: 2px 6px; border-radius: 6px; background: rgba(255,255,255,.06); }
+    .pt-foot { display: flex; justify-content: space-between; gap: 14px; flex-wrap: wrap; padding: 26px 0 40px; border-top: 1px solid var(--line); color: var(--text-muted); font-size: .82rem; }
+    .pt-foot a { margin-left: 16px; }
+    .pt-foot a:hover { color: #fff; }
+
+    .pt-toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(20px); opacity: 0; z-index: 120; padding: 11px 16px; border-radius: 12px; background: #151829; border: 1px solid var(--line2); font-size: .85rem; transition: opacity .2s, transform .2s; pointer-events: none; max-width: calc(100vw - 32px); }
+    .pt-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    @media (max-width: 1020px) {
+      .pt-grid { grid-template-columns: minmax(0, 1fr); }
+      .pt-hero { grid-template-columns: minmax(0, 1fr); }
+      .pt-orbit { justify-content: flex-start; }
+      .pt-how { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 760px) {
+      .pt-links { display: none; }
+      .pt-conn { margin-left: auto; }
+      .pt-wrap { padding: 0 14px; }
+      .pt-card { padding: 16px; border-radius: 18px; }
+      .pt-chains { grid-template-columns: 1fr; }
+      .pt-flip { justify-self: center; margin: -4px 0; transform: rotate(90deg); }
+      .pt-flip:hover { transform: rotate(270deg); }
+      .pt-amount input { font-size: 1.55rem; }
+      .pt-wbtn .lbl { display: none; }
+      .pt-hero { padding-top: 26px; }
+      .pt-addr label { width: 76px; }
+      .pt-bal { font-size: .76rem; }
+      .pt-bal td .a { gap: 6px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="pt-glow" aria-hidden="true"></div>
+
+  <nav class="pt-nav">
+    <div class="pt-wrap">
+      <a class="pt-brand" href="index.html">
+        <svg width="28" height="28" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="32" fill="#1a1f35"/><path d="M18 42 L32 18 L46 42 Z" fill="#00e0ff"/></svg>
+        SoneVibe <small>Portal</small>
+      </a>
+      <div class="pt-links">
+        <a href="swap.html">Swap</a><a href="pools.html">Pools</a><a href="dashboard.html">Lend</a><a class="on" href="portal.html">Portal</a><a href="analytics.html">Analytics</a><a href="docs.html">Docs</a>
+      </div>
+      <div class="pt-conn">
+        <button class="pt-wbtn" id="btnSub" type="button"><img src="icons/dot.svg" alt=""><span class="lbl">Polkadot wallet</span></button>
+        <button class="pt-wbtn" id="btnEvm" type="button"><img src="icons/metamask.svg" alt=""><span class="lbl">EVM wallet</span></button>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <div class="pt-wrap">
+      <section class="pt-hero">
+        <div>
+          <div class="pt-eyebrow">SoneVibe Portal</div>
+          <h1>Move assets across <span>Polkadot, Astar, Soneium &amp; Ethereum</span></h1>
+          <p>Native XCM transfers between Polkadot Asset Hub, Polkadot Hub EVM and Astar — real DOT, USDt and USDC, never wrapped IOUs. Routes to Soneium and Ethereum go through the official bridges.</p>
+        </div>
+        <div>
+          <div class="pt-orbit" id="orbit"></div>
+          <div class="pt-orbit" style="margin-top:12px">
+            <span class="pt-status wait" id="stAH"><i></i>Asset Hub</span>
+            <span class="pt-status" id="stAstar"><i></i>Astar</span>
+            <span class="pt-status wait" id="stEvm"><i></i>Hub EVM</span>
+          </div>
+        </div>
+      </section>
+
+      <div class="pt-grid">
+        <!-- ===== Transfer ===== -->
+        <section class="pt-card" id="transfer" aria-label="Transfer">
+          <div class="pt-card-head">
+            <h2>Transfer</h2>
+            <span id="routeBadge"></span>
+          </div>
+
+          <div class="pt-chains">
+            <button class="pt-chainbtn" id="fromBtn" type="button"><small>From</small><div class="row"></div></button>
+            <button class="pt-flip" id="flip" type="button" aria-label="Swap direction">⇄</button>
+            <button class="pt-chainbtn" id="toBtn" type="button"><small>To</small><div class="row"></div></button>
+          </div>
+
+          <div class="pt-field">
+            <div class="pt-field-top">
+              <span>Amount</span>
+              <span id="balLine">Balance: —</span>
+            </div>
+            <div class="pt-amount">
+              <input id="amount" inputmode="decimal" autocomplete="off" placeholder="0.0" aria-label="Amount">
+              <button class="pt-assetbtn" id="assetBtn" type="button"></button>
+            </div>
+            <div class="pt-quick" id="quick">
+              <button type="button" data-p="25">25%</button><button type="button" data-p="50">50%</button><button type="button" data-p="75">75%</button><button type="button" data-p="100" class="pt-max">MAX</button>
+            </div>
+          </div>
+
+          <div class="pt-field pt-recipient" id="recipBox">
+            <div class="pt-field-top">
+              <span id="recipLabel">Recipient</span>
+              <button class="pt-link" id="useMine" type="button">Use my account</button>
+            </div>
+            <input id="recipient" autocomplete="off" spellcheck="false" placeholder="Destination address">
+            <div class="pt-hint" id="recipHint"></div>
+          </div>
+
+          <div id="summary"></div>
+          <div id="alerts"></div>
+          <button class="pt-cta" id="cta" type="button" disabled>Select a route</button>
+          <div id="progress"></div>
+        </section>
+
+        <!-- ===== Side ===== -->
+        <div class="pt-side">
+          <section class="pt-card" aria-label="Your accounts">
+            <div class="pt-card-head"><h2>Your accounts</h2><span class="pt-sub">Addresses & mapping</span></div>
+            <div class="pt-acct" id="acct"></div>
+          </section>
+
+          <section class="pt-card" aria-label="Balances">
+            <div class="pt-card-head"><h2>Balances</h2><button class="pt-small-btn" id="refresh" type="button">Refresh</button></div>
+            <div id="balances"></div>
+          </section>
+
+          <section class="pt-card" aria-label="Recent transfers">
+            <div class="pt-card-head"><h2>Recent transfers</h2><button class="pt-link" id="clearHist" type="button">Clear</button></div>
+            <div class="pt-hist" id="history"></div>
+          </section>
+        </div>
+      </div>
+    </div>
+
+    <section class="pt-sec" id="routes">
+      <div class="pt-wrap">
+        <h2>Route map</h2>
+        <p>Every lane the Portal knows. Green lanes are signed here with native XCM. Purple lanes open the official partner bridge with the right settings. Click any cell to load it into the transfer card.</p>
+        <div class="pt-matrix-wrap"><table class="pt-matrix" id="matrix"></table></div>
+        <div class="pt-legend"><span><i style="background:#22c55e"></i>Native in Portal</span><span><i style="background:#a855f7"></i>Partner bridge</span><span><i style="background:#3c4160"></i>Not available yet</span></div>
+      </div>
+    </section>
+
+    <section class="pt-sec">
+      <div class="pt-wrap">
+        <h2>How it works</h2>
+        <p>Polkadot Asset Hub and Polkadot Hub EVM are one chain with two doors. Astar is a sibling parachain connected by XCM.</p>
+        <div class="pt-how">
+          <div class="pt-box"><h3>Asset Hub ⇄ Hub EVM</h3><p>Every 0x address has an Asset Hub twin (the address followed by twelve <code>EE</code> bytes). Sending to Hub EVM is a plain transfer to that twin; coming back uses the XCM precompile at <code>0x…0a0000</code>. Tokens appear in MetaMask as ERC20 precompiles, e.g. USDt at <code>0x000007C0…01200000</code>.</p></div>
+          <div class="pt-box"><h3>Polkadot ⇄ Astar</h3><p>Asset Hub is the reserve for DOT, USDt and USDC. Going to Astar is an XCM reserve transfer; coming back uses Astar's XCM pallets. Destination fees (≈0.0001 DOT or ≈0.0002 USDt on Astar) are taken from the amount.</p></div>
+          <div class="pt-box"><h3>Soneium &amp; Ethereum</h3><p>Ethereum assets reach Polkadot through Snowbridge and then move into Hub EVM here. ASTR reaches Soneium through Chainlink CCIP on the Astar Portal. The Portal points you to the right bridge and completes the Polkadot side.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="pt-sec pt-faq" id="faq">
+      <div class="pt-wrap">
+        <h2>FAQ</h2>
+        <details><summary>Which wallet do I need?</summary><p>For Asset Hub and Astar use Talisman, SubWallet, Nova Wallet or Polkadot.js. For Polkadot Hub EVM use MetaMask (Talisman and SubWallet also work as EVM wallets). Asset Hub ⇄ Hub EVM needs the wallet of the side you send from.</p></details>
+        <details><summary>What is "Map account" and do I need it?</summary><p>A Polkadot account that wants to use EVM apps directly (sign in MetaMask-style dApps with the same key) calls <code>revive.mapAccount</code> once. It links your native account to its 0x address and takes a small refundable deposit. You do not need it to receive funds on a MetaMask address — the Portal sends to the right account automatically.</p></details>
+        <details><summary>Can I deposit DOT from an exchange straight to my MetaMask address?</summary><p>Yes. Exchanges only support Polkadot (SS58) addresses, so use the "Asset Hub deposit address" shown under your EVM wallet. Funds sent there show up in MetaMask on Polkadot Hub.</p></details>
+        <details><summary>Why can't I bridge ASTR to Polkadot Hub?</summary><p>ASTR is not registered as a foreign asset on Polkadot Asset Hub yet, so Asset Hub cannot hold it. Registration has to be proposed by Astar over XCM. As soon as it exists it becomes one line in <code>portal-config.js</code>. Until then, ASTR moves to Soneium via CCIP.</p></details>
+        <details><summary>Why did I receive slightly less than I sent?</summary><p>Cross-chain transfers pay execution on the destination in the asset itself: about 0.0001 DOT on Astar, about 0.0008 DOT on Asset Hub, a fraction of a cent for USDt/USDC. Same-chain moves between Asset Hub and Hub EVM have no destination fee.</p></details>
+        <details><summary>Where do I trade after bridging?</summary><p>On Polkadot Hub EVM the SoneVibe DEX trades WDOT and SoneVibe USDT. After a transfer lands, the Portal offers a one-click wrap so your funds are ready for <a href="swap.html" style="color:var(--cyan)">Swap</a> and <a href="pools.html" style="color:var(--cyan)">Pools</a>.</p></details>
+      </div>
+    </section>
+
+    <div class="pt-wrap">
+      <div class="pt-foot">
+        <span>© <span id="year">2026</span> SoneVibe · Transfers are signed in your wallet. SoneVibe never holds your funds.</span>
+        <span><a href="index.html">Home</a><a href="docs.html">Docs</a><a href="https://github.com/sonevibe/Lending" target="_blank" rel="noopener">GitHub</a><a href="https://x.com/Sonevibe" target="_blank" rel="noopener">X</a></span>
+      </div>
+    </div>
+  </main>
+
+  <div class="pt-modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="pt-dialog">
+      <div class="pt-dialog-h"><span id="modalTitle"></span><button class="pt-x" id="modalX" type="button" aria-label="Close">×</button></div>
+      <input class="pt-search" id="modalSearch" placeholder="Search" autocomplete="off">
+      <div class="pt-list" id="modalList"></div>
+    </div>
+  </div>
+  <div class="pt-toast" id="toast" role="status"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.10.0/dist/ethers.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@polkadot/util@14.0.3/bundle-polkadot-util.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@polkadot/util-crypto@14.0.3/bundle-polkadot-util-crypto.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@polkadot/keyring@14.0.3/bundle-polkadot-keyring.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@polkadot/types@17.0.1/bundle-polkadot-types.js"></script>
+  <script>
+    /* bundle-polkadot-api.js reads these two globals from sub-paths of @polkadot/types that have no UMD bundle. */
+    window.constants = window.constants || { LATEST_EXTRINSIC_VERSION: 4 };
+    window.util$1 = window.util$1 || { unwrapStorageSi: (t) => (t.isPlain ? t.asPlain : t.asMap.value) };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/@polkadot/api@17.0.1/bundle-polkadot-api.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@polkadot/extension-dapp@0.64.1/bundle-polkadot-extension-dapp.js"></script>
+  <script src="portal-config.js"></script>
+  <script src="portal-xcm.js"></script>
+  <script src="portal.js"></script>
+</body>
+</html>
