@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>SoneVibe | Swap, Earn & Borrow on Soneium</title>
+  <title>SoneVibe | Swap, Earn & Borrow on Soneium and BNB Chain</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="description" content="SoneVibe is the DeFi hub of Soneium: swap tokens, provide liquidity, lend, borrow and mint SVUSD. Every number on this page is read live from the blockchain.">
+  <meta name="description" content="SoneVibe is the DeFi hub of Soneium, with DEX liquidity on BNB Chain, Astar and Polkadot Hub. Swap, provide liquidity, lend, borrow and mint SVUSD. Every number is read live from the blockchain.">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="SoneVibe — Swap, Earn & Borrow on Soneium">
-  <meta property="og:description" content="DEX, lending, SVUSD stablecoin and NFT market. Live on-chain stats, open contracts.">
+  <meta property="og:title" content="SoneVibe — Swap, Earn & Borrow. Home on Soneium, live on BNB Chain.">
+  <meta property="og:description" content="Multi-chain DEX, lending, SVUSD stablecoin and NFT market. Live on-chain stats, open contracts.">
   <meta property="og:url" content="https://sonevibe.github.io/Lending/">
   <meta property="og:image" content="https://sonevibe.github.io/Lending/icons/sonevibe.png">
   <meta name="twitter:card" content="summary">
@@ -118,7 +118,55 @@
     .lp-footer a { display: block; margin-bottom: 10px; } .lp-footer a:hover { color: #fff; }
     .lp-footer .fine { grid-column: 1 / -1; padding-top: 24px; border-top: 1px solid rgba(255,255,255,.06); font-size: .78rem; line-height: 1.6; }
 
+    /* hero multi-chain */
+    .lp-also { display: inline-flex; align-items: center; gap: 8px; margin-left: 8px; padding: 7px 12px; border-radius: 999px; border: 1px solid rgba(243,186,47,.3); background: rgba(243,186,47,.07); color: #f3d27a; font-size: .8rem; font-weight: 600; }
+    .lp-also img { width: 16px; height: 16px; border-radius: 50%; }
+    .lp-pills { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; }
+    .lp-pills .lp-also { margin-left: 0; }
+
+    /* networks */
+    .lp-tvlbar { display: flex; gap: 3px; height: 12px; border-radius: 999px; overflow: hidden; background: rgba(255,255,255,.05); margin-bottom: 12px; }
+    .lp-tvlbar span { min-width: 6px; transition: flex .6s ease; }
+    .lp-bar-empty { flex: 1; background: linear-gradient(90deg, rgba(255,255,255,.03), rgba(255,255,255,.08), rgba(255,255,255,.03)); background-size: 200% 100%; animation: lpShimmer 1.2s infinite; }
+    .lp-legend { display: flex; flex-wrap: wrap; gap: 18px; font-size: .84rem; color: var(--text-muted); margin-bottom: 26px; }
+    .lp-legend i { display: inline-block; width: 9px; height: 9px; border-radius: 3px; margin-right: 7px; }
+    .lp-legend b { color: #fff; font-weight: 600; margin-left: 4px; font-variant-numeric: tabular-nums; }
+    .lp-chains { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .lp-chain { --c: #00e0ff; position: relative; padding: 22px; border-radius: 20px; background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.07); overflow: hidden; text-align: left; }
+    .lp-chain::before { content: ''; position: absolute; inset: 0 0 auto 0; height: 3px; background: var(--c); opacity: .8; }
+    .lp-chain.flagship { grid-column: 1 / -1; padding: 26px 28px; background: linear-gradient(120deg, color-mix(in srgb, var(--c) 13%, transparent), rgba(255,255,255,.02) 55%); border-color: color-mix(in srgb, var(--c) 35%, transparent); }
+    .lp-chain-head { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; }
+    .lp-chain-head h3 { margin: 0; font-size: 1.1rem; text-align: left; }
+    .lp-chain.flagship .lp-chain-head h3 { font-size: 1.35rem; }
+    .lp-chain.flagship .lp-chain-stats { grid-template-columns: repeat(6, 1fr); }
+    .lp-chain-ic { width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center; background: color-mix(in srgb, var(--c) 16%, transparent); flex: none; }
+    .lp-chain-ic img { width: 22px; height: 22px; border-radius: 50%; }
+    .lp-chain-tag { font-size: .78rem; color: var(--text-muted); }
+    .lp-home { margin-left: auto; font-size: .7rem; font-weight: 700; padding: 4px 9px; border-radius: 999px; color: #051018; background: var(--c); }
+    .lp-chain-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; font-variant-numeric: tabular-nums; }
+    .lp-chain-stats b { display: block; font-size: 1.05rem; color: #fff; min-height: 1.4rem; }
+    .lp-chain.flagship .lp-chain-stats b { font-size: 1.6rem; min-height: 2rem; }
+    .lp-mini-skel { width: 70%; border-radius: 6px; background: linear-gradient(90deg, rgba(255,255,255,.04), rgba(255,255,255,.1), rgba(255,255,255,.04)); background-size: 200% 100%; animation: lpShimmer 1.2s infinite; }
+    .lp-chain-products { display: flex; flex-wrap: wrap; gap: 8px; margin-left: 12px; }
+    .lp-chain-products span { font-size: .76rem; font-weight: 600; padding: 4px 10px; border-radius: 8px; background: rgba(255,255,255,.07); color: #fff; }
+    .lp-chain-top { margin: 16px 0 0; font-size: .84rem; color: var(--text-muted); }
+    .lp-chain-top b { color: #fff; font-weight: 600; }
+    .lp-net { --c: #00e0ff; display: inline-flex; align-items: center; gap: 6px; font-size: .72rem; color: var(--text-muted); margin-top: 2px; }
+    .lp-net::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--c); }
+    .lp-pool-pair b { display: block; }
+
+    /* contract tabs */
+    .lp-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+    .lp-tabs button { font: inherit; font-size: .8rem; font-weight: 600; padding: 6px 12px; border-radius: 999px; border: 1px solid rgba(255,255,255,.1); background: none; color: var(--text-muted); cursor: pointer; }
+    .lp-tabs button[aria-selected="true"] { color: #051018; background: #00e0ff; border-color: #00e0ff; }
+    .lp-chip { --c: #00e0ff; }
+    .lp-chip i { background: var(--c) !important; }
+    .lp-chip.on { border-color: color-mix(in srgb, var(--c) 45%, transparent); }
+
     @media (max-width: 1000px) {
+      .lp-chains { grid-template-columns: 1fr 1fr; }
+      .lp-chain.flagship .lp-chain-stats { grid-template-columns: repeat(3, 1fr); row-gap: 18px; }
+      .lp-chain-products { order: 5; width: 100%; margin-left: 0; }
       .lp-stats { grid-template-columns: repeat(2, 1fr); } .lp-stats .lp-stat:last-child { grid-column: 1 / -1; }
       .lp-products { grid-template-columns: 1fr 1fr; } .lp-split { grid-template-columns: 1fr; }
       .lp-footer .lp-wrap { grid-template-columns: 1fr 1fr; }
@@ -127,6 +175,8 @@
       .lp-links { display: none; }
       .lp-hero { padding: 56px 0 30px; }
       .lp-products { grid-template-columns: 1fr; }
+      .lp-chains { grid-template-columns: 1fr; }
+      .lp-chain.flagship .lp-chain-stats b { font-size: 1.25rem; }
       .lp-pool { grid-template-columns: 1fr 1fr; } .lp-pool-pair { grid-column: 1 / -1; }
       .lp-stat .v { font-size: 1.35rem; }
       .lp-cta .lp-btn { flex: 1; }
@@ -157,23 +207,26 @@
 
   <main class="lp-wrap">
     <section class="lp-hero">
-      <div class="lp-live"><i></i> Live on Soneium Mainnet <span id="liveBlock"></span></div>
-      <h1>Swap, earn and borrow.<br><em>All on Soneium.</em></h1>
-      <p>SoneVibe brings a DEX, lending markets, the SVUSD stablecoin and an NFT market into one app. Every number below is read live from the blockchain — no placeholders, no black boxes.</p>
+      <div class="lp-pills">
+        <div class="lp-live"><i></i> Live on Soneium Mainnet <span id="liveBlock"></span></div>
+        <a class="lp-also" href="#networks"><img src="icons/bnb.png" alt="">Also on BNB Chain</a>
+      </div>
+      <h1>Swap, earn and borrow.<br><em>Built on Soneium.</em></h1>
+      <p>SoneVibe brings a DEX, lending markets, the SVUSD stablecoin and an NFT market into one app — with DEX liquidity on BNB Chain, Astar and Polkadot Hub too. Every number below is read live from the blockchain.</p>
       <div class="lp-cta">
         <a href="swap.html" class="lp-btn primary">Start trading →</a>
         <a href="analytics.html" class="lp-btn ghost">Explore live analytics</a>
       </div>
 
       <div class="lp-stats" aria-live="polite">
-        <div class="lp-stat loading" id="stTvl"><div class="k">DEX liquidity</div><div class="v">—</div><div class="s"></div></div>
+        <div class="lp-stat loading" id="stTvl"><div class="k">DEX liquidity · all chains</div><div class="v">—</div><div class="s"></div></div>
         <div class="lp-stat loading" id="stVol"><div class="k">Volume 24h</div><div class="v">—</div><div class="s"></div></div>
-        <div class="lp-stat loading" id="stSwaps"><div class="k">Swaps · 7 days</div><div class="v">—</div><div class="s"></div></div>
+        <div class="lp-stat loading" id="stSwaps"><div class="k">Soneium swaps · 7 days</div><div class="v">—</div><div class="s"></div></div>
         <div class="lp-stat loading" id="stPairs"><div class="k">Trading pairs</div><div class="v">—</div><div class="s"></div></div>
         <div class="lp-stat loading" id="stLend"><div class="k">Lending supplied</div><div class="v">—</div><div class="s"></div></div>
       </div>
       <div class="lp-verified">
-        <span>✓ Verified on-chain from Soneium contracts · <span id="liveUpdated">Loading…</span></span>
+        <span>✓ Verified on-chain from each network's contracts · <span id="liveUpdated">Loading…</span></span>
         <a href="analytics.html">Full analytics →</a>
       </div>
     </section>
@@ -185,7 +238,7 @@
       <div class="lp-products">
         <a class="lp-card" href="swap.html">
           <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 7h13l-4-4M17 17H4l4 4"/></svg></div>
-          <h3>Swap</h3><p>Trade Soneium tokens at a flat 0.25% fee with multi-hop routing and slippage protection.</p><span class="go">Trade now →</span>
+          <h3>Swap</h3><p>Trade on Soneium and BNB Chain at a flat 0.25% fee, with live price-impact warnings, slippage protection and one-click native wrapping.</p><span class="go">Trade now →</span>
         </a>
         <a class="lp-card" href="pools.html">
           <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12c3-4 6-4 9 0s6 4 9 0M3 18c3-4 6-4 9 0s6 4 9 0M3 6c3-4 6-4 9 0s6 4 9 0"/></svg></div>
@@ -201,7 +254,7 @@
         </a>
         <a class="lp-card" href="marketplace.html">
           <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="m3 16 5-5 4 4 3-3 6 6"/></svg></div>
-          <h3>NFT market</h3><p>List, buy and trade NFTs on Soneium from the same wallet you use for DeFi.</p><span class="go">Browse NFTs →</span>
+          <h3>NFT market</h3><p>List, buy and trade ERC-721 and ERC-1155 NFTs on Soneium and Astar from the same wallet you use for DeFi.</p><span class="go">Browse NFTs →</span>
         </a>
         <a class="lp-card" href="vibe-vault.html">
           <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 10h18M5 10v8M9 10v8M15 10v8M19 10v8M2 21h20M12 3l9 5H3z"/></svg></div>
@@ -210,10 +263,19 @@
       </div>
     </section>
 
+    <section class="lp-section" id="networks">
+      <div class="lp-eyebrow">Multi-chain</div>
+      <h2>Home on Soneium. Liquid where you trade.</h2>
+      <p class="lead">Soneium runs the full SoneVibe suite. The same open, verifiable DEX contracts also hold liquidity on BNB Chain, Astar and Polkadot Hub — here is how it is split, live.</p>
+      <div class="lp-tvlbar" id="tvlBar" aria-label="DEX liquidity share by network"><span class="lp-bar-empty"></span></div>
+      <div class="lp-legend" id="tvlLegend"></div>
+      <div class="lp-chains" id="chainGrid"></div>
+    </section>
+
     <section class="lp-section" id="pools">
       <div class="lp-eyebrow">Top pools</div>
       <h2>Where liquidity is working right now</h2>
-      <p class="lead">Fee APR is based on the last 7 days of real swap fees earned by liquidity providers.</p>
+      <p class="lead">Fee APR comes from real swap fees paid to liquidity providers: last 7 days on Soneium, last 24 hours on BNB Chain.</p>
       <div class="lp-pools" id="topPools"><div class="lp-skel"></div><div class="lp-skel"></div><div class="lp-skel"></div></div>
     </section>
 
@@ -227,15 +289,17 @@
           <p class="sub">The rules every user should know before depositing.</p>
           <ul class="lp-facts">
             <li><span><b>0.25% swap fee.</b> 5/6 goes to liquidity providers, 1/6 to the protocol treasury.</span></li>
-            <li><span><b>Oracle-priced lending.</b> Collateral is valued by the SoneVibe oracle; positions below a health factor of 1.0 can be liquidated.</span></li>
+            <li><span><b>Oracle-priced lending.</b> Collateral is valued by the SoneVibe oracle; positions below a health factor of 1.0 can be liquidated with a 10% bonus, up to 50% of the debt at a time.</span></li>
             <li><span><b>Self-custody.</b> Your assets stay in smart contracts you interact with directly from your wallet.</span></li>
             <li><span><b>Live data.</b> Stats on this page and in Analytics are read from the chain, not from a private database.</span></li>
           </ul>
-          <div class="lp-chips" id="networks"></div>
+          <div class="lp-chips" id="netChips"></div>
+          <p class="sub" style="margin:18px 0 0"><a href="docs.html#security" style="color:var(--success)">Admin controls & security →</a></p>
         </div>
         <div class="lp-panel">
-          <h3>Soneium contracts</h3>
-          <p class="sub">Click to open on Blockscout or copy the full address.</p>
+          <h3>Contracts by network</h3>
+          <p class="sub">Open any address on the block explorer or copy it.</p>
+          <div class="lp-tabs" id="contractTabs" role="tablist"></div>
           <div id="contracts"></div>
           <div class="lp-risk">DeFi carries risk, including smart-contract bugs, oracle failures and impermanent loss. Only deposit what you can afford to lose.</div>
         </div>
@@ -244,7 +308,7 @@
 
     <section class="lp-final">
       <h2>Ready to put your assets to work?</h2>
-      <p>Connect your wallet and make your first swap on Soneium in under a minute.</p>
+      <p>Connect MetaMask, Trust Wallet or Nova and make your first swap on Soneium — or BNB Chain — in under a minute.</p>
       <div class="lp-cta">
         <a href="swap.html" class="lp-btn primary">Launch App</a>
         <a href="https://x.com/Sonevibe" target="_blank" rel="noopener" class="lp-btn ghost">Follow @Sonevibe</a>
@@ -259,7 +323,7 @@
           <svg width="26" height="26" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="32" fill="#1a1f35"/><path d="M18 42 L32 18 L46 42 Z" fill="#00e0ff"/></svg>
           SoneVibe
         </a>
-        <p style="margin:0; max-width:280px; line-height:1.6">The DeFi hub of Soneium: swap, earn, borrow and mint SVUSD.</p>
+        <p style="margin:0; max-width:280px; line-height:1.6">The DeFi hub of Soneium: swap, earn, borrow and mint SVUSD. DEX also live on BNB Chain, Astar and Polkadot Hub.</p>
       </div>
       <div>
         <h4>Products</h4>
@@ -267,7 +331,7 @@
       </div>
       <div>
         <h4>Resources</h4>
-        <a href="analytics.html">Analytics</a><a href="markets.html">Markets</a><a href="docs.html">Docs</a><a href="docsvusd.html">SVUSD Docs</a><a href="https://github.com/sonevibe/Lending" target="_blank" rel="noopener">GitHub</a>
+        <a href="analytics.html">Analytics</a><a href="markets.html">Markets</a><a href="docs.html">Docs</a><a href="docs.html#contracts">Contracts</a><a href="https://github.com/sonevibe/Lending" target="_blank" rel="noopener">GitHub</a>
       </div>
       <div>
         <h4>Community</h4>

@@ -1,396 +1,455 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>VIBE Protocol | Documentation</title>
+  <meta charset="UTF-8" />
+  <title>SoneVibe Docs | DEX, Lending, SVUSD & NFT Market</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description" content="Official SoneVibe documentation: how the DEX, liquidity pools, lending markets, SVUSD stablecoin, farms and NFT market work on Soneium, BNB Chain, Astar and Polkadot Hub. Live parameters and contract addresses.">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="SoneVibe Docs">
+  <meta property="og:description" content="How SoneVibe works: fees, formulas, risk parameters, admin controls and every contract address — read live from the chain.">
+  <meta property="og:url" content="https://sonevibe.github.io/Lending/docs.html">
+  <meta property="og:image" content="https://sonevibe.github.io/Lending/icons/sonevibe.png">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:site" content="@Sonevibe">
   <link rel="icon" type="image/svg+xml" href="icons/vibe.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
+  <style>
+    :root { --dc-max: 1240px; --accent: #00e0ff; --purple: #a855f7; --line: rgba(255,255,255,.07); --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace; }
+    html { scroll-behavior: smooth; scroll-padding-top: 88px; }
+    body { background: #07080f; }
+    .dc-glow { position: fixed; inset: 0; pointer-events: none; z-index: -1;
+      background: radial-gradient(800px 420px at 85% -10%, rgba(0,224,255,.10), transparent 60%), radial-gradient(600px 400px at -10% 40%, rgba(168,85,247,.08), transparent 60%); }
+    .dc-wrap { max-width: var(--dc-max); margin: 0 auto; padding: 0 24px; }
+
+    /* nav */
+    .dc-nav { position: sticky; top: 0; z-index: 50; backdrop-filter: blur(14px); background: rgba(7,8,15,.78); border-bottom: 1px solid var(--line); }
+    .dc-nav .dc-wrap { display: flex; align-items: center; gap: 20px; height: 64px; }
+    .dc-brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.15rem; color: #fff; }
+    .dc-brand small { font-weight: 600; font-size: .75rem; color: var(--text-muted); padding: 3px 8px; border: 1px solid var(--line); border-radius: 6px; }
+    .dc-links { display: flex; gap: 22px; margin-left: auto; font-size: .9rem; color: var(--text-muted); }
+    .dc-links a:hover { color: #fff; }
+    .dc-btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 11px; font-weight: 700; font-size: .9rem; background: linear-gradient(135deg, #00e0ff, #2d6cdf); color: #051018; white-space: nowrap; }
+    .dc-menu { display: none; margin-left: auto; font: inherit; font-weight: 600; font-size: .85rem; color: #fff; background: rgba(255,255,255,.05); border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; cursor: pointer; }
+
+    /* layout */
+    .dc-layout { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 56px; padding-top: 40px; }
+    .dc-side { position: sticky; top: 88px; align-self: start; max-height: calc(100vh - 110px); overflow: auto; padding-bottom: 30px; scrollbar-width: thin; }
+    .dc-search { width: 100%; font: inherit; font-size: .88rem; color: #fff; background: rgba(255,255,255,.04); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; margin-bottom: 18px; outline: none; }
+    .dc-search:focus { border-color: rgba(0,224,255,.5); }
+    .dc-toc-group { font-size: .7rem; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--text-muted); margin: 18px 0 8px; opacity: .8; }
+    .dc-toc a { display: block; padding: 7px 12px; border-left: 2px solid var(--line); color: var(--text-muted); font-size: .88rem; transition: color .15s, border-color .15s, background .15s; }
+    .dc-toc a:hover { color: #fff; }
+    .dc-toc a.on { color: #fff; border-left-color: var(--accent); background: linear-gradient(90deg, rgba(0,224,255,.08), transparent); }
+    .dc-toc a[hidden] { display: none; }
+    .dc-noresult { font-size: .85rem; color: var(--text-muted); padding: 8px 12px; }
+
+    /* content */
+    .dc-main { min-width: 0; padding-bottom: 80px; }
+    .dc-hero { padding: 6px 0 34px; border-bottom: 1px solid var(--line); margin-bottom: 10px; }
+    .dc-eyebrow { color: var(--accent); font-weight: 700; font-size: .78rem; letter-spacing: 1.4px; text-transform: uppercase; }
+    .dc-hero h1 { font-size: clamp(2rem, 4.4vw, 3rem); letter-spacing: -.03em; line-height: 1.08; margin: 12px 0 14px; }
+    .dc-hero p { color: var(--text-muted); font-size: 1.08rem; line-height: 1.65; max-width: 720px; margin: 0; }
+    .dc-meta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; font-size: .8rem; color: var(--text-muted); }
+    .dc-meta span { padding: 5px 10px; border: 1px solid var(--line); border-radius: 999px; background: rgba(255,255,255,.02); }
+    .dc-meta .live::before { content: ''; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--success); margin-right: 7px; }
+
+    .dc-sec { padding: 44px 0 6px; border-bottom: 1px solid var(--line); }
+    .dc-sec:last-of-type { border-bottom: 0; }
+    .dc-sec h2 { font-size: 1.7rem; letter-spacing: -.02em; margin: 0 0 14px; display: flex; align-items: center; gap: 10px; }
+    .dc-sec h2 a.anchor { opacity: 0; color: var(--text-muted); font-size: 1.1rem; transition: opacity .15s; }
+    .dc-sec h2:hover a.anchor { opacity: 1; }
+    .dc-sec h3 { font-size: 1.12rem; margin: 30px 0 10px; }
+    .dc-sec p, .dc-sec li { color: #c7cbe0; line-height: 1.72; font-size: .97rem; }
+    .dc-sec p { margin: 0 0 14px; max-width: 800px; }
+    .dc-sec ul, .dc-sec ol { padding-left: 22px; margin: 0 0 16px; max-width: 800px; }
+    .dc-sec li { margin-bottom: 6px; }
+    .dc-sec b, .dc-sec strong { color: #fff; }
+    .dc-sec a:not(.anchor):not(.dc-card) { color: var(--accent); }
+    code { font-family: var(--mono); font-size: .86em; padding: 2px 6px; border-radius: 6px; background: rgba(255,255,255,.06); color: #e6e9ff; }
+    pre { font-family: var(--mono); font-size: .86rem; line-height: 1.7; background: #0b0d18; border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; overflow: auto; color: #dbe1ff; margin: 0 0 18px; max-width: 800px; }
+    pre .c { color: #6b7394; }
+
+    .dc-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 20px 0 24px; }
+    .dc-card { display: block; padding: 18px; border-radius: 16px; background: rgba(255,255,255,.03); border: 1px solid var(--line); transition: border-color .15s, transform .15s; }
+    .dc-card:hover { border-color: rgba(0,224,255,.35); transform: translateY(-2px); }
+    .dc-card b { display: block; color: #fff; margin-bottom: 4px; }
+    .dc-card span { color: var(--text-muted); font-size: .86rem; line-height: 1.5; }
+
+    .dc-table-wrap { overflow-x: auto; margin: 6px 0 22px; border: 1px solid var(--line); border-radius: 14px; }
+    table.dc-table { width: 100%; border-collapse: collapse; font-size: .9rem; font-variant-numeric: tabular-nums; }
+    .dc-table th { text-align: left; font-size: .72rem; letter-spacing: .6px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; padding: 12px 14px; background: rgba(255,255,255,.025); border-bottom: 1px solid var(--line); white-space: nowrap; }
+    .dc-table td { padding: 12px 14px; border-bottom: 1px solid var(--line); color: #d7dbef; vertical-align: top; }
+    .dc-table tr:last-child td { border-bottom: 0; }
+    .dc-table td.num { white-space: nowrap; }
+    .dc-table .muted { color: var(--text-muted); }
+
+    .dc-note { position: relative; padding: 14px 16px 14px 40px; border-radius: 14px; margin: 6px 0 20px; font-size: .92rem; line-height: 1.6; max-width: 800px; border: 1px solid; }
+    .dc-note::before { position: absolute; left: 18px; top: 14px; font-weight: 800; }
+    .dc-note.info { background: rgba(0,224,255,.06); border-color: rgba(0,224,255,.22); color: #bfefff; } .dc-note.info::before { content: 'i'; color: var(--accent); }
+    .dc-note.warn { background: rgba(249,224,97,.06); border-color: rgba(249,224,97,.25); color: #efe2a6; } .dc-note.warn::before { content: '!'; color: #f9e061; }
+    .dc-note.danger { background: rgba(255,90,110,.07); border-color: rgba(255,90,110,.28); color: #ffc4cc; } .dc-note.danger::before { content: '!'; color: #ff5a6e; }
+
+    .lv { font-weight: 700; color: #fff; font-variant-numeric: tabular-nums; }
+    .lv.loading { display: inline-block; min-width: 54px; height: 1em; vertical-align: -2px; border-radius: 5px; color: transparent; background: linear-gradient(90deg, rgba(255,255,255,.05), rgba(255,255,255,.12), rgba(255,255,255,.05)); background-size: 200% 100%; animation: dcShimmer 1.2s infinite; }
+    @keyframes dcShimmer { to { background-position: -200% 0; } }
+    .tag { display: inline-block; font-size: .7rem; font-weight: 700; padding: 2px 8px; border-radius: 6px; letter-spacing: .3px; white-space: nowrap; }
+    .tag.ok { background: rgba(0,224,160,.12); color: #5ef0c0; } .tag.test { background: rgba(168,85,247,.14); color: #d2a8ff; }
+    .tag.eoa { background: rgba(249,224,97,.12); color: #f9e061; } .tag.ctr { background: rgba(0,224,255,.12); color: #7fe9ff; }
+    .tag.soon { background: rgba(255,255,255,.07); color: var(--text-muted); }
+
+    .dc-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 12px; }
+    .dc-tabs button { font: inherit; font-size: .82rem; font-weight: 600; padding: 7px 13px; border-radius: 999px; border: 1px solid var(--line); background: none; color: var(--text-muted); cursor: pointer; }
+    .dc-tabs button[aria-selected="true"] { color: #051018; background: var(--accent); border-color: var(--accent); }
+    .dc-addr { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: .84rem; }
+    .dc-addr a { color: var(--accent); }
+    .dc-addr .full { display: inline; } .dc-addr .short { display: none; }
+    .dc-copy { font: inherit; font-family: var(--font-main, Inter); font-size: .72rem; padding: 3px 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,.14); background: none; color: var(--text-muted); cursor: pointer; }
+    .dc-copy:hover { color: #fff; }
+
+    details.dc-faq { border: 1px solid var(--line); border-radius: 14px; padding: 0 18px; margin-bottom: 10px; background: rgba(255,255,255,.02); max-width: 800px; }
+    details.dc-faq summary { cursor: pointer; padding: 16px 0; font-weight: 600; color: #fff; list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+    details.dc-faq summary::after { content: '+'; color: var(--text-muted); font-size: 1.2rem; line-height: 1; }
+    details.dc-faq[open] summary::after { content: '–'; }
+    details.dc-faq p { margin: 0 0 16px; }
+
+    .dc-foot { border-top: 1px solid var(--line); padding: 30px 0 40px; color: var(--text-muted); font-size: .84rem; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 14px; }
+    .dc-foot a { color: var(--text-muted); margin-left: 16px; } .dc-foot a:hover { color: #fff; }
+
+    @media (max-width: 1080px) { .dc-addr .full { display: none; } .dc-addr .short { display: inline; } }
+    @media (max-width: 960px) {
+      .dc-layout { grid-template-columns: 1fr; gap: 0; padding-top: 24px; }
+      .dc-links { display: none; } .dc-menu { display: inline-flex; }
+      .dc-side { position: fixed; inset: 64px 0 0 0; max-height: none; z-index: 40; background: #07080f; padding: 20px 24px 40px; transform: translateY(-8px); opacity: 0; pointer-events: none; transition: opacity .18s, transform .18s; }
+      body.toc-open .dc-side { opacity: 1; transform: none; pointer-events: auto; }
+      body.toc-open { overflow: hidden; }
+      .dc-cards { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 600px) {
+      .dc-cards { grid-template-columns: 1fr; }
+      .dc-btn { display: none; }
+      .dc-sec h2 { font-size: 1.4rem; }
+      .dc-table th, .dc-table td { padding: 10px; }
+    }
+  </style>
 </head>
 <body>
+  <div class="dc-glow" aria-hidden="true"></div>
 
-  <div class="app-container">
-    <!-- Sidebar: Documentation Navigation -->
-    <nav class="sidebar glass-panel">
-      <div class="logo-area">
-        <svg width="28" height="28" viewBox="0 0 64 64"><circle cx="32" cy="32" r="32" fill="#1a1f35"/><path d="M18 42 L32 18 L46 42 Z" fill="#00e0ff"/></svg>
-        VIBE Docs
+  <nav class="dc-nav">
+    <div class="dc-wrap">
+      <a class="dc-brand" href="index.html">
+        <svg width="28" height="28" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="32" fill="#1a1f35"/><path d="M18 42 L32 18 L46 42 Z" fill="#00e0ff"/></svg>
+        SoneVibe <small>Docs</small>
+      </a>
+      <div class="dc-links">
+        <a href="swap.html">Swap</a><a href="pools.html">Pools</a><a href="dashboard.html">Lend</a><a href="analytics.html">Analytics</a><a href="marketplace.html">NFTs</a>
       </div>
-      
-      <div style="font-size:0.75rem; text-transform:uppercase; color:var(--text-muted); margin-left:12px; margin-top:10px; margin-bottom:5px;">Navigation</div>
-      <a href="index.html" class="nav-link">← Back to Home</a>
-      <a href="dashboard.html" class="nav-link" style="color:var(--success);">Launch App</a>
+      <button class="dc-menu" id="tocToggle" type="button" aria-expanded="false" aria-controls="side">Contents ☰</button>
+      <a class="dc-btn" href="swap.html">Launch App</a>
+    </div>
+  </nav>
 
-      <div style="font-size:0.75rem; text-transform:uppercase; color:var(--text-muted); margin-left:12px; margin-top:20px; margin-bottom:5px;">Contents</div>
-      <a href="#vision" class="nav-link active">Vision & Status</a>
-      <a href="#lending" class="nav-link">Lending Core</a>
-      <!-- Agrega esto en el sidebar, debajo de Lending Core -->
-<a href="#whitepaper" class="nav-link" style="color:var(--warning);">📜 Whitepaper & Math</a>
-      <a href="#governance" class="nav-link">Token & Governance</a>
-      <a href="#stablecoin" class="nav-link">VIBEUSD Stablecoin</a>
-      <a href="#router" class="nav-link">Liquidity Router</a>
-      <!-- NUEVO: Enlace al Yellow Paper -->
-      <a href="#yellowpaper" class="nav-link" style="color:var(--warning); border-left-color:var(--warning);">⚡ Protocol Yellow Paper</a>
-       <!-- AGREGAR ESTA LÍNEA -->
-      <a href="#security" class="nav-link" style="color:var(--danger);">Security & Risk</a> 
-      
-      <a href="#roadmap" class="nav-link">Roadmap 2025/26</a>
-    </nav>
+  <div class="dc-wrap dc-layout">
+    <aside class="dc-side" id="side">
+      <input class="dc-search" id="tocSearch" type="search" placeholder="Search docs  ( / )" aria-label="Search sections">
+      <nav class="dc-toc" id="toc">
+        <div class="dc-toc-group">Start here</div>
+        <a href="#overview">Overview</a>
+        <a href="#networks">Networks</a>
+        <a href="#getting-started">Getting started</a>
+        <div class="dc-toc-group">Products</div>
+        <a href="#swap">Swap</a>
+        <a href="#liquidity">Liquidity & APR</a>
+        <a href="#lending">Lending & borrowing</a>
+        <a href="#svusd">SVUSD stablecoin</a>
+        <a href="#farms">Farms & staking</a>
+        <a href="#nft">NFT market</a>
+        <div class="dc-toc-group">Reference</div>
+        <a href="#tokens">Tokens</a>
+        <a href="#fees">Fees</a>
+        <a href="#contracts">Contracts</a>
+        <a href="#security">Security & admin</a>
+        <a href="#risks">Risks</a>
+        <a href="#faq">FAQ</a>
+        <div class="dc-noresult" id="tocEmpty" hidden>No matching sections.</div>
+      </nav>
+    </aside>
 
-    <!-- Main Content -->
-    <div class="main-content">
-      
-      <header>
-        <div>
-          <h1 style="margin:0; font-size:1.8rem;">Technical Master Blueprint</h1>
-          <p style="margin:4px 0 0 0; color:var(--text-muted);">Architecture v2.0 | Last Updated: December 9, 2025</p>
+    <main class="dc-main">
+      <div class="dc-hero">
+        <div class="dc-eyebrow">Documentation</div>
+        <h1>How SoneVibe works</h1>
+        <p>Everything you need to trade, provide liquidity, lend, borrow, mint SVUSD and trade NFTs with SoneVibe — the formulas, the fees, the risk parameters and every contract address. Values marked live are read from the blockchain when you open this page.</p>
+        <div class="dc-meta"><span class="live">Live parameters</span><span>Home chain: Soneium</span><span>Also on BNB Chain · Astar · Polkadot Hub</span><span id="docUpdated">Reading chain…</span></div>
+      </div>
+
+      <!-- ============ OVERVIEW ============ -->
+      <section class="dc-sec" id="overview">
+        <h2>Overview <a class="anchor" href="#overview" aria-label="Link to Overview">#</a></h2>
+        <p><b>SoneVibe</b> is a non-custodial DeFi protocol whose home is <b>Soneium</b>. It combines six products in one app:</p>
+        <div class="dc-cards">
+          <a class="dc-card" href="#swap"><b>VibeSwap DEX</b><span>Constant-product AMM with a flat 0.25% fee.</span></a>
+          <a class="dc-card" href="#liquidity"><b>Liquidity pools</b><span>Earn 5/6 of every swap fee, auto-compounded.</span></a>
+          <a class="dc-card" href="#lending"><b>Lending markets</b><span>Supply to earn interest, borrow against collateral.</span></a>
+          <a class="dc-card" href="#svusd"><b>SVUSD</b><span>Dollar stablecoin with a 1:1 USDC stability module.</span></a>
+          <a class="dc-card" href="#farms"><b>Farms</b><span>Stake LP tokens to earn LIGHT emissions.</span></a>
+          <a class="dc-card" href="#nft"><b>NFT market</b><span>Fixed-price ERC-721 / ERC-1155 listings.</span></a>
         </div>
-      </header>
-
-      <!-- Section 1: Vision -->
-      <section id="vision" class="glass-panel doc-section">
-        <h2 class="doc-header">🔹 Protocol Vision</h2>
-        <p>VIBE Protocol is architected to be the most advanced, sovereign, and modular DeFi protocol within the EVM and Polkadot ecosystems.</p>
-        <p>We combine the efficiency of established lending markets with the resilience of a unified liquidity architecture. VIBE acts as the financial nervous system connecting <strong>Soneium</strong> and <strong>Astar Network</strong>.</p>
-        
-        <div class="doc-callout">
-            <strong>🚀 Live Status (Dec 9, 2025):</strong><br>
-            The protocol is fully operational on <strong>Soneium Mainnet</strong> and <strong>Astar EVM Mainnet</strong>.
-        </div>
+        <p>You always interact with the smart contracts directly from your own wallet. SoneVibe never holds your private keys, and there is no off-chain order book or database: balances, prices and statistics in the app come from the chain.</p>
       </section>
 
-      <!-- Section 2: Lending Layer -->
-      <section id="lending" class="glass-panel doc-section">
-        <h2 class="doc-header">⚙️ 1. Core: Lending Layer (Phase A)</h2>
-        <p>The foundation of the protocol, handling asset pools, interest rates, and solvency.</p>
-        
-        <div class="table-container">
-            <table class="doc-table">
-                <thead>
-                    <tr><th>Contract Module</th><th>Functionality</th><th>Status</th></tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><span class="code-tag">V_cERC20_ExtendedInterest</span></td>
-                        <td>Handles ERC-20 markets (mint, redeem, borrow, repay, liquidate). Includes extension for supply/borrow caps and reward hooks.</td>
-                        <td><span style="color:var(--success)">✅ Live & Stable</span></td>
-                    </tr>
-                    <tr>
-                        <td><span class="code-tag">V_MasterEnhanced</span></td>
-                        <td>The Comptroller V3. Coordinates all markets, calculates account health, and enforces global risk parameters.</td>
-                        <td><span style="color:var(--success)">✅ Live & Stable</span></td>
-                    </tr>
-                    <tr>
-                        <td><span class="code-tag">InterestRateModelDynamic</span></td>
-                        <td>Modular interest model based on kink utilization curves. Upgradable via governance without market migration.</td>
-                        <td><span style="color:var(--success)">✅ Live</span></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+      <!-- ============ NETWORKS ============ -->
+      <section class="dc-sec" id="networks">
+        <h2>Networks <a class="anchor" href="#networks" aria-label="Link to Networks">#</a></h2>
+        <p>Soneium runs the full suite. The DEX is also deployed on BNB Chain, Astar and Polkadot Hub, and the NFT market runs on Soneium and Astar. Testnets are used to ship new features before mainnet.</p>
+        <div class="dc-table-wrap"><table class="dc-table" id="netTable">
+          <thead><tr><th>Network</th><th>Chain ID</th><th>Status</th><th>Products</th><th>Explorer</th></tr></thead>
+          <tbody><tr><td colspan="5" class="muted">Loading networks…</td></tr></tbody>
+        </table></div>
       </section>
 
-      <!-- Section 3: Governance & Token -->
-      <section id="governance" class="glass-panel doc-section">
-        <h2 class="doc-header">🧠 2. Governance & VIBE Token (Phase B)</h2>
-        <p>Decentralized control and incentives mechanism.</p>
-
-        <ul class="doc-list">
-            <li><strong>Token Name:</strong> VIBE Governance Token</li>
-            <li><strong>Max Supply:</strong> 1,000,000 VIBE (Soneium)</li>
-            <li><strong>Utility:</strong> Voting rights, Boosting rewards, Safety Module staking.</li>
-        </ul>
-
-        <h3 style="margin-top:20px; color:var(--text-main);">Tokenomics Distribution</h3>
-        <div class="stats-grid" style="margin-top:10px;">
-            <div class="stat-card" style="background:rgba(0,0,0,0.2);">
-                <h3>Community</h3>
-                <div class="stat-value" style="font-size:1.2rem;">60%</div>
-                <div style="font-size:0.8rem; color:var(--text-muted);">Lenders, Borrowers, LM</div>
-            </div>
-            <div class="stat-card" style="background:rgba(0,0,0,0.2);">
-                <h3>Treasury</h3>
-                <div class="stat-value" style="font-size:1.2rem;">20%</div>
-                <div style="font-size:0.8rem; color:var(--text-muted);">Protocol Safety</div>
-            </div>
-            <div class="stat-card" style="background:rgba(0,0,0,0.2);">
-                <h3>Team</h3>
-                <div class="stat-value" style="font-size:1.2rem;">0%</div>
-                <div style="font-size:0.8rem; color:var(--text-muted);">No allocations</div>
-            </div>
-            <div class="stat-card" style="background:rgba(0,0,0,0.2);">
-                <h3>Eco/Liquidity</h3>
-                <div class="stat-value" style="font-size:1.2rem;">20%</div>
-                <div style="font-size:0.8rem; color:var(--text-muted);">Cross-chain Reserves</div>
-            </div>
-        </div>
-      </section>
-
-      <!-- Section 4: Stablecoin -->
-      <section id="stablecoin" class="glass-panel doc-section">
-        <h2 class="doc-header">💵 3. Stablecoin Layer — VIBEUSD (Phase C)</h2>
-        <p>A native, over-collateralized stablecoin mintable directly via the borrow module. Inspired by modern debt-based stablecoin designs.</p>
-        
-        <ul class="doc-list">
-            <li><strong>VIBEUSDStabilityModule (VSM):</strong> Maintains peg via asymmetric mint/burn mechanics and market making.</li>
-            <li><strong>Parameters:</strong> 
-                <span class="code-tag">LTV Max: 75%</span>, 
-                <span class="code-tag">Liquidation Threshold: 80%</span>, 
-                <span class="code-tag">Stability Fee: 0.5%</span>.
-            </li>
-        </ul>
-      </section>
-
-      <!-- Section 5: Liquidity Router -->
-      <section id="router" class="glass-panel doc-section">
-        <h2 class="doc-header">🪙 4. Omnipool & Liquidity Router (Phase D)</h2>
-        <p>
-            <strong>SoneVibeLiquidityRouter:</strong> An internal swap router that seeks the best execution path across SoneSwap, UniswapV3, and Curve.
-        </p>
-        <p>
-            <strong>Omnipool Adapter:</strong> Allows liquidators to instantly swap seized collateral into debt assets within the same transaction, reducing slippage and increasing system health.
-        </p>
-      </section>
-            <!-- ============================================================== -->
-      <!-- NUEVA SECCION: YELLOW PAPER (Respuesta a Feedback Técnico)     -->
-      <!-- ============================================================== -->
-      <section id="yellowpaper" class="glass-panel doc-section" style="border-top: 4px solid var(--accent);">
-        <h2 class="doc-header">⚡ Protocol Yellow Paper: Core Logic & Differentiation</h2>
-        <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:20px;">
-          Detailed architectural breakdown for researchers and auditors. Defining the VIBE deviation from standard lending forks.
-        </p>
-
-        <!-- 1. Genealogy -->
-        <h3 style="color:#fff; margin-top:25px;">1. Protocol Genealogy & Security</h3>
-        <p>VIBE Finance is not a raw fork. It implements a <strong>Hybrid Architecture</strong>:</p>
-        <ul class="doc-list">
-            <li><strong>Core Solvency Engine:</strong> Based on <em>Compound V2</em> (Unitroller/Comptroller pattern) for its battle-tested mathematical reliability over 5 years.</li>
-            <li><strong>Risk Management:</strong> Implements <em>Aave V3-style</em> caps (Supply Caps, Borrow Caps) and Isolation Mode logic directly into the Comptroller.</li>
-            <li><strong>Price Feeds:</strong> Custom oracle wrappers supporting <em>DIA</em> (Astar) and <em>Chainlink</em> (Soneium) with fallback mechanisms.</li>
-        </ul>
-
-        <!-- 2. The Internal Cash Innovation -->
-        <h3 style="color:#fff; margin-top:25px;">2. Anti-Manipulation: The <code>internalCash</code> Mechanism</h3>
-        <p>
-            Standard cTokens (Compound V2) rely on <code>balanceOf(address(this))</code> to calculate interest rates. This is vulnerable to <strong>"Donation Attacks"</strong> where an attacker sends underlying tokens directly to the contract to manipulate the exchange rate or force liquidations.
-        </p>
-        <p>
-            <strong>The VIBE Solution (V_cERC20_ExtendedInterest.sol):</strong>
-        </p>
-        <div style="background:rgba(0,0,0,0.3); padding:15px; border-radius:8px; border:1px solid rgba(255,255,255,0.1); font-family:monospace; font-size:0.85rem; color:var(--success);">
-            // Core Innovation in VIBE cTokens<br>
-            uint256 public internalCash;<br><br>
-            function mint(uint256 amount) external nonReentrant {<br>
-            &nbsp;&nbsp;...<br>
-            &nbsp;&nbsp;// 1. Calculate actual transfer (Support fee-on-transfer tokens)<br>
-            &nbsp;&nbsp;uint256 balanceBefore = ERC20(underlying).balanceOf(this);<br>
-            &nbsp;&nbsp;transferFrom(msg.sender, this, amount);<br>
-            &nbsp;&nbsp;uint256 received = ERC20(underlying).balanceOf(this) - balanceBefore;<br><br>
-            &nbsp;&nbsp;// 2. Sync Internal Accounting<br>
-            &nbsp;&nbsp;internalCash += received;<br>
-            &nbsp;&nbsp;...<br>
-            }
-        </div>
-        <p style="margin-top:10px;">
-            By strictly tracking <code>internalCash</code> on every Mint, Redeem, Borrow, and Repay, VIBE creates a <strong>hermetic accounting system</strong>. External donations are ignored by the interest rate model, protecting users from exchange rate manipulation.
-        </p>
-
-        <!-- 3. Real Yield Integration -->
-        <h3 style="color:#fff; margin-top:25px;">3. Future Outlook: Startale Vault Routing</h3>
-        <p>
-            Current lending protocols leave idle liquidity (Cash - Reserves) unproductive.
-            Following community feedback (RFC-9213), we are architecting a <strong>Yield Router Module</strong>.
-        </p>
-        <p>
-            <em>Conceptual Logic:</em> Instead of idle capital sitting in the cToken contract earning 0%, the protocol will utilize an "Idle Strategy Strategy" to route excess liquidity into <strong>Startale App Vaults</strong> or <strong>Soneium Staking</strong>, generating 'Real Yield' that flows back to the Reserves, increasing the APY for suppliers organically without token emissions.
-        </p>
-
-        <!-- 4. Math Spec -->
-        <h3 style="color:#fff; margin-top:25px;">4. Mathematical Specifications</h3>
-        <div class="table-container">
-            <table class="doc-table">
-                <thead><tr><th>Metric</th><th>Formula</th></tr></thead>
-                <tbody>
-                    <tr>
-                        <td><strong>Exchange Rate</strong></td>
-                        <td><code>(internalCash + totalBorrows - totalReserves) / totalSupply</code></td>
-                    </tr>
-                    <tr>
-                        <td><strong>Utilization Rate</strong></td>
-                        <td><code>totalBorrows / (internalCash + totalBorrows - totalReserves)</code></td>
-                    </tr>
-                    <tr>
-                        <td><strong>Health Factor</strong></td>
-                        <td><code>(Σ Collateral_USD * LiquidationThreshold) / TotalBorrows_USD</code></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-      </section>
-            <!-- ================================================================= -->
-      <!-- NUEVA SECCION: WHITEPAPER & YELLOWPAPER HYBRID -->
-      <!-- ================================================================= -->
-      <section id="whitepaper" class="glass-panel doc-section">
-        <h2 class="doc-header">📜 Protocol Whitepaper & Math Specifications</h2>
-        <p style="font-size:1.1rem; color:#fff; margin-bottom:20px;">
-          The underlying mathematical models governing the VIBE Protocol solvency, interest rates, and liquidation logic.
-        </p>
-
-        <!-- 1. Interest Rate Model -->
-        <h3 style="color:var(--accent); border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:8px; margin-top:30px;">1. The Jump Rate Model (Interest Logic)</h3>
-        <p>VIBE utilizes a dynamic algorithmic interest rate model derived from the <strong>Utilization Rate (U)</strong> of each market. This ensures liquidity is always available for withdrawals while optimizing yield for suppliers.</p>
-        
-        <div style="background:rgba(0,0,0,0.3); padding:20px; border-radius:12px; border-left:4px solid var(--accent); margin:15px 0;">
-            <p style="margin:0 0 10px 0; font-family:monospace; color:var(--text-muted);">// 1. Utilization Rate Formula</p>
-            <div style="font-size:1.2rem; font-weight:bold; color:#fff; font-family:'Times New Roman', serif;">
-                U = TotalBorrows / (Cash + TotalBorrows - Reserves)
-            </div>
-        </div>
-
-        <p>The Borrow Rate changes based on a "Kink" point (optimal utilization). This incentivizes borrowers when liquidity is abundant and protects the protocol when liquidity is scarce.</p>
-
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin-top:15px;">
-            <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:8px;">
-                <strong style="color:var(--success)">If U < Kink:</strong>
-                <p style="font-family:monospace; margin-top:5px; color:#ddd;">Rate = BaseRate + (U * Multiplier)</p>
-                <div style="font-size:0.8rem; color:var(--text-muted); margin-top:5px;">Slow increase to encourage borrowing.</div>
-            </div>
-            <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:8px;">
-                <strong style="color:var(--danger)">If U > Kink:</strong>
-                <p style="font-family:monospace; margin-top:5px; color:#ddd;">Rate = RateAtKink + (U - Kink) * JumpMultiplier</p>
-                <div style="font-size:0.8rem; color:var(--text-muted); margin-top:5px;">Rapid spike to force repayments.</div>
-            </div>
-        </div>
-
-        <!-- 2. Exchange Rate Logic -->
-        <h3 style="color:var(--accent); border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:8px; margin-top:40px;">2. cToken Exchange Rate</h3>
-        <p>cTokens (e.g., cASTR) are interest-bearing wrappers. Their value relative to the underlying asset increases every block as interest accrues.</p>
-        
-        <div style="background:rgba(0,0,0,0.3); padding:20px; border-radius:12px; border-left:4px solid var(--success); margin:15px 0;">
-            <div style="font-size:1.1rem; font-weight:bold; color:#fff; font-family:'Times New Roman', serif; line-height:1.5;">
-                ExchangeRate = <br>
-                (Cash + TotalBorrows - Reserves) / TotalSupply_cTokens
-            </div>
-        </div>
-        <p style="font-size:0.9rem; color:var(--text-muted);">
-            * <strong>Cash:</strong> Underlying balance held in the contract.<br>
-            * <strong>Reserves:</strong> Protocol profit set aside for safety.
-        </p>
-
-        <!-- 3. Liquidation Logic -->
-        <h3 style="color:var(--accent); border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:8px; margin-top:40px;">3. Solvency & Liquidation</h3>
-        <p>To ensure protocol solvency, accounts with a Health Factor (HF) below 1.0 are subject to liquidation.</p>
-
-        <div style="display:flex; flex-wrap:wrap; gap:20px; margin-top:15px;">
-            <div style="flex:1; min-width:250px; background:rgba(255, 85, 85, 0.1); border:1px solid var(--danger); padding:20px; border-radius:12px;">
-                <h4 style="margin:0 0 10px 0; color:var(--danger);">Health Factor Formula</h4>
-                <div style="font-size:1.2rem; font-weight:bold; color:#fff;">HF = ( Σ Collateral_i * CF_i ) / TotalBorrows_USD</div>
-                <ul style="font-size:0.85rem; color:var(--text-muted); margin-top:10px; padding-left:20px;">
-                    <li><strong>Collateral_i:</strong> Value of asset i in USD.</li>
-                    <li><strong>CF_i:</strong> Collateral Factor (e.g., 0.75 for ASTR).</li>
-                </ul>
-            </div>
-            
-            <div style="flex:1; min-width:250px; background:rgba(249, 224, 97, 0.1); border:1px solid var(--warning); padding:20px; border-radius:12px;">
-                <h4 style="margin:0 0 10px 0; color:var(--warning);">Liquidation Incentive</h4>
-                <p style="font-size:0.9rem;">
-                    When HF < 1.0, liquidators repay up to 50% of the debt (Close Factor) and receive collateral plus a bonus.
-                </p>
-                <div style="font-weight:bold; color:#fff; margin-top:5px;">
-                    Bonus (Incentive): 8% - 10%
-                </div>
-                <p style="font-size:0.8rem; color:var(--text-muted); margin-top:5px;">
-                    Calculated as: <code>SeizeAmount = RepayAmount * (1 + Incentive)</code>
-                </p>
-            </div>
-        </div>
-
-      </section>
-            <!-- [NUEVA SECCION] Security & Risk Architecture -->
-      <section id="security" class="glass-panel doc-section" style="border-left: 4px solid var(--danger);">
-        <h2 class="doc-header">🛡️ 5. Security Architecture (The Nucleus)</h2>
-        <p>VIBE Protocol implements a proprietary "Defense-in-Depth" security model designed to protect against modern DeFi vectors like donation attacks and price manipulation.</p>
-
-        <h3 style="margin-top:20px; font-size:1.1rem; color:#fff;">A. The Nucleus Mechanism (`internalCash`)</h3>
-        <p>
-            Unlike standard lending forks that rely on <code>balanceOf(this)</code>, VIBE uses an isolated accounting variable called <span class="code-tag">internalCash</span>. 
-        </p>
-        <ul class="doc-list">
-            <li><strong>Anti-Inflation:</strong> Prevents attackers from artificially inflating the exchange rate by sending direct token transfers to the contract.</li>
-            <li><strong>Donation Sweep:</strong> Any surplus tokens sent to the contract (donations) are separated from the lending pool and routed to the <strong>Protocol Reserves</strong> via the <code>sweepDonations()</code> function, benefitting VIBE stakers instead of attackers.</li>
-        </ul>
-
-        <h3 style="margin-top:20px; font-size:1.1rem; color:#fff;">B. Guarded Launch Parameters</h3>
-        <div class="table-container">
-            <table class="doc-table">
-                <thead>
-                    <tr><th>Security Module</th><th>Description</th></tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><strong>Supply/Borrow Caps</strong></td>
-                        <td>Hard limits on total liquidity per asset. Prevents infinite minting attacks or over-exposure to a single asset class.</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Guardian Pauses</strong></td>
-                        <td>The <code>PauseGuardian</code> multisig can instantly freeze Minting, Borrowing, or Liquidations globally or per market in case of on-chain anomalies.</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Oracle Thresholds</strong></td>
-                        <td>Price updates are rejected if they deviate >20% from the previous checkpoint without manual validation (Circuit Breaker).</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <h3 style="margin-top:20px; font-size:1.1rem; color:#fff;">C. Asset Listing Strategy</h3>
-        <p>We prioritize solvency over volume. New assets are listed in tiers:</p>
-        <ol style="color:var(--text-muted); padding-left:20px; line-height:1.6;">
-            <li><strong>Tier 1 (Live):</strong> Majors & Native Gas (ASTR, USDC). Max LTV: 75%. (ASTR LTV: 30% DOT LTV: 60%)</li>
-            <li><strong>Tier 2 (Upcoming):</strong> Bridged Bluechips (WBTC, WETH). Requires 30-day bridge stability.</li>
-            <li><strong>Tier 3 (Governance):</strong> Ecosystem tokens (LSDs, DEX Gov tokens). Isolated mode with Debt Ceilings.</li>
+      <!-- ============ GETTING STARTED ============ -->
+      <section class="dc-sec" id="getting-started">
+        <h2>Getting started <a class="anchor" href="#getting-started" aria-label="Link to Getting started">#</a></h2>
+        <ol>
+          <li><b>Install a wallet.</b> SoneVibe supports <b>MetaMask</b>, <b>Trust Wallet</b> and <b>Nova Wallet</b> (browser extension or the wallet's in-app browser on mobile).</li>
+          <li><b>Get gas.</b> Transactions on Soneium are paid in <b>ETH</b>; on BNB Chain in <b>BNB</b>; on Astar in <b>ASTR</b>. Bridge ETH to Soneium through the official bridge listed on <a href="https://soneium.org" target="_blank" rel="noopener">soneium.org</a>.</li>
+          <li><b>Connect.</b> Press <i>Connect Wallet</i> in the app. If your wallet is on another network, the app asks it to switch or add the network for you.</li>
+          <li><b>Approve, then act.</b> The first time you use a token, your wallet asks for an approval so the contract can move that token. After that, swaps, deposits and repayments need a single confirmation.</li>
         </ol>
+        <div class="dc-note warn">Always check that you are on <b>sonevibe.github.io/Lending</b> and that contract addresses in your wallet match the ones in <a href="#contracts">Contracts</a>. SoneVibe will never ask for your seed phrase.</div>
       </section>
 
-
-      <!-- Section 6: Roadmap -->
-      <section id="roadmap" class="glass-panel doc-section" style="border-top: 4px solid var(--warning);">
-        <h2 class="doc-header">🧭 Roadmap 2025 – 2026</h2>
-        <div class="doc-timeline">
-            <div class="timeline-item">
-                <div class="timeline-date">Q1 2025 (Completed)</div>
-                <div class="timeline-content">Consolidate Lending Core (cERC20 + cNative + Comptroller V3 Fixed).</div>
-            </div>
-            <div class="timeline-item">
-                <div class="timeline-date">Q2 2025 (Completed)</div>
-                <div class="timeline-content">VIBE Token Launch + Governance DAO activation.</div>
-            </div>
-            <div class="timeline-item active">
-                <div class="timeline-date" style="color:var(--success)">Q3-Q4 2025 (Current)</div>
-                <div class="timeline-content">
-                    Integration of VIBEUSD Stablecoin & Treasury System.<br>
-                    Deployment of Omnipool Router and Oracle Hub.
-                </div>
-            </div>
-            <div class="timeline-item">
-                <div class="timeline-date">Q1 2026</div>
-                <div class="timeline-content">Cross-chain Bridge Layer (Soneium ↔ Astar). RiskManager AI Beta.</div>
-            </div>
-        </div>
+      <!-- ============ SWAP ============ -->
+      <section class="dc-sec" id="swap">
+        <h2>Swap <a class="anchor" href="#swap" aria-label="Link to Swap">#</a></h2>
+        <p>VibeSwap is a Uniswap V2-style constant-product AMM. Each pool holds two tokens and keeps <code>x · y = k</code> after every trade (minus the fee), so the price moves with the size of your order relative to the pool.</p>
+        <pre><span class="c">// Output of a swap, with the 0.25% fee taken from the input</span>
+amountInWithFee = amountIn × 9975
+amountOut       = amountInWithFee × reserveOut / (reserveIn × 10000 + amountInWithFee)</pre>
+        <h3>Settings and protections</h3>
+        <div class="dc-table-wrap"><table class="dc-table">
+          <thead><tr><th>Setting</th><th>Value</th><th>What it does</th></tr></thead>
+          <tbody>
+            <tr><td>Swap fee</td><td class="num"><b>0.25%</b></td><td>Charged on the input amount and left inside the pool.</td></tr>
+            <tr><td>Slippage tolerance</td><td class="num"><b>0.5%</b> default · 0.1% / 1% / 5%</td><td>The transaction reverts if you would receive less than <code>quote × (1 − slippage)</code>.</td></tr>
+            <tr><td>Deadline</td><td class="num"><b>20 minutes</b></td><td>The swap reverts if it is mined later than this, so a stuck transaction cannot fill at a stale price.</td></tr>
+            <tr><td>Price impact</td><td class="num">Warning &gt; 1% · Danger &gt; 5%</td><td>How far your trade moves the pool price. Shown before you confirm.</td></tr>
+            <tr><td>Wrap / unwrap</td><td class="num">1 : 1, no fee</td><td>ETH ↔ WETH (or BNB ↔ WBNB) goes straight through the wrapped-token contract, not a pool.</td></tr>
+          </tbody>
+        </table></div>
+        <h3>Routing</h3>
+        <p>The app swaps through the <b>direct pool</b> between the two tokens you pick (for example ASTR → USDC). If a pair has no pool, swap through a common token such as ETH or USDC in two steps. The router contract itself supports multi-hop paths, and automatic routing in the app is on the roadmap.</p>
+        <div class="dc-note info">Token approvals from the Swap page are unlimited, so you only approve each token once. You can review or revoke them at any time from your wallet or the block explorer's token-approval tool.</div>
       </section>
 
-      <section class="glass-panel doc-section" style="text-align:center;">
-        <h3 style="color:var(--accent);">“Liquidity is life.”</h3>
-        <p style="max-width:600px; margin:0 auto; color:var(--text-muted);">
-            SoneVibe is becoming the financial nervous system between Soneium, Astar, and Polkadot — a network where collateral, credit, and governance flow freely with total transparency.
-        </p>
+      <!-- ============ LIQUIDITY ============ -->
+      <section class="dc-sec" id="liquidity">
+        <h2>Liquidity & APR <a class="anchor" href="#liquidity" aria-label="Link to Liquidity">#</a></h2>
+        <p>Deposit both tokens of a pair in equal value and you receive <b>LP tokens</b> that represent your share of the pool. Fees accumulate inside the pool, so the value of each LP token grows as people trade. Nothing to claim: fees are <b>auto-compounded</b> and paid out when you remove liquidity.</p>
+        <h3>Where the 0.25% goes</h3>
+        <div class="dc-table-wrap"><table class="dc-table">
+          <thead><tr><th>Recipient</th><th>Share of fee</th><th>Share of volume</th></tr></thead>
+          <tbody>
+            <tr><td>Liquidity providers</td><td class="num">5/6</td><td class="num"><b>0.2083%</b></td></tr>
+            <tr><td>Protocol treasury (<code>feeTo</code>)</td><td class="num">1/6</td><td class="num"><b>0.0417%</b></td></tr>
+          </tbody>
+        </table></div>
+        <p>The protocol share is minted as LP tokens to the treasury only when liquidity is added or removed (<code>_mintFee</code>), exactly like Uniswap V2. The first deposit in every new pool permanently locks <code>100,000</code> wei of LP tokens to prevent share-price manipulation.</p>
+        <h3>How APR and APY are calculated</h3>
+        <pre>Fee APR = (7-day volume × 0.2083%) / 7 × 365 / pool TVL
+APY     = (1 + APR / 365)^365 − 1</pre>
+        <p>This is the same method used by the large DEXs: it is based on <b>real fees from the last 7 days</b>, not a target. It changes every day with volume and liquidity. The <a href="analytics.html">Analytics</a> page shows APR per pool and a calculator for your own position.</p>
+        <h3>Impermanent loss</h3>
+        <p>When the price of one token changes relative to the other, the pool rebalances and you end up with less value than if you had simply held both tokens. Fees offset this over time.</p>
+        <div class="dc-table-wrap"><table class="dc-table">
+          <thead><tr><th>Price change of one token</th><th>1.25×</th><th>1.5×</th><th>2×</th><th>3×</th><th>5×</th></tr></thead>
+          <tbody><tr><td>Loss vs. holding</td><td class="num">−0.6%</td><td class="num">−2.0%</td><td class="num">−5.7%</td><td class="num">−13.4%</td><td class="num">−25.5%</td></tr></tbody>
+        </table></div>
+        <p class="muted" style="color:var(--text-muted)">Formula: <code>IL = 2·√r / (1 + r) − 1</code>, where <code>r</code> is the price ratio change. The same numbers apply if the price falls by the same factor.</p>
       </section>
 
-    </div> 
+      <!-- ============ LENDING ============ -->
+      <section class="dc-sec" id="lending">
+        <h2>Lending & borrowing <a class="anchor" href="#lending" aria-label="Link to Lending">#</a></h2>
+        <p>SoneVibe lending follows the proven Compound V2 design. When you <b>supply</b> an asset you receive interest-bearing <b>cTokens</b> (e.g. cASTR). Supplied assets can be enabled as <b>collateral</b> to <b>borrow</b> other assets. Interest accrues every block.</p>
+        <h3>Live markets on Soneium</h3>
+        <div class="dc-table-wrap"><table class="dc-table" id="lendTable">
+          <thead><tr><th>Market</th><th>Supplied</th><th>Borrowed</th><th>Utilization</th><th>Supply APR</th><th>Borrow APR</th></tr></thead>
+          <tbody><tr><td colspan="6" class="muted">Reading markets…</td></tr></tbody>
+        </table></div>
+        <h3>Risk parameters</h3>
+        <div class="dc-table-wrap"><table class="dc-table">
+          <thead><tr><th>Parameter</th><th>Value</th><th>Meaning</th></tr></thead>
+          <tbody>
+            <tr><td>Collateral factor</td><td class="num">Per market, shown in the app</td><td>Share of a collateral's value you can borrow against. $100 of collateral with a 60% factor supports $60 of debt.</td></tr>
+            <tr><td>Close factor</td><td class="num"><span class="lv loading" data-live="closeFactor"></span></td><td>Maximum share of a borrow that can be repaid in a single liquidation.</td></tr>
+            <tr><td>Liquidation incentive</td><td class="num"><span class="lv loading" data-live="liqIncentive"></span></td><td>Bonus collateral a liquidator receives on top of the debt repaid.</td></tr>
+            <tr><td>Reserve factor</td><td class="num"><span class="lv loading" data-live="reserveFactor"></span></td><td>Share of borrow interest kept as protocol reserves instead of paid to suppliers.</td></tr>
+          </tbody>
+        </table></div>
+        <h3>Formulas</h3>
+        <pre>Utilization U    = borrows / (cash + borrows − reserves)
+Borrow rate      = base + U × multiplier                      <span class="c">(U ≤ kink)</span>
+                 = base + kink × multiplier + (U − kink) × jump <span class="c">(U &gt; kink)</span>
+Supply rate      = borrow rate × U × (1 − reserve factor)
+Exchange rate    = (cash + borrows − reserves) / cToken supply
+Health factor    = Σ (collateral USD × collateral factor) / total borrows USD</pre>
+        <p>SoneVibe cTokens track <code>internalCash</code> instead of reading the contract's token balance. Tokens sent directly to a market ("donations") therefore cannot move the exchange rate — a known attack on standard Compound forks.</p>
+        <h3>Liquidation</h3>
+        <p>If your <b>health factor falls below 1.0</b>, anyone can repay up to the close factor of your debt and receive your collateral plus the liquidation incentive. Keep a buffer: prices move, and interest keeps growing your debt.</p>
+        <pre><span class="c">// Example with the live parameters</span>
+Debt $1,000 · HF 0.97 → liquidator repays up to $500
+Liquidator receives $500 × 1.10 = $550 of your collateral</pre>
+        <p>Prices come from the SoneVibe oracle contract (<span class="lv loading" data-live="oracle"></span>), shown in <a href="#contracts">Contracts</a>.</p>
+      </section>
+
+      <!-- ============ SVUSD ============ -->
+      <section class="dc-sec" id="svusd">
+        <h2>SVUSD stablecoin <a class="anchor" href="#svusd" aria-label="Link to SVUSD">#</a></h2>
+        <p><b>SVUSD</b> is SoneVibe's dollar stablecoin. It can only be minted by approved <b>facilitators</b>, and each facilitator has a hard <b>bucket cap</b> on how much it can create. Two facilitators exist:</p>
+        <h3>1 · Stability module (PSM)</h3>
+        <p>Swap USDC and SVUSD 1:1 minus a small fee. This is what holds the peg: when SVUSD trades above $1, minting through the module is profitable; below $1, redeeming is.</p>
+        <div class="dc-table-wrap"><table class="dc-table">
+          <thead><tr><th>Action</th><th>Function</th><th>Fee</th></tr></thead>
+          <tbody>
+            <tr><td>USDC → SVUSD (mint)</td><td><code>buySVUSD(amountUSDC)</code></td><td class="num"><span class="lv loading" data-live="psmFeeIn"></span></td></tr>
+            <tr><td>SVUSD → USDC (redeem)</td><td><code>sellSVUSD(amountSVUSD)</code></td><td class="num"><span class="lv loading" data-live="psmFeeOut"></span></td></tr>
+          </tbody>
+        </table></div>
+        <p>The module holds the USDC reserves itself, up to a reserve cap of <span class="lv loading" data-live="psmCap"></span>. SVUSD in circulation on Soneium: <span class="lv loading" data-live="svusdSupply"></span>.</p>
+        <h3>2 · Borrowing (mintable market)</h3>
+        <p>Supply collateral in the lending markets and borrow SVUSD from the <code>cSVUSD</code> market. Borrowing mints new SVUSD to your wallet and repaying burns it. Because no one supplies SVUSD, interest on SVUSD debt goes to the protocol treasury. Positions follow the same health-factor and liquidation rules as any other borrow.</p>
+        <p><a href="mint-svusd.html">Open the SVUSD console →</a></p>
+      </section>
+
+      <!-- ============ FARMS ============ -->
+      <section class="dc-sec" id="farms">
+        <h2>Farms & staking <a class="anchor" href="#farms" aria-label="Link to Farms">#</a></h2>
+        <p><b>Farms (MasterChef).</b> Stake LP tokens to earn <b>LIGHT</b>. A fixed amount of LIGHT is emitted per block and split between farms by their allocation points. There is no bonus multiplier (1×), and <code>emergencyWithdraw</code> always lets you take your LP tokens out, giving up pending rewards.</p>
+        <p><b>Pools (SousChef).</b> Stake a single token and earn another (for example stake LIGHT, earn DOT). Rewards are pre-funded in each pool contract; the owner cannot withdraw the staked token or the reward token from it.</p>
+        <div class="dc-note info">Farms and staking pools are live on <b>Soneium Minato testnet</b>. Mainnet farms will be announced on <a href="https://x.com/Sonevibe" target="_blank" rel="noopener">@Sonevibe</a> with their emission schedule before launch.</div>
+      </section>
+
+      <!-- ============ NFT ============ -->
+      <section class="dc-sec" id="nft">
+        <h2>NFT market <a class="anchor" href="#nft" aria-label="Link to NFT market">#</a></h2>
+        <p>List ERC-721 and ERC-1155 NFTs at a fixed price and buy them in one transaction. Prices are set in an ERC-20 payment token per network, so buyers approve the token once and then call <code>buyItem</code>. Sellers can <code>cancelListing</code> at any time.</p>
+        <div class="dc-table-wrap"><table class="dc-table" id="nftTable">
+          <thead><tr><th>Network</th><th>Payment token</th><th>Market fee</th><th>Collections</th><th>Indexer</th></tr></thead>
+          <tbody><tr><td colspan="5" class="muted">Loading markets…</td></tr></tbody>
+        </table></div>
+        <p>The market fee is deducted from the sale price and sent to the treasury; the seller receives the rest. Listing and cancelling are free apart from gas.</p>
+      </section>
+
+      <!-- ============ TOKENS ============ -->
+      <section class="dc-sec" id="tokens">
+        <h2>Tokens <a class="anchor" href="#tokens" aria-label="Link to Tokens">#</a></h2>
+        <div class="dc-table-wrap"><table class="dc-table">
+          <thead><tr><th>Token</th><th>Role</th><th>Supply</th></tr></thead>
+          <tbody>
+            <tr><td><b>LIGHT</b></td><td>Farm reward and ecosystem token. Mintable only by its owner (the MasterChef once farms go live), never above the max supply.</td><td class="num">Max 1,000,000,000<br><span class="muted">Minted: <span class="lv loading" data-live="lightSupply"></span></span></td></tr>
+            <tr><td><b>SVUSD</b></td><td>Dollar stablecoin minted by facilitators (stability module and mintable market).</td><td class="num"><span class="lv loading" data-live="svusdSupply"></span></td></tr>
+            <tr><td><b>LP tokens</b></td><td>Your share of a VibeSwap pool, ERC-20, redeemable at any time.</td><td class="num">Per pool</td></tr>
+            <tr><td><b>cTokens</b></td><td>Your deposit in a lending market, growing in value as interest accrues.</td><td class="num">Per market</td></tr>
+          </tbody>
+        </table></div>
+        <p>At deployment 1,000,000 LIGHT (0.1% of max supply) were minted to the deployer for initial liquidity. Every future mint is visible on-chain.</p>
+      </section>
+
+      <!-- ============ FEES ============ -->
+      <section class="dc-sec" id="fees">
+        <h2>Fees <a class="anchor" href="#fees" aria-label="Link to Fees">#</a></h2>
+        <div class="dc-table-wrap"><table class="dc-table">
+          <thead><tr><th>Action</th><th>Fee</th><th>Goes to</th></tr></thead>
+          <tbody>
+            <tr><td>Swap</td><td class="num"><b>0.25%</b></td><td>0.2083% liquidity providers · 0.0417% treasury</td></tr>
+            <tr><td>Wrap / unwrap</td><td class="num">0%</td><td>—</td></tr>
+            <tr><td>Add / remove liquidity</td><td class="num">0%</td><td>—</td></tr>
+            <tr><td>Supply / withdraw (lending)</td><td class="num">0%</td><td>—</td></tr>
+            <tr><td>Borrow interest</td><td class="num">Variable</td><td>Suppliers, minus the <span class="lv loading" data-live="reserveFactor"></span> reserve factor</td></tr>
+            <tr><td>Liquidation</td><td class="num"><span class="lv loading" data-live="liqIncentive"></span> bonus</td><td>Liquidator (paid from the liquidated collateral)</td></tr>
+            <tr><td>SVUSD mint / redeem (PSM)</td><td class="num"><span class="lv loading" data-live="psmFeeIn"></span> / <span class="lv loading" data-live="psmFeeOut"></span></td><td>Treasury</td></tr>
+            <tr><td>SVUSD borrow interest</td><td class="num">Variable</td><td>Treasury</td></tr>
+            <tr><td>NFT sale</td><td class="num"><span class="lv loading" data-live="nftFee"></span></td><td>Treasury (paid by seller from the sale price)</td></tr>
+          </tbody>
+        </table></div>
+        <p>Gas is paid to the network, not to SoneVibe.</p>
+      </section>
+
+      <!-- ============ CONTRACTS ============ -->
+      <section class="dc-sec" id="contracts">
+        <h2>Contracts <a class="anchor" href="#contracts" aria-label="Link to Contracts">#</a></h2>
+        <p>Generated from the same configuration the app uses, so this list is always in sync. Open any address on the explorer or copy it.</p>
+        <div class="dc-tabs" id="ctTabs" role="tablist"></div>
+        <div class="dc-table-wrap"><table class="dc-table" id="ctTable">
+          <thead><tr><th>Contract</th><th>Address</th></tr></thead>
+          <tbody><tr><td colspan="2" class="muted">Loading contracts…</td></tr></tbody>
+        </table></div>
+      </section>
+
+      <!-- ============ SECURITY ============ -->
+      <section class="dc-sec" id="security">
+        <h2>Security & admin controls <a class="anchor" href="#security" aria-label="Link to Security">#</a></h2>
+        <p>Good DeFi protocols tell you exactly who can change what. This section is read live from the contracts.</p>
+        <div class="dc-table-wrap"><table class="dc-table" id="adminTable">
+          <thead><tr><th>Role</th><th>Controlled by</th><th>Type</th><th>Can do</th></tr></thead>
+          <tbody><tr><td colspan="4" class="muted">Reading admin roles…</td></tr></tbody>
+        </table></div>
+        <h3>Design protections</h3>
+        <ul>
+          <li><b>Donation-proof lending accounting</b> with <code>internalCash</code>.</li>
+          <li><b>Reentrancy guards</b> on farms, staking pools and the NFT market.</li>
+          <li><b>Bucket caps</b> limit how much SVUSD each facilitator can mint, and the stability module has a USDC reserve cap.</li>
+          <li><b>Hard cap</b> of 1B LIGHT enforced in the token contract.</li>
+          <li><b>Emergency withdraw</b> in farms and staking pools always returns your deposit.</li>
+        </ul>
+        <h3>Audits</h3>
+        <p>No third-party audit report has been published yet. Contracts are verified on the block explorers so anyone can read the code. Audit reports will be linked here when available.</p>
+        <p>Found a vulnerability? Contact <a href="https://x.com/Sonevibe" target="_blank" rel="noopener">@Sonevibe</a> by direct message before disclosing publicly.</p>
+      </section>
+
+      <!-- ============ RISKS ============ -->
+      <section class="dc-sec" id="risks">
+        <h2>Risks <a class="anchor" href="#risks" aria-label="Link to Risks">#</a></h2>
+        <ul>
+          <li><b>Smart-contract risk.</b> Bugs can lead to loss of funds, even in forks of well-tested code.</li>
+          <li><b>Admin risk.</b> The roles listed in <a href="#security">Security</a> can change parameters. Check who controls them.</li>
+          <li><b>Oracle risk.</b> A wrong price can cause unfair liquidations or bad debt.</li>
+          <li><b>Liquidation risk.</b> Borrowers can lose part of their collateral if their health factor drops below 1.0.</li>
+          <li><b>Impermanent loss.</b> Liquidity providers can end up with less value than holding.</li>
+          <li><b>Low-liquidity pools.</b> Small pools have high price impact and can be moved by a single trade.</li>
+          <li><b>Stablecoin risk.</b> SVUSD and USDC can lose their peg.</li>
+          <li><b>Bridge and network risk.</b> Assets bridged between chains depend on the bridge's security; networks can halt or reorganize.</li>
+        </ul>
+        <p>Nothing on this site is financial advice. Only deposit what you can afford to lose.</p>
+      </section>
+
+      <!-- ============ FAQ ============ -->
+      <section class="dc-sec" id="faq">
+        <h2>FAQ <a class="anchor" href="#faq" aria-label="Link to FAQ">#</a></h2>
+        <details class="dc-faq"><summary>Why is my swap failing with "slippage"?</summary><p>The price moved more than your slippage tolerance between quoting and mining. Try a smaller amount, or raise tolerance to 1% for volatile or thin pools. Be careful with 5% — it leaves room for front-running.</p></details>
+        <details class="dc-faq"><summary>Do I need to claim or compound LP fees?</summary><p>No. Swap fees stay in the pool and increase the value of your LP tokens automatically. You receive them when you remove liquidity.</p></details>
+        <details class="dc-faq"><summary>Why does the APR change every day?</summary><p>It is based on the last 7 days of real swap volume divided by the liquidity in the pool. More volume or less liquidity means higher APR, and the reverse.</p></details>
+        <details class="dc-faq"><summary>What happens if my health factor drops below 1?</summary><p>Your position becomes liquidatable. A liquidator repays up to half of your debt and receives the same value of your collateral plus a 10% bonus. Add collateral or repay debt to raise your health factor.</p></details>
+        <details class="dc-faq"><summary>Is SoneVibe on BNB Chain the same protocol?</summary><p>Yes. The same DEX contracts are deployed on BNB Chain, controlled by the same team. Lending, SVUSD and the NFT market are currently on Soneium (and NFTs also on Astar).</p></details>
+        <details class="dc-faq"><summary>How do I revoke token approvals?</summary><p>Use your wallet's permissions page or the token-approval tool on Blockscout / BscScan and revoke the router, market or pool contract you approved.</p></details>
+      </section>
+
+      <div class="dc-foot">
+        <span>© <span id="year">2026</span> SoneVibe · Docs are updated with every protocol change.</span>
+        <span><a href="index.html">Home</a><a href="analytics.html">Analytics</a><a href="https://github.com/sonevibe/Lending" target="_blank" rel="noopener">GitHub</a><a href="https://x.com/Sonevibe" target="_blank" rel="noopener">X</a></span>
+      </div>
+    </main>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.10.0/dist/ethers.umd.min.js"></script>
+  <script src="config.js"></script>
+  <script src="market-config.js"></script>
+  <script src="docs.js"></script>
 </body>
 </html>
