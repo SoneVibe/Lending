@@ -25,7 +25,7 @@
       "symbol": "WBTC",
       "name": "Wrapped Bitcoin",
       "decimals": 8,
-      "logoURI": "icons/vibe.svg"
+      "logoURI": "icons/wbtc.svg"
     },
     {
       "chainId": 1868,
@@ -57,7 +57,7 @@
       "symbol": "SVIBE",
       "name": "SVIBE",
       "decimals": 18,
-      "logoURI": "icons/sonevibe.png"
+      "logoURI": "icons/svibe.svg"
     },
     {
       "chainId": 420420419,
@@ -65,7 +65,7 @@
       "symbol": "WDOT",
       "name": "WDOT",
       "decimals": 18,
-      "logoURI": "icons/dot2.jpg"
+      "logoURI": "icons/wdot.svg"
     },
     {
       "chainId": 420420419,
@@ -81,7 +81,7 @@
       "symbol": "WDOT",
       "name": "WDOT",
       "decimals": 18,
-      "logoURI": "icons/dot2.jpg"
+      "logoURI": "icons/wdot.svg"
     },
        {
       "chainId": 420420417,
@@ -185,7 +185,7 @@
       "symbol": "DOT",
       "name": "DOT",
       "decimals": 10,
-      "logoURI": "icons/dot2.jpg"
+      "logoURI": "icons/dot.svg"
     },
     {
       "chainId": 592,
