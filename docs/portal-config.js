@@ -22,11 +22,11 @@
     hubevm: {
       id: 'hubevm', name: 'Polkadot Hub EVM', short: 'Hub EVM', eco: 'Polkadot', kind: 'evm', twinOf: 'assethub',
       color: '#FF2670', chainId: 420420419, nativeSymbol: 'DOT', nativeDecimals: 18,
-      rpc: 'https://services.polkadothub-rpc.com/mainnet',
+      rpc: 'https://eth-rpc.polkadot.io/',
       explorerTx: 'https://blockscout.polkadot.io/tx/', explorerAcct: 'https://blockscout.polkadot.io/address/',
       blurb: 'Same chain as Asset Hub, seen through MetaMask. SoneVibe DEX lives here.',
       addChain: {
-        chainId: '0x190f1b43', chainName: 'Polkadot Hub', rpcUrls: ['https://services.polkadothub-rpc.com/mainnet'],
+        chainId: '0x190f1b43', chainName: 'Polkadot Hub', rpcUrls: ['https://eth-rpc.polkadot.io/'],
         nativeCurrency: { name: 'Polkadot', symbol: 'DOT', decimals: 18 }, blockExplorerUrls: ['https://blockscout.polkadot.io/']
       }
     },
@@ -69,7 +69,7 @@
 
   const assets = {
     DOT: {
-      symbol: 'DOT', name: 'Polkadot', decimals: 10, icon: 'icons/dot.svg', color: '#E6007A', group: 'core', sufficient: true, minBalance: '100000000',
+      symbol: 'DOT', name: 'Polkadot', decimals: 10, icon: 'icons/polkadot.svg', color: '#E6007A', group: 'core', sufficient: true, minBalance: '100000000',
       on: { assethub: { type: 'native' }, hubevm: { type: 'native' }, astar: { type: 'asset', id: '340282366920938463463374607431768211455' } },
       astarEvmErc20: xc('340282366920938463463374607431768211455'),
       ahLoc: { parents: 1, interior: 'Here' },

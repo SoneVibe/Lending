@@ -65,7 +65,7 @@
       "symbol": "WDOT",
       "name": "WDOT",
       "decimals": 18,
-      "logoURI": "icons/wdot.svg"
+      "logoURI": "icons/polkadot.svg"
     },
     {
       "chainId": 420420419,
@@ -81,7 +81,7 @@
       "symbol": "WDOT",
       "name": "WDOT",
       "decimals": 18,
-      "logoURI": "icons/wdot.svg"
+      "logoURI": "icons/polkadot.svg"
     },
        {
       "chainId": 420420417,
@@ -185,7 +185,7 @@
       "symbol": "DOT",
       "name": "DOT",
       "decimals": 10,
-      "logoURI": "icons/dot.svg"
+      "logoURI": "icons/polkadot.svg"
     },
     {
       "chainId": 592,

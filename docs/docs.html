@@ -146,13 +146,13 @@
   <nav class="dc-nav">
     <div class="dc-wrap">
       <a class="dc-brand" href="index.html">
-        <svg width="28" height="28" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="32" fill="#1a1f35"/><path d="M18 42 L32 18 L46 42 Z" fill="#00e0ff"/></svg>
+        <img class="brand-logo" src="icons/vibe.svg" alt="" width="30" height="30">
         SoneVibe <small>Docs</small>
       </a>
       <div class="dc-links">
-        <a href="swap.html">Swap</a><a href="pools.html">Pools</a><a href="dashboard.html">Lend</a><a href="analytics.html">Analytics</a><a href="marketplace.html">NFTs</a>
+        <a href="swap.html">Swap</a><a href="pools.html">Pools</a><a href="dashboard.html">Lend</a><a href="portal.html">Portal</a><a href="analytics.html">Analytics</a><a href="marketplace.html">NFTs</a><a href="docs.html" aria-current="page" style="color:#fff">Docs</a>
       </div>
-      <button class="dc-menu" id="tocToggle" type="button" aria-expanded="false" aria-controls="side">Contents ☰</button>
+      <button class="dc-menu" id="tocToggle" type="button" aria-expanded="false" aria-controls="side">Contents</button>
       <a class="dc-btn" href="swap.html">Launch App</a>
     </div>
   </nav>
@@ -196,7 +196,7 @@
         <h2>Overview <a class="anchor" href="#overview" aria-label="Link to Overview">#</a></h2>
         <p><b>SoneVibe</b> is a non-custodial DeFi protocol whose home is <b>Soneium</b>. It combines six products in one app:</p>
         <div class="dc-cards">
-          <a class="dc-card" href="#swap"><b>VibeSwap DEX</b><span>Constant-product AMM with a flat 0.25% fee.</span></a>
+          <a class="dc-card" href="#swap"><b>SoneVibe DEX</b><span>Constant-product AMM with a flat 0.25% fee.</span></a>
           <a class="dc-card" href="#liquidity"><b>Liquidity pools</b><span>Earn 5/6 of every swap fee, auto-compounded.</span></a>
           <a class="dc-card" href="#lending"><b>Lending markets</b><span>Supply to earn interest, borrow against collateral.</span></a>
           <a class="dc-card" href="#svusd"><b>SVUSD</b><span>Dollar stablecoin with a 1:1 USDC stability module.</span></a>
@@ -231,7 +231,7 @@
       <!-- ============ SWAP ============ -->
       <section class="dc-sec" id="swap">
         <h2>Swap <a class="anchor" href="#swap" aria-label="Link to Swap">#</a></h2>
-        <p>VibeSwap is a Uniswap V2-style constant-product AMM. Each pool holds two tokens and keeps <code>x · y = k</code> after every trade (minus the fee), so the price moves with the size of your order relative to the pool.</p>
+        <p>The SoneVibe DEX is a Uniswap V2-style constant-product AMM. Each pool holds two tokens and keeps <code>x · y = k</code> after every trade (minus the fee), so the price moves with the size of your order relative to the pool.</p>
         <pre><span class="c">// Output of a swap, with the 0.25% fee taken from the input</span>
 amountInWithFee = amountIn × 9975
 amountOut       = amountInWithFee × reserveOut / (reserveIn × 10000 + amountInWithFee)</pre>
@@ -358,7 +358,7 @@ Liquidator receives $500 × 1.10 = $550 of your collateral</pre>
           <tbody>
             <tr><td><b>LIGHT</b></td><td>Farm reward and ecosystem token. Mintable only by its owner (the MasterChef once farms go live), never above the max supply.</td><td class="num">Max 1,000,000,000<br><span class="muted">Minted: <span class="lv loading" data-live="lightSupply"></span></span></td></tr>
             <tr><td><b>SVUSD</b></td><td>Dollar stablecoin minted by facilitators (stability module and mintable market).</td><td class="num"><span class="lv loading" data-live="svusdSupply"></span></td></tr>
-            <tr><td><b>LP tokens</b></td><td>Your share of a VibeSwap pool, ERC-20, redeemable at any time.</td><td class="num">Per pool</td></tr>
+            <tr><td><b>LP tokens</b></td><td>Your share of a SoneVibe DEX pool, ERC-20, redeemable at any time.</td><td class="num">Per pool</td></tr>
             <tr><td><b>cTokens</b></td><td>Your deposit in a lending market, growing in value as interest accrues.</td><td class="num">Per market</td></tr>
           </tbody>
         </table></div>
@@ -455,5 +455,6 @@ Liquidator receives $500 × 1.10 = $550 of your collateral</pre>
   <script src="config.js"></script>
   <script src="market-config.js"></script>
   <script src="docs.js"></script>
+  <script src="nav.js"></script>
 </body>
 </html>

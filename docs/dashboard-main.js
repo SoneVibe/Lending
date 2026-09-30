@@ -292,7 +292,7 @@ async function renderMarkets() {
       return;
   }
 
-  const ICON_MAP = { ASTR:"icons/astr.svg", WBTC:"icons/bitcoin.svg", DOT:"icons/dot.svg", WETH:"icons/weth.svg", USDC:"icons/usdc.svg" };
+  const ICON_MAP = { ASTR:"icons/astr.svg", WBTC:"icons/bitcoin.svg", DOT:"icons/polkadot.svg", WETH:"icons/weth.svg", USDC:"icons/usdc.svg" };
   const tbody = getEl("marketsBody");
   tbody.innerHTML = "";
   

@@ -51,6 +51,7 @@ const updateStatus = (connected) => {
         btnAction.textContent = "Swap";
         btnAction.disabled = false;
     }
+    refreshActionButton();
   } else {
     // Header Status
     dot.style.color = "var(--danger)";
@@ -66,6 +67,7 @@ const updateStatus = (connected) => {
     if(btnAction) {
         btnAction.textContent = "Connect Wallet";
     }
+    refreshActionButton();
   }
 };
 
@@ -89,6 +91,11 @@ async function initApp() {
             // PARCHE: Inicializamos la gráfica AQUÍ, cuando ACTIVE ya existe
             await initHybridChart(); 
             loadChartData(); 
+        }
+
+        if(!userAddress && getEl('connStatus')) {
+            getEl('statusDot').style.color = "var(--success)";
+            getEl('connStatus').textContent = "Online · wallet not connected";
         }
 
         if(window.checkAutoConnect) {
@@ -267,7 +274,8 @@ window.setSlippage = (val) => {
             b.style.border = '1px solid transparent';
         }
     });
-    if(getEl('amountIn').value) getEl('amountIn').dispatchEvent(new Event('input'));
+    if(getEl('spSlipDetail')) getEl('spSlipDetail').textContent = val + "%";
+    if(getEl('amountIn').value || getEl('amountOut').value) scheduleQuote();
 };
 
 function formatSmartRate(rate) {
@@ -286,6 +294,7 @@ function setupAssets(network) {
     if(pairData.base.isNative === undefined) pairData.base.isNative = true;
     
     updateSwapUI();
+    ensureRoutablePair();
 }
 
 // === FUNCIÓN CORREGIDA: ORDEN DE ICONOS ASTR -> USDC ===
@@ -346,28 +355,21 @@ function updateSwapUI() {
 async function updateBalances() {
     if(!signer || !ACTIVE || !pairData.base || !pairData.quote) return;
     try {
-        const base = pairData.base;
-        const quote = pairData.quote;
-        
-        const tokenInObj = isEthToToken ? base : quote;
-        const tokenOutObj = isEthToToken ? quote : base;
+        const tokenInObj = isEthToToken ? pairData.base : pairData.quote;
+        const tokenOutObj = isEthToToken ? pairData.quote : pairData.base;
 
         const getBalanceForToken = async (tokenObj) => {
-            if(tokenObj.isNative || tokenObj.address === 'NATIVE') {
-                const b = await provider.getBalance(userAddress);
-                return parseFloat(ethers.formatEther(b)).toFixed(4);
-            } else {
-                const c = new ethers.Contract(tokenObj.address, window.MIN_ERC20_ABI, provider);
-                const b = await c.balanceOf(userAddress);
-                return parseFloat(ethers.formatUnits(b, tokenObj.decimals)).toFixed(2); 
-            }
+            if(tokenObj.isNative || tokenObj.address === 'NATIVE') return provider.getBalance(userAddress);
+            const c = new ethers.Contract(tokenObj.address, window.MIN_ERC20_ABI, provider);
+            return c.balanceOf(userAddress);
         };
 
-        const balIn = await getBalanceForToken(tokenInObj);
-        const balOut = await getBalanceForToken(tokenOutObj);
-        
-        getEl('balIn').textContent = balIn;
-        getEl('balOut').textContent = balOut;
+        const [balIn, balOut] = await Promise.all([getBalanceForToken(tokenInObj), getBalanceForToken(tokenOutObj)]);
+        rawBal = { in: balIn, out: balOut };
+
+        getEl('balIn').textContent = fmtWei(balIn, tokenInObj.decimals, 4);
+        getEl('balOut').textContent = fmtWei(balOut, tokenOutObj.decimals, 4);
+        refreshActionButton();
 
     } catch(e) { console.error("Balance Error", e); }
 }
@@ -377,120 +379,424 @@ const amountIn = getEl('amountIn');
 const amountOut = getEl('amountOut');
 const btnSwap = getEl('btnSwapAction');
 
-// INPUT LISTENER (QUOTE + PRICE IMPACT + WRAP DETECTION)
-if(amountIn) {
-    amountIn.addEventListener('input', async () => {
-        const val = amountIn.value;
-        const details = getEl('swapDetails');
-        
-        // Reset States
-        isWrapAction = false;
-        isUnwrapAction = false;
-        if(btnSwap && userAddress) btnSwap.textContent = "Swap";
-        
-        if(!val || parseFloat(val) === 0 || !ACTIVE?.router) {
-            amountOut.value = "";
-            if(details) details.style.display = 'none';
-            const impactEl = getEl('impactDisplay');
-            if(impactEl) { impactEl.textContent = "--"; impactEl.style.color = "var(--success)"; }
-            return;
-        }
+// ==========================================
+// === QUOTE ENGINE (BOTH DIRECTIONS) =======
+// ==========================================
+// Typing in "You pay" quotes with getAmountsOut; typing in "You receive" quotes with
+// getAmountsIn and fills "You pay". Execution stays exact-input (see btnSwap.onclick).
 
-        if(btnSwap) { btnSwap.disabled = true; btnSwap.textContent = "Fetching Price..."; }
+const QUOTE_ROUTER_ABI = [
+    "function getAmountsOut(uint amountIn, address[] path) view returns (uint[] amounts)",
+    "function getAmountsIn(uint amountOut, address[] path) view returns (uint[] amounts)"
+];
 
+let independentField = 'in';
+let quoteSeq = 0;
+let quoteTimer = null;
+let quoteLoading = false;
+let quoteError = null;
+let lastQuote = null;      // { inWei, outWei, impact }
+let rawBal = { in: null, out: null };
+let rateInverted = false;
+const readProviders = {};
+
+function getReadProvider() {
+    if (provider && signer) return provider;
+    const url = ACTIVE?.rpcUrls?.[0];
+    if (!url) return provider;
+    if (!readProviders[ACTIVE.chainId]) {
+        readProviders[ACTIVE.chainId] = new ethers.JsonRpcProvider(url, undefined, { staticNetwork: true });
+    }
+    return readProviders[ACTIVE.chainId];
+}
+
+function explorerUrl(pathPart) {
+    const base = ACTIVE?.blockExplorerUrls?.[0];
+    return base ? base.replace(/\/$/, '') + '/' + pathPart : null;
+}
+
+// ---- Routing: direct pool or one hop through any listed token, best price wins ----
+function routeCandidates(tIn, tOut) {
+    const W = ACTIVE.swapTokens.base.underlyingAddress;
+    const a = isNativeTok(tIn) ? W : tIn.address;
+    const b = isNativeTok(tOut) ? W : tOut.address;
+    const seen = new Set([a.toLowerCase(), b.toLowerCase()]);
+    const paths = [[a, b]];
+    [W, ...(ACTIVE.swapTokenList || []).map(t => t.address)].forEach(m => {
+        const l = m.toLowerCase();
+        if (seen.has(l)) return;
+        seen.add(l);
+        paths.push([a, m, b]);
+    });
+    return paths;
+}
+
+async function bestRoute(amountWei, exactIn, tIn, tOut) {
+    const router = new ethers.Contract(ACTIVE.router, QUOTE_ROUTER_ABI, getReadProvider());
+    const results = await Promise.all(routeCandidates(tIn, tOut).map(async (path) => {
         try {
-            if (!pairData.base || !pairData.quote) throw new Error("Pair data incomplete");
+            const amounts = exactIn ? await router.getAmountsOut(amountWei, path) : await router.getAmountsIn(amountWei, path);
+            return amounts[0] > 0n && amounts[amounts.length - 1] > 0n ? { path, amounts: [...amounts] } : null;
+        } catch (e) { return null; }
+    }));
+    const ok = results.filter(Boolean);
+    if (!ok.length) throw new Error("No route");
+    ok.sort((x, y) => {
+        const d = exactIn ? y.amounts[y.amounts.length - 1] - x.amounts[x.amounts.length - 1] : x.amounts[0] - y.amounts[0];
+        return d > 0n ? 1 : d < 0n ? -1 : x.path.length - y.path.length;
+    });
+    return ok[0];
+}
 
-            const WETH_ADDR = ACTIVE.swapTokens.base.underlyingAddress; 
-            const tokenInObj = isEthToToken ? pairData.base : pairData.quote;
-            const tokenOutObj = isEthToToken ? pairData.quote : pairData.base;
+let factoryAddrCache = {};
+async function routeImpact(path, amounts) {
+    try {
+        const rp = getReadProvider();
+        let factoryAddr = ACTIVE.factory || factoryAddrCache[ACTIVE.chainId];
+        if (!factoryAddr) {
+            factoryAddr = await new ethers.Contract(ACTIVE.router, window.POOL_ROUTER_ABI, rp).factory();
+            factoryAddrCache[ACTIVE.chainId] = factoryAddr;
+        }
+        const factory = new ethers.Contract(factoryAddr, FACTORY_ABI_IMPACT, rp);
+        let keep = 1;
+        for (let i = 0; i < path.length - 1; i++) {
+            const pairAddr = await factory.getPair(path[i], path[i + 1]);
+            if (pairAddr === ethers.ZeroAddress) return { impact: 0, warning: "No Liquidity" };
+            const pair = new ethers.Contract(pairAddr, PAIR_ABI_IMPACT, rp);
+            const [reserves, token0] = await Promise.all([pair.getReserves(), pair.token0()]);
+            const reserveIn = path[i].toLowerCase() === token0.toLowerCase() ? reserves[0] : reserves[1];
+            if (reserveIn <= 0n) return { impact: 0, warning: "Empty Pool" };
+            keep *= Number(reserveIn) / (Number(reserveIn) + Number(amounts[i]));
+        }
+        return { impact: (1 - keep) * 100, warning: null };
+    } catch (e) {
+        console.error("Impact Calc Error:", e);
+        return { impact: 0, warning: "Error" };
+    }
+}
 
-            // --- WRAP/UNWRAP DETECTION ---
-            const addrIn = (tokenInObj.isNative || tokenInObj.address === 'NATIVE') ? 'NATIVE' : tokenInObj.address.toLowerCase();
-            const addrOut = (tokenOutObj.isNative || tokenOutObj.address === 'NATIVE') ? 'NATIVE' : tokenOutObj.address.toLowerCase();
-            const wethLC = WETH_ADDR.toLowerCase();
+function routeLabel(path, tIn, tOut) {
+    const W = ACTIVE.swapTokens.base.underlyingAddress.toLowerCase();
+    const mid = path.slice(1, -1).map(a => {
+        const t = (ACTIVE.swapTokenList || []).find(x => x.address.toLowerCase() === a.toLowerCase());
+        if (t) return t.symbol;
+        return a.toLowerCase() === W ? 'W' + (ACTIVE.nativeCurrency?.symbol || 'ETH') : a.slice(0, 6);
+    });
+    return [tIn.symbol, ...mid, tOut.symbol].join(' → ');
+}
 
-            // CASO WRAP: Native -> WETH
-            if(addrIn === 'NATIVE' && addrOut === wethLC) {
-                isWrapAction = true;
-                amountOut.value = val; // 1:1
-                if(details) details.style.display = 'block';
-                getEl('priceDisplay').textContent = "1 : 1 (Wrap)";
-                getEl('impactDisplay').textContent = "0.00%";
-                getEl('minReceivedDisplay').textContent = `${val} ${tokenOutObj.symbol}`;
-                if(btnSwap) { btnSwap.textContent = "Wrap"; btnSwap.disabled = false; }
-                return;
-            }
+// If a network's default pair has no pool, start from the first listed token that can be routed.
+let pairCheckSeq = 0;
+async function ensureRoutablePair() {
+    const seq = ++pairCheckSeq;
+    const net = ACTIVE;
+    const base = pairData.base, quote = pairData.quote;
+    if (!net?.router || !base || !quote) return;
+    const probe = async (t) => {
+        try { await bestRoute(ethers.parseUnits('0.0001', base.decimals || 18), true, base, t); return true; }
+        catch (e) { return false; }
+    };
+    if (await probe(quote)) return;
+    const W = (base.underlyingAddress || '').toLowerCase();
+    const pref = ['USDC', 'USDT', 'DOT', 'ASTR'];
+    const rank = (s) => { const i = pref.indexOf(String(s).toUpperCase()); return i === -1 ? pref.length : i; };
+    const list = (net.swapTokenList || [])
+        .filter(t => t.address.toLowerCase() !== W && t.address.toLowerCase() !== String(quote.address).toLowerCase())
+        .sort((a, b) => rank(a.symbol) - rank(b.symbol));
+    for (const t of list) {
+        const cand = { symbol: t.symbol, address: t.address, decimals: t.decimals || 18, icon: t.logoURI || t.icon || 'icons/token.svg', isNative: false };
+        const ok = await probe(cand);
+        if (seq !== pairCheckSeq || ACTIVE !== net) return;
+        if (!ok) continue;
+        pairData.quote = cand;
+        rawBal = { in: null, out: null };
+        updateSwapUI();
+        updateBalances();
+        loadChartData();
+        if (amountIn.value || amountOut.value) scheduleQuote();
+        return;
+    }
+}
 
-            // CASO UNWRAP: WETH -> Native
-            if(addrIn === wethLC && addrOut === 'NATIVE') {
-                isUnwrapAction = true;
-                amountOut.value = val; // 1:1
-                if(details) details.style.display = 'block';
-                getEl('priceDisplay').textContent = "1 : 1 (Unwrap)";
-                getEl('impactDisplay').textContent = "0.00%";
-                getEl('minReceivedDisplay').textContent = `${val} ${tokenOutObj.symbol}`;
-                if(btnSwap) { btnSwap.textContent = "Unwrap"; btnSwap.disabled = false; }
-                return;
-            }
-            // -----------------------------
+let chartRoutePath = null;
 
-            // Lógica Router Standard (Si no es Wrap/Unwrap)
-            const router = new ethers.Contract(ACTIVE.router, window.ROUTER_ABI, provider);
-            
-            // Si es nativo para router usamos WETH Address en el path
-            const pathIn = (addrIn === 'NATIVE') ? WETH_ADDR : tokenInObj.address;
-            const pathOut = (addrOut === 'NATIVE') ? WETH_ADDR : tokenOutObj.address;
-            const path = [pathIn, pathOut];
-            
-            const amountWei = ethers.parseUnits(val, tokenInObj.decimals);
-            const amounts = await router.getAmountsOut(amountWei, path);
-            const outFmt = ethers.formatUnits(amounts[1], tokenOutObj.decimals);
-            
-            amountOut.value = parseFloat(outFmt).toFixed(6);
-            if(details) details.style.display = 'block';
-            
-            const impactData = await calculatePriceImpact(amountWei, path, tokenInObj.decimals);
+const tokenIn = () => isEthToToken ? pairData.base : pairData.quote;
+const tokenOut = () => isEthToToken ? pairData.quote : pairData.base;
+const isNativeTok = (t) => t.isNative || t.address === 'NATIVE';
+
+function cleanAmount(v, decimals) {
+    let s = String(v || '').replace(/,/g, '.').replace(/[^0-9.]/g, '');
+    const dot = s.indexOf('.');
+    if (dot !== -1) s = s.slice(0, dot + 1) + s.slice(dot + 1).replace(/\./g, '');
+    if (s.startsWith('.')) s = '0' + s;
+    const [i, f] = s.split('.');
+    return f !== undefined ? `${i}.${f.slice(0, Number(decimals))}` : i;
+}
+
+function toWei(v, decimals) {
+    const c = cleanAmount(v, decimals);
+    if (!c || c === '.' || Number(c) === 0) return null;
+    try { return ethers.parseUnits(c.endsWith('.') ? c.slice(0, -1) : c, decimals); } catch (e) { return null; }
+}
+
+// Formats a raw amount with a sensible number of decimals. roundUp is used for the
+// computed "You pay" side so the displayed input always covers the requested output.
+function fmtWei(wei, decimals, maxDec, roundUp = false) {
+    if (wei === null || wei === undefined) return '0';
+    const d = Number(decimals);
+    const whole = wei / (10n ** BigInt(d));
+    let places = maxDec ?? (whole >= 1000n ? 2 : whole >= 1n ? 6 : 8);
+    places = Math.min(places, d);
+    const scale = 10n ** BigInt(d - places);
+    let q = wei / scale;
+    if (roundUp && wei % scale !== 0n) q += 1n;
+    const out = ethers.formatUnits(q * scale, d);
+    return out.includes('.') ? out.replace(/\.?0+$/, '') : out;
+}
+
+function setHints() {
+    const hin = getEl('spHintIn'), hout = getEl('spHintOut');
+    const hasValue = amountIn.value || amountOut.value;
+    if (hin) hin.textContent = hasValue && independentField === 'out' ? 'Estimated' : '';
+    if (hout) hout.textContent = hasValue && independentField === 'in' ? 'Estimated' : '';
+}
+
+function resetQuote() {
+    quoteSeq++;
+    clearTimeout(quoteTimer);
+    quoteLoading = false; quoteError = null; lastQuote = null;
+    isWrapAction = false; isUnwrapAction = false;
+    const details = getEl('swapDetails');
+    if (details) details.style.display = 'none';
+    const impactEl = getEl('impactDisplay');
+    if (impactEl) { impactEl.textContent = "--"; impactEl.style.color = "var(--success)"; }
+    document.querySelectorAll('.token-input-box-pro').forEach(b => b.classList.remove('is-loading'));
+    setHints();
+    refreshActionButton();
+}
+
+function scheduleQuote() {
+    clearTimeout(quoteTimer);
+    const seq = ++quoteSeq;
+    const typed = independentField === 'in' ? amountIn.value : amountOut.value;
+    if (!typed || Number(cleanAmount(typed, 18)) === 0) {
+        (independentField === 'in' ? amountOut : amountIn).value = '';
+        resetQuote();
+        return;
+    }
+    quoteLoading = true; quoteError = null;
+    document.querySelectorAll('.token-input-box-pro').forEach((b, i) =>
+        b.classList.toggle('is-loading', (independentField === 'in') === (i === 1)));
+    setHints();
+    refreshActionButton();
+    quoteTimer = setTimeout(() => runQuote(seq), 250);
+}
+
+function renderRate(inWei, outWei) {
+    const tIn = tokenIn(), tOut = tokenOut();
+    const a = parseFloat(ethers.formatUnits(inWei, tIn.decimals));
+    const b = parseFloat(ethers.formatUnits(outWei, tOut.decimals));
+    const el = getEl('priceDisplay');
+    if (!el || !a || !b) return;
+    const fmt = (x) => x >= 1000 ? x.toLocaleString('en-US', { maximumFractionDigits: 2 })
+        : x >= 1 ? String(+x.toFixed(4)) : String(+x.toPrecision(4));
+    el.textContent = rateInverted
+        ? `1 ${tOut.symbol} = ${fmt(a / b)} ${tIn.symbol}`
+        : `1 ${tIn.symbol} = ${fmt(b / a)} ${tOut.symbol}`;
+}
+
+async function runQuote(seq) {
+    const tIn = tokenIn(), tOut = tokenOut();
+    const details = getEl('swapDetails');
+    const exactIn = independentField === 'in';
+    const typedWei = exactIn ? toWei(amountIn.value, tIn.decimals) : toWei(amountOut.value, tOut.decimals);
+    const dependent = exactIn ? amountOut : amountIn;
+
+    isWrapAction = false; isUnwrapAction = false;
+
+    try {
+        if (!typedWei) { dependent.value = ''; resetQuote(); return; }
+        if (!ACTIVE?.router || !tIn || !tOut) throw new Error("Pair data incomplete");
+
+        const WETH_ADDR = ACTIVE.swapTokens.base.underlyingAddress;
+        const wethLC = WETH_ADDR.toLowerCase();
+        const addrIn = isNativeTok(tIn) ? 'NATIVE' : tIn.address.toLowerCase();
+        const addrOut = isNativeTok(tOut) ? 'NATIVE' : tOut.address.toLowerCase();
+
+        let inWei, outWei, impact = 0, path = null;
+
+        if ((addrIn === 'NATIVE' && addrOut === wethLC) || (addrIn === wethLC && addrOut === 'NATIVE')) {
+            isWrapAction = addrIn === 'NATIVE';
+            isUnwrapAction = !isWrapAction;
+            inWei = outWei = typedWei;
+        } else {
+            const best = await bestRoute(typedWei, exactIn, tIn, tOut);
+            if (seq !== quoteSeq) return;
+            path = best.path;
+            inWei = best.amounts[0];
+            outWei = best.amounts[best.amounts.length - 1];
+            const impactData = await routeImpact(path, best.amounts);
+            if (seq !== quoteSeq) return;
             updateImpactUI(impactData);
+            impact = impactData.warning ? 0 : impactData.impact;
+            const route = getEl('spRoute');
+            if (route) route.textContent = routeLabel(path, tIn, tOut);
+        }
+        if (seq !== quoteSeq) return;
 
-            const rate = parseFloat(outFmt) / parseFloat(val);
-            getEl('priceDisplay').textContent = `1 ${tokenInObj.symbol} ≈ ${formatSmartRate(rate)} ${tokenOutObj.symbol}`;
-            
-            const slippageMulti = 1 - (currentSlippage / 100);
-            const minOut = parseFloat(outFmt) * slippageMulti;
-            getEl('minReceivedDisplay').textContent = `${minOut.toFixed(4)} ${tokenOutObj.symbol}`;
+        dependent.value = exactIn ? fmtWei(outWei, tOut.decimals) : fmtWei(inWei, tIn.decimals, undefined, true);
+        lastQuote = { inWei, outWei, impact, path };
 
-            if(btnSwap) { btnSwap.textContent = "Swap"; btnSwap.disabled = false; }
+        if (details) details.style.display = 'block';
+        if (isWrapAction || isUnwrapAction) {
+            getEl('priceDisplay').textContent = isWrapAction ? "1 : 1 (Wrap)" : "1 : 1 (Unwrap)";
+            getEl('impactDisplay').textContent = "0.00%";
+            getEl('impactDisplay').style.color = "var(--success)";
+            getEl('minReceivedDisplay').textContent = `${fmtWei(outWei, tOut.decimals)} ${tOut.symbol}`;
+            const route = getEl('spRoute');
+            if (route) route.textContent = `${tIn.symbol} → ${tOut.symbol} · ${isWrapAction ? 'Wrap' : 'Unwrap'}`;
+        } else {
+            renderRate(inWei, outWei);
+            const slippageBps = BigInt(Math.floor(currentSlippage * 100));
+            const minOut = (outWei * (10000n - slippageBps)) / 10000n;
+            getEl('minReceivedDisplay').textContent = `${fmtWei(minOut, tOut.decimals)} ${tOut.symbol}`;
+        }
+        quoteError = null;
+    } catch (e) {
+        if (seq !== quoteSeq) return;
+        console.log("Quote Error:", e);
+        dependent.value = '';
+        lastQuote = null;
+        quoteError = "Insufficient liquidity for this trade";
+        if (details) details.style.display = 'none';
+        const impactEl = getEl('impactDisplay');
+        if (impactEl) impactEl.textContent = "--";
+    } finally {
+        if (seq === quoteSeq) {
+            quoteLoading = false;
+            document.querySelectorAll('.token-input-box-pro').forEach(b => b.classList.remove('is-loading'));
+            setHints();
+            refreshActionButton();
+        }
+    }
+}
 
-        } catch(e) {
-            console.log("Quote Error:", e);
-            amountOut.value = "0.0";
-            if(btnSwap) { btnSwap.textContent = "Insufficient Liquidity"; btnSwap.disabled = true; }
-            const impactEl = getEl('impactDisplay');
-            if(impactEl) impactEl.textContent = "--";
+function refreshActionButton() {
+    const btn = getEl('btnSwapAction');
+    if (!btn) return;
+    btn.classList.remove('is-warning', 'is-danger');
+    const set = (text, disabled) => { btn.textContent = text; btn.disabled = disabled; };
+
+    if (!userAddress) return set("Connect Wallet", false);
+    if (!pairData.base || !pairData.quote) return set("Select a token", true);
+    const hasValue = (getEl('amountIn')?.value || getEl('amountOut')?.value);
+    if (quoteLoading) return set("Fetching best price…", true);
+    if (quoteError) return set(quoteError, true);
+    if (!hasValue || !lastQuote) return set("Enter an amount", true);
+    if (rawBal.in !== null && lastQuote.inWei > rawBal.in) return set(`Insufficient ${tokenIn().symbol} balance`, true);
+
+    if (isWrapAction) return set("Wrap", false);
+    if (isUnwrapAction) return set("Unwrap", false);
+    if (lastQuote.impact > 15) { btn.classList.add('is-danger'); return set("Swap anyway · high price impact", false); }
+    if (lastQuote.impact > 5) btn.classList.add('is-warning');
+    set("Swap", false);
+}
+
+function onAmountTyped(field) {
+    const el = field === 'in' ? amountIn : amountOut;
+    const t = field === 'in' ? tokenIn() : tokenOut();
+    const cleaned = cleanAmount(el.value, t ? t.decimals : 18);
+    if (cleaned !== el.value) el.value = cleaned;
+    independentField = field;
+    getEl('swapStatus').textContent = '';
+    scheduleQuote();
+}
+
+if (amountIn) amountIn.addEventListener('input', () => onAmountTyped('in'));
+if (amountOut) {
+    amountOut.disabled = false;
+    amountOut.addEventListener('input', () => onAmountTyped('out'));
+}
+
+async function setFractionOfBalance(numerator, denominator) {
+    if (!signer) { openWalletModal(); return; }
+    if (rawBal.in === null) await updateBalances();
+    const t = tokenIn();
+    if (!t || rawBal.in === null) return;
+    let amount = (rawBal.in * BigInt(numerator)) / BigInt(denominator);
+    if (isNativeTok(t) && numerator === denominator) {
+        try {
+            const fee = await getReadProvider().getFeeData();
+            const gasPrice = fee.maxFeePerGas ?? fee.gasPrice ?? 0n;
+            const reserve = gasPrice * 300000n * 2n;
+            amount = amount > reserve ? amount - reserve : 0n;
+        } catch (e) { /* keep full balance */ }
+    }
+    amountIn.value = amount > 0n ? fmtWei(amount, t.decimals, Math.min(8, Number(t.decimals))) : '';
+    independentField = 'in';
+    scheduleQuote();
+}
+if (getEl('spMax')) getEl('spMax').onclick = () => setFractionOfBalance(1, 1);
+if (getEl('spHalf')) getEl('spHalf').onclick = () => setFractionOfBalance(1, 2);
+
+if (getEl('priceDisplay')) getEl('priceDisplay').onclick = () => {
+    rateInverted = !rateInverted;
+    if (lastQuote && !isWrapAction && !isUnwrapAction) renderRate(lastQuote.inWei, lastQuote.outWei);
+};
+
+const settingsBtn = getEl('spSettingsBtn');
+const settingsPanel = getEl('spSettings');
+if (settingsBtn && settingsPanel) {
+    settingsBtn.onclick = (e) => {
+        e.stopPropagation();
+        settingsPanel.hidden = !settingsPanel.hidden;
+        settingsBtn.setAttribute('aria-expanded', String(!settingsPanel.hidden));
+    };
+    document.addEventListener('click', (e) => {
+        if (!settingsPanel.hidden && !settingsPanel.contains(e.target) && !settingsBtn.contains(e.target)) {
+            settingsPanel.hidden = true;
+            settingsBtn.setAttribute('aria-expanded', 'false');
         }
     });
 }
 
-if(getEl('btnSwitch')) {
-    getEl('btnSwitch').onclick = () => {
-        isEthToToken = !isEthToToken;
-        updateSwapUI();
-        updateBalances();
-        loadChartData(); 
-        amountIn.value = ""; amountOut.value = "";
-        getEl('swapDetails').style.display = 'none';
-    };
+document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    if (getEl('tokenModal')?.classList.contains('open')) closeTokenModal();
+    if (getEl('walletModal')?.classList.contains('open')) closeWalletModal();
+    if (settingsPanel && !settingsPanel.hidden) { settingsPanel.hidden = true; settingsBtn.setAttribute('aria-expanded', 'false'); }
+});
+
+if (getEl('btnViewExplorer')) getEl('btnViewExplorer').onclick = () => {
+    const url = userAddress && explorerUrl('address/' + userAddress);
+    if (url) window.open(url, '_blank', 'noopener');
+};
+
+// The typed amount stays with its token when the pair is flipped.
+function flipTokens() {
+    const vIn = amountIn.value, vOut = amountOut.value;
+    isEthToToken = !isEthToToken;
+    rawBal = { in: rawBal.out, out: rawBal.in };
+    updateSwapUI();
+    updateBalances();
+    loadChartData();
+    if (independentField === 'in') { amountOut.value = vIn; amountIn.value = ''; independentField = 'out'; }
+    else { amountIn.value = vOut; amountOut.value = ''; independentField = 'in'; }
+    const btn = getEl('btnSwitch');
+    if (btn) { btn.classList.remove('spin'); void btn.offsetWidth; btn.classList.add('spin'); }
+    if (amountIn.value || amountOut.value) scheduleQuote(); else resetQuote();
 }
+if (getEl('btnSwitch')) getEl('btnSwitch').onclick = flipTokens;
 
 if(btnSwap) {
     btnSwap.onclick = async () => {
         if(!signer) { openWalletModal(); return; }
-        const val = amountIn.value;
-        if(!val) return;
+        if(btnSwap.disabled) return;
+        const tokenInObj = isEthToToken ? pairData.base : pairData.quote;
+        const val = cleanAmount(amountIn.value, tokenInObj.decimals);
+        if(!val || Number(val) === 0) return;
 
         const statusDiv = getEl('swapStatus');
-        const tokenInObj = isEthToToken ? pairData.base : pairData.quote;
         const amountInWei = ethers.parseUnits(val, tokenInObj.decimals);
         const WETH_ADDR = ACTIVE.swapTokens.base.underlyingAddress;
 
@@ -519,10 +825,10 @@ if(btnSwap) {
                 
                 const addrIn = (tokenInObj.isNative || tokenInObj.address === 'NATIVE') ? WETH_ADDR : tokenInObj.address;
                 const addrOut = (tokenOutObj.isNative || tokenOutObj.address === 'NATIVE') ? WETH_ADDR : tokenOutObj.address;
-                const path = [addrIn, addrOut];
+                const path = (lastQuote && lastQuote.path) ? lastQuote.path : [addrIn, addrOut];
                 
                 const amounts = await router.getAmountsOut(amountInWei, path);
-                const amountOutExpected = amounts[1];
+                const amountOutExpected = amounts[amounts.length - 1];
                 
                 const slippageBps = BigInt(Math.floor(currentSlippage * 100));
                 const BPS_MAX = 10000n;
@@ -565,18 +871,29 @@ if(btnSwap) {
             }
 
             statusDiv.innerText = "Tx Sent...";
+            btnSwap.disabled = true; btnSwap.textContent = "Confirming…";
             await tx.wait();
-            statusDiv.innerText = isWrapAction ? "Wrap Successful! 🌯" : (isUnwrapAction ? "Unwrap Successful! 🔓" : "Swap Successful! 🚀");
+            const doneMsg = isWrapAction ? "Wrap successful" : (isUnwrapAction ? "Unwrap successful" : "Swap successful");
+            const txUrl = explorerUrl('tx/' + tx.hash);
+            statusDiv.textContent = doneMsg + (txUrl ? " · " : "");
+            if(txUrl) {
+                const a = document.createElement('a');
+                a.href = txUrl; a.target = "_blank"; a.rel = "noopener"; a.textContent = "View on explorer ↗";
+                statusDiv.appendChild(a);
+            }
             statusDiv.style.color = "var(--success)";
-            updateBalances();
             amountIn.value = ""; amountOut.value = "";
+            resetQuote();
+            updateBalances();
             
         } catch(e) {
             console.error(e);
             let msg = "Transaction Failed";
             if(e.reason && e.reason.includes("INSUFFICIENT_OUTPUT_AMOUNT")) msg = "Slippage Error";
+            if(e.code === "ACTION_REJECTED" || e.info?.error?.code === 4001) msg = "Transaction rejected in wallet";
             statusDiv.innerText = msg;
             statusDiv.style.color = "var(--danger)";
+            refreshActionButton();
         }
     };
 }
@@ -665,12 +982,22 @@ function renderTokenList(filter = "") {
             </div>
         `;
         item.onclick = () => selectToken(token);
+        item.tabIndex = 0;
+        item.setAttribute('role', 'button');
+        item.onkeydown = (e) => { if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectToken(token); } };
         tokenListContainer.appendChild(item);
     });
 }
 
 async function selectToken(token) {
     if(!pairData || !selectingSide) return;
+
+    const other = selectingSide === 'base' ? pairData.quote : pairData.base;
+    if(other && String(other.address).toLowerCase() === String(token.address).toLowerCase()) {
+        closeTokenModal();
+        flipTokens();
+        return;
+    }
 
     let finalAddress = token.address;
     
@@ -685,12 +1012,13 @@ async function selectToken(token) {
     if(selectingSide === 'base') pairData.base = newTokenObj;
     else pairData.quote = newTokenObj;
 
+    rawBal = { in: null, out: null };
     updateSwapUI();     
     updateBalances(); 
     loadChartData(); 
-    getEl('amountIn').value = ""; getEl('amountOut').value = "";
-    if(getEl('swapDetails')) getEl('swapDetails').style.display = 'none';
+    const keep = independentField === 'in' ? amountIn.value : amountOut.value;
     closeTokenModal();
+    if(keep) scheduleQuote(); else resetQuote();
 }
 
 // ==========================================
@@ -705,48 +1033,6 @@ const PAIR_ABI_IMPACT = [
 const FACTORY_ABI_IMPACT = [
     "function getPair(address, address) view returns (address)"
 ];
-
-async function calculatePriceImpact(amountInWei, path, decimalsIn) {
-    try {
-        const tokenA = path[0];
-        const tokenB = path[1];
-        
-        let factoryAddr = ACTIVE.factory;
-        if(!factoryAddr) {
-            const router = new ethers.Contract(ACTIVE.router, window.POOL_ROUTER_ABI, provider);
-            factoryAddr = await router.factory();
-        }
-
-        const factory = new ethers.Contract(factoryAddr, FACTORY_ABI_IMPACT, provider);
-        const pairAddr = await factory.getPair(tokenA, tokenB);
-
-        if (pairAddr === "0x0000000000000000000000000000000000000000") {
-            return { impact: 0, warning: "No Liquidity" };
-        }
-
-        const pair = new ethers.Contract(pairAddr, PAIR_ABI_IMPACT, provider);
-        const [reserves, token0] = await Promise.all([
-            pair.getReserves(),
-            pair.token0()
-        ]);
-
-        const isTokenA0 = tokenA.toLowerCase() === token0.toLowerCase();
-        const reserveIn = isTokenA0 ? reserves[0] : reserves[1];
-
-        if(reserveIn <= 0n) return { impact: 0, warning: "Empty Pool" };
-
-        const amountInFloat = parseFloat(ethers.formatUnits(amountInWei, decimalsIn));
-        const reserveInFloat = parseFloat(ethers.formatUnits(reserveIn, decimalsIn));
-
-        const impact = (amountInFloat / (reserveInFloat + amountInFloat)) * 100;
-        
-        return { impact: impact, warning: null };
-
-    } catch (e) {
-        console.error("Impact Calc Error:", e);
-        return { impact: 0, warning: "Error" };
-    }
-}
 
 function updateImpactUI(impactData) {
     const el = getEl('impactDisplay');
@@ -797,6 +1083,7 @@ window.initChart = function() { initHybridChart(); };
 
 window.loadChartData = async function() {
     if(chartInterval) clearInterval(chartInterval);
+    chartRoutePath = null;
 
     // Validar entorno básico
     if(!ACTIVE) return; 
@@ -842,6 +1129,8 @@ window.loadChartData = async function() {
         const historyData = generateSyntheticHistory(price, 100, volatility);
         
         if(candleSeries) {
+            const precision = price >= 100 ? 2 : price >= 1 ? 4 : Math.min(10, Math.max(4, Math.ceil(-Math.log10(price)) + 3));
+            candleSeries.applyOptions({ priceFormat: { type: 'price', precision, minMove: Math.pow(10, -precision) } });
             candleSeries.setData(historyData);
         }
         
@@ -918,22 +1207,28 @@ async function fetchPriceFromBlockchain(provider) {
 
     try {
         const router = new ethers.Contract(ACTIVE.router, window.ROUTER_ABI, provider);
-        const WETH = ACTIVE.swapTokens.base.underlyingAddress;
         
         // Determinar dirección basada en el switch de la UI
         const tIn = isEthToToken ? pairData.base : pairData.quote; 
         const tOut = isEthToToken ? pairData.quote : pairData.base;
 
-        const addrIn = (tIn.isNative || tIn.address === 'NATIVE') ? WETH : tIn.address;
-        const addrOut = (tOut.isNative || tOut.address === 'NATIVE') ? WETH : tOut.address;
-
-        // Pedir precio de 1 unidad de entrada
-        const oneUnit = ethers.parseUnits("1", tIn.decimals);
-        const amounts = await router.getAmountsOut(oneUnit, [addrIn, addrOut]);
+        // Spot price: quoting a full unit in shallow pools returns the price after slippage,
+        // so quote 1/10,000 of a unit (same route as the swap) and scale it back up.
+        const probeExp = Number(tIn.decimals) >= 6 ? 4 : 0;
+        const probe = ethers.parseUnits("1", Number(tIn.decimals) - probeExp);
+        let amounts;
+        if (chartRoutePath) {
+            amounts = await router.getAmountsOut(probe, chartRoutePath);
+        } else {
+            const best = await bestRoute(probe, true, tIn, tOut);
+            chartRoutePath = best.path;
+            amounts = best.amounts;
+        }
         
-        const price = parseFloat(ethers.formatUnits(amounts[1], tOut.decimals));
+        const price = parseFloat(ethers.formatUnits(amounts[amounts.length - 1], tOut.decimals)) * Math.pow(10, probeExp);
         return price;
     } catch(e) {
+        chartRoutePath = null;
         // Retornamos null silenciosamente para activar el fallback
         return null;
     }

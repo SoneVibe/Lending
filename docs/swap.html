@@ -21,6 +21,7 @@
   <meta name="theme-color" content="#07080f">
   <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/swap-responsive.css">
+  <link rel="stylesheet" href="css/swap-pro.css">
   <script src="https://unpkg.com/lightweight-charts@3.8.0/dist/lightweight-charts.standalone.production.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <style>
@@ -54,8 +55,7 @@
   <div class="app-container swap-layout">
     <nav class="sidebar glass-panel">
       <div class="logo-area">
-        <svg width="28" height="28" viewBox="0 0 64 64"><circle cx="32" cy="32" r="32" fill="#1a1f35"/><path d="M18 42 L32 18 L46 42 Z" fill="#00e0ff"/></svg>
-        VIBE Finance
+        <a class="brand-mark" href="index.html" aria-label="SoneVibe home"><img src="icons/vibe.svg" alt="" width="32" height="32"><span>SoneVibe</span></a>
       </div>
       <div class="nav-section-label">App</div>
       <a href="index.html" class="nav-link">Home</a>
@@ -90,8 +90,8 @@
       
       <header>
         <div>
-          <h1 style="margin:0; font-size:1.8rem; background: linear-gradient(90deg, #fff, #a5b4fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">VibeSwap Pro</h1>
-          <p style="margin:4px 0 0 0; color:var(--text-muted);">Institutional Grade Execution</p>
+          <h1 style="margin:0; font-size:1.8rem; background: linear-gradient(90deg, #fff, #a5b4fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">SoneVibe Swap</h1>
+          <p style="margin:4px 0 0 0; color:var(--text-muted);">Trade instantly at the best on-chain price</p>
         </div>
         
         <div class="nav-group">
@@ -132,63 +132,81 @@
         <div class="swap-container-pro">
             <div id="swapPanel" class="swap-card-pro">
                 <div class="swap-header-pro">
-                    <h3>Market Order</h3>
-                    <span id="slippageSmall" style="color:var(--text-muted); font-size:0.8rem;">0.5% Slippage</span>
+                    <h3>Swap</h3>
+                    <div class="sp-head-actions">
+                        <span id="slippageSmall" class="sp-slip-pill">0.5% Slippage</span>
+                        <button type="button" id="spSettingsBtn" class="sp-icon-btn" aria-label="Swap settings" aria-expanded="false" aria-controls="spSettings">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1.08-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="spSettings" class="sp-settings" hidden>
+                    <div class="sp-settings-row">
+                        <span>Max. slippage</span>
+                        <span id="slippageDisplay" class="sp-slip-val">0.5%</span>
+                    </div>
+                    <div class="sp-slip-options">
+                        <button type="button" class="btn-ghost" onclick="setSlippage(0.1)">0.1%</button>
+                        <button type="button" class="btn-ghost" onclick="setSlippage(0.5)" style="border:1px solid var(--success);">0.5%</button>
+                        <button type="button" class="btn-ghost" onclick="setSlippage(1.0)">1.0%</button>
+                        <button type="button" class="btn-ghost" onclick="setSlippage(5.0)" style="color:var(--warning);">5.0%</button>
+                    </div>
+                    <p class="sp-settings-note">Your transaction reverts if the price moves against you by more than this percentage.</p>
                 </div>
 
                 <div class="token-input-box-pro">
                     <div class="token-flex">
-                        <label>Pay</label>
-                        <span class="balance-label">Bal: <span id="balIn">0.00</span></span>
+                        <label for="amountIn">You pay</label>
+                        <span class="sp-hint" id="spHintIn"></span>
                     </div>
                     <div class="token-flex-main">
-                        <input type="number" id="amountIn" class="swap-input-pro" placeholder="0.0">
-                        <div class="token-badge-pro" id="tokenInBtn">
-                            <img alt="" id="imgIn" src="icons/weth.svg" width="24" onerror="this.src='icons/token.svg'"> <span id="symIn">ETH</span>
-                        </div>
+                        <input type="text" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" pattern="^[0-9]*[.,]?[0-9]*$" id="amountIn" class="swap-input-pro" placeholder="0">
+                        <button type="button" class="token-badge-pro" id="tokenInBtn" aria-label="Select token to pay">
+                            <img alt="" id="imgIn" src="icons/weth.svg" width="24" onerror="this.src='icons/token.svg'"> <span id="symIn">ETH</span><svg class="sp-chev" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+                        </button>
+                    </div>
+                    <div class="sp-sub">
+                        <span class="balance-label">Balance: <span id="balIn">0.00</span></span>
+                        <span class="sp-chips">
+                            <button type="button" class="sp-chip" id="spHalf">50%</button>
+                            <button type="button" class="sp-chip" id="spMax">MAX</button>
+                        </span>
                     </div>
                 </div>
 
                 <div class="swap-arrow-pro">
-                    <div class="btn-arrow-pro" id="btnSwitch">↓</div>
+                    <button type="button" class="btn-arrow-pro" id="btnSwitch" aria-label="Switch tokens">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+                    </button>
                 </div>
 
                 <div class="token-input-box-pro">
                     <div class="token-flex">
-                        <label>Receive (Estimated)</label>
-                        <span class="balance-label">Bal: <span id="balOut">0.00</span></span>
+                        <label for="amountOut">You receive</label>
+                        <span class="sp-hint" id="spHintOut"></span>
                     </div>
                     <div class="token-flex-main">
-                        <input type="number" id="amountOut" class="swap-input-pro" placeholder="0.0" disabled>
-                        <div class="token-badge-pro" id="tokenOutBtn">
-                            <img alt="" id="imgOut" src="icons/vibe.svg" width="24" onerror="this.src='icons/token.svg'"> <span id="symOut">LIGHT</span>
-                        </div>
+                        <input type="text" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" pattern="^[0-9]*[.,]?[0-9]*$" id="amountOut" class="swap-input-pro" placeholder="0">
+                        <button type="button" class="token-badge-pro" id="tokenOutBtn" aria-label="Select token to receive">
+                            <img alt="" id="imgOut" src="icons/vibe.svg" width="24" onerror="this.src='icons/token.svg'"> <span id="symOut">LIGHT</span><svg class="sp-chev" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+                        </button>
+                    </div>
+                    <div class="sp-sub">
+                        <span class="balance-label">Balance: <span id="balOut">0.00</span></span>
                     </div>
                 </div>
-
-                <div style="margin: 15px 0;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                        <span style="font-size:0.75rem; color:var(--text-muted);">Slippage Tolerance</span>
-                        <span id="slippageDisplay" style="color:var(--success); font-weight:600; font-size:0.8rem;">0.5%</span>
-                    </div>
-                    <div style="display:flex; gap:5px;">
-                        <button class="btn-ghost" onclick="setSlippage(0.1)" style="flex:1; font-size:0.75rem; padding:6px;">0.1%</button>
-                        <button class="btn-ghost" onclick="setSlippage(0.5)" style="flex:1; font-size:0.75rem; padding:6px; border:1px solid var(--success);">0.5%</button>
-                        <button class="btn-ghost" onclick="setSlippage(1.0)" style="flex:1; font-size:0.75rem; padding:6px;">1.0%</button>
-                        <button class="btn-ghost" onclick="setSlippage(5.0)" style="flex:1; font-size:0.75rem; padding:6px; color:var(--warning);">5.0%</button>
-                    </div>
-                </div>
-                
 
                 <div class="swap-details" id="swapDetails" style="display:none;">
-                    <div class="detail-row"><span>Rate</span><span id="priceDisplay" style="color:var(--success)">--</span></div>
-                    <div class="detail-row"><span>Price Impact</span><span id="impactDisplay" style="color:var(--success)">0.00%</span></div>
-                    <div class="detail-row"><span>Route</span><span>VibeRouter V2</span></div>
-                    <div class="detail-row"><span>Minimum Received</span><span id="minReceivedDisplay" style="color:#fff">--</span></div>
+                    <div class="detail-row"><span>Rate</span><button type="button" id="priceDisplay" class="sp-rate" title="Switch rate direction">--</button></div>
+                    <div class="detail-row"><span>Price impact</span><span id="impactDisplay" style="color:var(--success)">0.00%</span></div>
+                    <div class="detail-row"><span>Minimum received</span><span id="minReceivedDisplay" style="color:#fff">--</span></div>
+                    <div class="detail-row"><span>Max. slippage</span><span id="spSlipDetail">0.5%</span></div>
+                    <div class="detail-row"><span>Route</span><span id="spRoute">SoneVibe Router V2</span></div>
                 </div>
 
                 <button id="btnSwapAction" class="btn-primary-pro">Connect Wallet</button>
-                <div id="swapStatus" class="action-status" style="margin-top:10px;"></div>
+                <div id="swapStatus" class="action-status" role="status" aria-live="polite" style="margin-top:10px;"></div>
             </div>
 
             </div> 
@@ -200,7 +218,7 @@
     <div class="modal-card">
       <div class="modal-header"><h2 class="modal-title">Connect Wallet</h2><button class="btn-close" onclick="closeWalletModal()">×</button></div>
       <div id="walletList" class="wallet-grid"></div>
-      <div style="margin-top:24px; text-align:center; font-size:0.8rem; color:var(--text-muted);">By connecting, you agree to VIBE Terms of Service.</div>
+      <div style="margin-top:24px; text-align:center; font-size:0.8rem; color:var(--text-muted);">By connecting, you agree to SoneVibe Terms of Service.</div>
     </div>
   </div>
 

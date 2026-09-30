@@ -63,7 +63,7 @@
     "slug": "Polkadot",
     "label": "Polkadot Mainnet",
     "chainId": "420420419",
-    "rpcUrls": ["https://services.polkadothub-rpc.com/mainnet"],
+    "rpcUrls": ["https://eth-rpc.polkadot.io/"],
     "blockExplorerUrls": ["https://blockscout.polkadot.io/"],
     "nativeCurrency": { "name": "Polkadot", "symbol": "DOT", "decimals": 18 },
     "master": "",
@@ -76,7 +76,7 @@
             "symbol": "DOT", 
             "underlyingAddress": "0xaf905e66038EcE89e03D843B35a11D262053B630", 
             "decimals": 18, 
-            "icon": "icons/dot2.jpg",
+            "icon": "icons/polkadot.svg",
             "isNative": true
         },
         "quote": { 
@@ -136,7 +136,7 @@
             "symbol": "DOT", 
             "underlyingAddress": "0x9b9219B3834b3E3307267EAa1E38FABCF165fC2e", 
             "decimals": 18, 
-            "icon": "icons/dot2.jpg",
+            "icon": "icons/polkadot.svg",
             "isNative": true
         },
         "quote": { 
@@ -151,7 +151,7 @@
       {
         "symbol": "cDOT",
         "underlyingSymbol": "DOT",
-        "icon": "icons/dot2.jpg",
+        "icon": "icons/polkadot.svg",
         "address": "0x44dF8ED3917c12DE14062Ad57f70eD48E479c9aa",
         "underlying": "0x9b9219B3834b3E3307267EAa1E38FABCF165fC2e",
         "underlyingDecimals": 18,
@@ -290,7 +290,7 @@
       {
         "symbol": "cDOT",
         "underlyingSymbol": "DOT",
-        "icon": "icons/dot.svg",
+        "icon": "icons/polkadot.svg",
         "address": "0xe5cE001dD3439A198b2A19567D5F3CD6cd30e61f",
         "underlying": "0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF",
         "underlyingDecimals": 10,
@@ -378,7 +378,7 @@
        {
          "symbol": "cDOT",
          "underlyingSymbol": "DOT",
-        "icon": "icons/dot.svg",
+        "icon": "icons/polkadot.svg",
         "address": "0x17d8068e1922C850FE31dA77192591B8b00DC352",
        "underlying": "0xE565757cc757a0985327Af1190185fF7b172868E",
        "underlyingDecimals": 18,

@@ -15,7 +15,7 @@
     '1868': { name: 'Soneium', color: '#00e0ff', icon: 'icons/weth.svg', products: ['DEX', 'Lending', 'SVUSD', 'NFTs'], logs: { chunk: 10000, days: 7, concurrency: 4 } },
     '56': { name: 'BNB Chain', color: '#f3ba2f', icon: 'icons/bnb.png', products: ['DEX'], stables: ['usd1'], logs: { rpc: 'https://rpc-bsc.48.club', chunk: 5000, days: 1, concurrency: 12 } },
     '592': { name: 'Astar', color: '#8b5cf6', icon: 'icons/astr.svg', products: ['DEX', 'Lending', 'NFTs'] },
-    '420420419': { name: 'Polkadot Hub', color: '#e6007a', icon: 'icons/dot2.jpg', products: ['DEX'] },
+    '420420419': { name: 'Polkadot Hub', color: '#e6007a', icon: 'icons/polkadot.svg', products: ['DEX'] },
   };
   // Orden explícito: las claves numéricas de un objeto JS se ordenan de menor a mayor.
   const ORDER = ['1868', '56', '592', '420420419'];

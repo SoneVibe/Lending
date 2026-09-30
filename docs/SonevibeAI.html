@@ -435,6 +435,8 @@
       }
     }
       /* Unified nav groups + shared footer (matches css/style.css) */
+    .brand-mark { display: flex; align-items: center; gap: 10px; color: #fff; font-weight: 800; letter-spacing: -.02em; text-decoration: none; }
+    .brand-mark img { border-radius: 50%; box-shadow: 0 0 0 1px rgba(255,255,255,.08), 0 4px 14px rgba(124,58,237,.35); }
     .sidebar { overflow-y: auto; }
     .nav-section-label { font-size: .7rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text-secondary); padding: 12px 12px 4px; }
     .nav-more { display: flex; flex-direction: column; }
@@ -462,9 +464,8 @@
   <!-- Sidebar -->
   <nav class="sidebar" id="sidebar">
     <div class="logo-area">
-      <svg width="28" height="28" viewBox="0 0 64 64"><circle cx="32" cy="32" r="32" fill="#1a1f35"/><path d="M18 42 L32 18 L46 42 Z" fill="#00e0ff"/></svg>
-      <span>VIBE Finance</span>
-    </div>
+        <a class="brand-mark" href="index.html" aria-label="SoneVibe home"><img src="icons/vibe.svg" alt="" width="32" height="32"><span>SoneVibe</span></a>
+      </div>
     <div class="nav-section-label">App</div>
     <a href="index.html" class="nav-link">Home</a>
     <a href="swap.html" class="nav-link">Swap</a>
@@ -535,7 +536,7 @@
         <div class="message">
           <div class="bubble">
             ✨ <strong>VIBE is online</strong><br><br>
-            I'm VIBE, the AI assistant of SoneVibe Finance. I specialize in:<br><br>
+            I'm VIBE, the AI assistant of SoneVibe. I specialize in:<br><br>
             • <strong>DeFi Multi-Chain</strong>: Polkadot, Astar Network, Soneium, BNB Chain<br>
             • <strong>SoneVibe Protocol</strong>: Lending, swapping, SVUSD stablecoin, $VIBE tokenomics<br>
             • <strong>General Knowledge</strong>: Ask me anything!<br><br>
@@ -567,7 +568,7 @@
 
     <!-- FAQ Section - SoneVibe Information -->
     <div class="faq-section">
-      <h3 style="margin-bottom: 16px;"><i class="fas fa-question-circle"></i> About SoneVibe Finance</h3>
+      <h3 style="margin-bottom: 16px;"><i class="fas fa-question-circle"></i> About SoneVibe</h3>
       <div class="faq-grid" id="faqGrid">
         <!-- FAQ items will be populated by JavaScript -->
       </div>
@@ -590,7 +591,7 @@
     // SoneVibe Knowledge Base (from official sources)
     // ======================
     const sonevibeFacts = {
-      protocol: "SoneVibe Finance is a decentralized money market protocol offering lending, borrowing, and swapping. Deployed on Astar EVM (Polkadot parachain), Soneium (Sony-backed L2), and expanding to BNB Chain.",
+      protocol: "SoneVibe is a decentralized money market protocol offering lending, borrowing, and swapping. Deployed on Astar EVM (Polkadot parachain), Soneium (Sony-backed L2), and expanding to BNB Chain.",
       token: "$VIBE is the native token with a hard cap of 1,000,000 supply. It distributes real yield from protocol fees and features deflationary mechanisms including ASTR burns on claims.",
       svusd: "SVUSD is SoneVibe's native overcollateralized stablecoin, inspired by Aave GHO and backed by ASTR, USDC, and cross-chain assets. It includes a Peg Stability Module (PSM) for price stability.",
       astar: "SoneVibe is deeply integrated with Astar Network: ASTR is core collateral, used in lending markets, paired with DOT on Astar EVM, and featured in ASTR/VIBE liquidity pools with 0.1% burn on claims.",
@@ -603,7 +604,7 @@
 
     // Questions and Answers for FAQ
     const faqItems = [
-      { q: "What is SoneVibe Finance?", a: sonevibeFacts.protocol },
+      { q: "What is SoneVibe?", a: sonevibeFacts.protocol },
       { q: "What is $VIBE token?", a: sonevibeFacts.token },
       { q: "What is SVUSD?", a: sonevibeFacts.svusd },
       { q: "How does SoneVibe integrate with Astar?", a: sonevibeFacts.astar },
