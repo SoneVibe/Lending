@@ -1,0 +1,129 @@
+/* =========================================
+   SONEVIBE SWAP — card refinements (loaded after style.css + swap-responsive.css)
+   ========================================= */
+
+.swap-card-pro {
+  position: relative;
+  background: linear-gradient(180deg, rgba(23,26,38,.96), rgba(16,18,28,.96));
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 24px;
+  padding: 16px;
+  box-shadow: 0 24px 60px rgba(0,0,0,.45), 0 0 0 1px rgba(124,58,237,.06), 0 0 80px -20px rgba(124,58,237,.25);
+}
+
+.swap-header-pro { margin: 2px 4px 12px; }
+.swap-header-pro h3 { font-size: 1.15rem; font-weight: 700; letter-spacing: -.01em; }
+.sp-head-actions { display: flex; align-items: center; gap: 6px; }
+.sp-slip-pill {
+  font-size: .75rem; font-weight: 600; color: var(--text-muted);
+  padding: 5px 10px; border-radius: 999px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.06);
+}
+.sp-icon-btn {
+  width: 40px; height: 40px; border-radius: 12px; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  color: var(--text-muted); background: transparent; border: 1px solid transparent; transition: color .15s, background .15s, transform .3s;
+}
+.sp-icon-btn:hover, .sp-icon-btn[aria-expanded="true"] { color: #fff; background: rgba(255,255,255,.06); }
+.sp-icon-btn[aria-expanded="true"] svg { transform: rotate(60deg); }
+.sp-icon-btn svg { transition: transform .3s; }
+
+/* Settings popover */
+.sp-settings {
+  margin: 0 0 12px; padding: 14px; border-radius: 16px;
+  background: #0d0f18; border: 1px solid rgba(255,255,255,.08);
+  animation: fadeIn .15s ease-out;
+}
+.sp-settings[hidden] { display: none; }
+.sp-settings-row { display: flex; justify-content: space-between; align-items: center; font-size: .85rem; color: var(--text-muted); margin-bottom: 10px; }
+.sp-slip-val { color: var(--success); font-weight: 700; }
+.sp-slip-options { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.sp-slip-options .btn-ghost { padding: 10px 0; font-size: .82rem; border-radius: 10px; min-height: 40px; }
+.sp-settings-note { margin: 10px 0 0; font-size: .75rem; line-height: 1.5; color: var(--text-muted); }
+
+/* Token boxes */
+.token-input-box-pro {
+  background: #0b0c15;
+  border: 1px solid rgba(255,255,255,.05);
+  border-radius: 18px;
+  padding: 14px 16px 12px;
+}
+.token-input-box-pro:hover { border-color: rgba(255,255,255,.1); }
+.token-input-box-pro:focus-within { border-color: rgba(124,58,237,.55); background: #0e0f1a; box-shadow: 0 0 0 3px rgba(124,58,237,.12); }
+.token-flex { margin-bottom: 0; }
+.token-flex label { font-size: .85rem; font-weight: 500; color: var(--text-muted); }
+.sp-hint { font-size: .72rem; font-weight: 600; color: var(--text-muted); letter-spacing: .02em; }
+
+.token-flex-main { gap: 12px; margin-top: 6px; }
+.swap-input-pro {
+  flex: 1; min-width: 0; width: auto;
+  font-size: 2.1rem; font-weight: 600; letter-spacing: -.02em;
+  font-variant-numeric: tabular-nums; text-overflow: ellipsis;
+}
+.swap-input-pro::placeholder { color: #3a3d4f; }
+.token-input-box-pro.is-loading .swap-input-pro { animation: pulse 1.2s infinite; }
+
+.token-badge-pro {
+  flex-shrink: 0; border: 1px solid rgba(255,255,255,.08); color: #fff; font-family: inherit;
+  background: #22253a; padding: 6px 10px 6px 6px; border-radius: 999px; font-size: 1.05rem;
+}
+.token-badge-pro:hover { background: #2d3150; border-color: rgba(255,255,255,.14); }
+.token-badge-pro img { width: 26px; height: 26px; border-radius: 50%; object-fit: contain; background: #0b0c15; }
+.sp-chev { opacity: .7; margin-left: 2px; }
+
+.sp-sub { display: flex; justify-content: space-between; align-items: center; min-height: 28px; margin-top: 6px; }
+.sp-sub .balance-label { cursor: default; font-variant-numeric: tabular-nums; }
+.sp-sub .balance-label:hover { color: var(--text-muted); }
+.sp-chips { display: flex; gap: 6px; }
+.sp-chip {
+  font: inherit; font-size: .72rem; font-weight: 700; letter-spacing: .03em; cursor: pointer;
+  padding: 4px 10px; border-radius: 8px; color: #c4b5fd;
+  background: rgba(124,58,237,.12); border: 1px solid rgba(124,58,237,.28); transition: background .15s, color .15s;
+}
+.sp-chip:hover { background: rgba(124,58,237,.25); color: #fff; }
+
+/* Flip button */
+.swap-arrow-pro { margin: -12px 0; }
+.btn-arrow-pro {
+  width: 40px; height: 40px; border-radius: 12px; padding: 0;
+  border: 4px solid #151826; background-color: #22253a; color: #fff;
+  transition: background-color .15s, transform .3s;
+}
+.btn-arrow-pro:hover { background-color: #7c3aed; color: #fff; }
+.btn-arrow-pro.spin svg { animation: spFlip .35s ease; }
+@keyframes spFlip { from { transform: rotate(0); } to { transform: rotate(180deg); } }
+
+/* Details */
+.swap-details { margin-top: 12px; padding: 12px 14px; border-radius: 16px; background: rgba(255,255,255,.025); border: 1px solid rgba(255,255,255,.06); }
+.swap-details .detail-row { align-items: center; margin-bottom: 8px; font-size: .82rem; }
+.swap-details .detail-row > span:last-child { color: #e5e7eb; font-variant-numeric: tabular-nums; text-align: right; }
+.sp-rate {
+  font: inherit; font-size: .82rem; font-weight: 600; color: var(--success); cursor: pointer;
+  background: none; border: 0; padding: 2px 0; text-align: right; font-variant-numeric: tabular-nums;
+}
+.sp-rate:hover { color: #fff; }
+
+/* Main action */
+#btnSwapAction {
+  margin-top: 12px; padding: 16px; font-size: 1.08rem; font-weight: 700; border-radius: 18px; color: #fff;
+  background: linear-gradient(135deg, #7c3aed 0%, #2d6cdf 100%);
+  box-shadow: 0 10px 30px rgba(124,58,237,.3);
+}
+#btnSwapAction:hover:not(:disabled) { box-shadow: 0 14px 34px rgba(124,58,237,.45); }
+#btnSwapAction:disabled { background: #1c1f2e; color: #6b7080; box-shadow: none; }
+#btnSwapAction.is-warning { background: linear-gradient(135deg, #d97706, #b45309); box-shadow: 0 10px 30px rgba(217,119,6,.25); }
+#btnSwapAction.is-danger { background: linear-gradient(135deg, #dc2626, #991b1b); box-shadow: 0 10px 30px rgba(220,38,38,.25); }
+#swapStatus a { color: #c4b5fd; font-weight: 600; }
+#swapStatus a:hover { color: #fff; }
+
+/* Token list modal */
+#tokenListContainer .wallet-btn:focus-visible { outline-offset: -2px; }
+
+@media (max-width: 600px) {
+  .swap-card-pro { padding: 12px; border-radius: 20px; }
+  .swap-input-pro { font-size: 1.7rem; width: auto; }
+  .token-badge-pro { font-size: .95rem; }
+  .btn-arrow-pro { width: 44px; height: 44px; }
+}
+@media (max-width: 360px) {
+  .swap-input-pro { font-size: 1.45rem; }
+}
