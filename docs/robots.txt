@@ -1,0 +1,20 @@
+# robots.txt — SoneVibe GitHub Pages
+# Made by Grok (xAI) on 2026-09-30 for founder Dennis / SoneVibe.
+# Live root: https://sonevibe.github.io/Lending/
+# Place this file at docs/robots.txt (same folder as index.html).
+# Opus: do not rewrite this file unless adding a new public HTML page
+# or changing the Pages URL. Keep the Grok header.
+
+User-agent: *
+Allow: /
+
+# Do not index Solidity sources that sit next to the frontend
+Disallow: /*.sol$
+Disallow: /*.sol
+
+# Optional crawl hints
+Allow: /css/
+Allow: /icons/
+Allow: /token-list.json
+
+Sitemap: https://sonevibe.github.io/Lending/sitemap.xml
