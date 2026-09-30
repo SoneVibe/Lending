@@ -73,10 +73,8 @@
         margin-top: 15px;
     }
 
-    /* 2. Sidebar (Navegación Horizontal) */
+    /* 2. Sidebar (drawer, ver style.css) */
     .sidebar {
-        margin-bottom: 20px;
-        padding: 10px;
         background: #13161f; /* Fondo más sólido para legibilidad */
         border: 1px solid var(--card-border);
     }
@@ -122,8 +120,8 @@
     }
     
     .btn-arrow-pro {
-        width: 32px;
-        height: 32px;
+        width: 44px;
+        height: 44px;
         font-size: 0.8rem;
     }
 
@@ -147,6 +145,10 @@
     .modal-header {
         padding-top: 10px; /* Safe area notch */
     }
+
+    /* Objetivos táctiles de 44px */
+    .btn-close { width: 44px; height: 44px; }
+    .swap-card-pro .btn-ghost { min-height: 44px; }
     
     #tokenListContainer {
         padding-bottom: 50px; /* Espacio para scroll final */
@@ -154,8 +156,8 @@
 
     /* 5. Dropdown de cuenta (ajuste para que no se salga de pantalla) */
     .account-dropdown {
-        right: -10px; /* Mover un poco a la derecha */
-        width: 220px;
+        right: 0;
+        width: min(240px, calc(100vw - 20px));
         top: 120%;
     }
 }
@@ -167,10 +169,11 @@
     }
     
     .token-badge-pro span {
-        display: none; /* Ocultar nombre (ETH), solo mostrar icono si es muy pequeño */
+        font-size: 0.85rem; /* El símbolo siempre visible */
     }
     
     .token-badge-pro {
-        padding: 5px;
+        padding: 5px 8px 5px 5px;
+        gap: 4px;
     }
 }

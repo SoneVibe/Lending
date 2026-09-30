@@ -3,8 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>VIBE • AI Assistant by SoneVibe Finance</title>
+  <title>VIBE AI Assistant | SoneVibe</title>
+  <meta name="description" content="VIBE AI, the SoneVibe assistant: ask about the protocol, pools and yields, or read Polkadot OpenGov referenda.">
+  <link rel="canonical" href="https://sonevibe.github.io/Lending/SonevibeAI.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="SoneVibe">
+  <meta property="og:title" content="VIBE AI Assistant | SoneVibe">
+  <meta property="og:description" content="VIBE AI, the SoneVibe assistant: ask about the protocol, pools and yields, or read Polkadot OpenGov referenda.">
+  <meta property="og:url" content="https://sonevibe.github.io/Lending/SonevibeAI.html">
+  <meta property="og:image" content="https://sonevibe.github.io/Lending/icons/sonevibe.png">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:site" content="@Sonevibe">
+  <meta name="twitter:creator" content="@Real_Dennis_S_F">
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
   <link rel="icon" type="image/svg+xml" href="icons/vibe.svg">
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
+  <meta name="theme-color" content="#07080f">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -420,6 +434,21 @@
         padding: 6px 12px;
       }
     }
+      /* Unified nav groups + shared footer (matches css/style.css) */
+    .sidebar { overflow-y: auto; }
+    .nav-section-label { font-size: .7rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text-secondary); padding: 12px 12px 4px; }
+    .nav-more { display: flex; flex-direction: column; }
+    .nav-more > summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center; min-height: 44px; padding: 10px 12px; border-radius: 12px; font-size: .7rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text-secondary); }
+    .nav-more > summary::-webkit-details-marker { display: none; }
+    .nav-more > summary::after { content: "▾"; font-size: .9rem; }
+    .nav-more[open] > summary::after { transform: rotate(180deg); }
+    .nav-ext { margin-left: 6px; font-size: .8em; opacity: .7; }
+    .nav-link.nav-danger { color: var(--danger); }
+    .sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+    .site-footer { margin-top: 32px; padding: 24px 0 12px; border-top: 1px solid var(--border-light); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px 24px; color: var(--text-secondary); font-size: .85rem; }
+    .site-footer .sf-links { display: flex; flex-wrap: wrap; gap: 4px 6px; }
+    .site-footer a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 10px; border-radius: 10px; color: var(--text-secondary); text-decoration: none; }
+    .site-footer a:hover { color: #fff; background: rgba(255,255,255,.05); }
   </style>
 </head>
 <body>
@@ -436,19 +465,28 @@
       <svg width="28" height="28" viewBox="0 0 64 64"><circle cx="32" cy="32" r="32" fill="#1a1f35"/><path d="M18 42 L32 18 L46 42 Z" fill="#00e0ff"/></svg>
       <span>VIBE Finance</span>
     </div>
-    <a href="index.html" class="nav-link">Dashboard Home</a>
-    <a href="dashboard.html" class="nav-link">Lend/Borrow</a>
-    <a href="swap.html" class="nav-link">Trade & Swap</a>
+    <div class="nav-section-label">App</div>
+    <a href="index.html" class="nav-link">Home</a>
+    <a href="swap.html" class="nav-link">Swap</a>
     <a href="pools.html" class="nav-link">Liquidity Pools</a>
-    <a href="#" class="nav-link active">VIBE AI Assistant</a>
-    <a href="analytics.html" class="nav-link">Pools TVL & Analytics</a>
-    <a href="markets.html" class="nav-link">Markets Overview</a>
-    <a href="marketplace.html" class="nav-link">NFT Market V3</a>
-    <a href="mint-svusd.html" class="nav-link">Mint SVUSD</a>
-    <a href="swapstabilizer.html" class="nav-link">Peg Stabilizer (SVUSD)</a>
-    <a href="souschef.html" class="nav-link">Sous Chef Pools</a>
-    <a href="vibe-vault.html" class="nav-link">Governance Vault</a>
-    
+    <a href="dashboard.html" class="nav-link">Lend / Borrow</a>
+    <a href="analytics.html" class="nav-link">Analytics</a>
+    <a href="portal.html" class="nav-link">Portal</a>
+    <details class="nav-more">
+      <summary>More</summary>
+      <a href="markets.html" class="nav-link">Markets Overview</a>
+      <a href="marketplace.html" class="nav-link">NFT Market</a>
+      <a href="mint-svusd.html" class="nav-link">Mint SVUSD</a>
+      <a href="swapstabilizer.html" class="nav-link">Peg Stabilizer</a>
+      <a href="vibe-vault.html" class="nav-link">Governance Vault</a>
+      <a href="farm.html" class="nav-link">Yield Farms</a>
+      <a href="souschef.html" class="nav-link">Sous Chef Pools</a>
+      <a href="souschefv2.html" class="nav-link">Sous Chef V2 (Preview)</a>
+      <a href="SonevibeAI.html" class="nav-link active" aria-current="page">VIBE AI</a>
+      <a href="docs.html" class="nav-link">Docs</a>
+      <a href="https://sonevibe-ai.onrender.com/" class="nav-link" target="_blank" rel="noopener noreferrer">AI Control Center<span class="nav-ext" aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span></a>
+      <a href="liquidator.html" class="nav-link nav-danger">Liquidator Console</a>
+    </details>
     <div style="flex-grow:1"></div>
     <div style="padding: 10px; font-size: 0.7rem; color: var(--text-secondary);">
       <span class="status-dot"></span> AI System Online<br>
@@ -534,6 +572,17 @@
         <!-- FAQ items will be populated by JavaScript -->
       </div>
     </div>
+
+    <footer class="site-footer">
+      <span class="sf-fine">© 2026 SoneVibe · DeFi carries risk. Nothing on this site is financial advice.</span>
+      <div class="sf-links">
+        <a href="docs.html">Docs</a>
+        <a href="https://x.com/Sonevibe" target="_blank" rel="noopener">X · @Sonevibe</a>
+        <a href="https://x.com/Real_Dennis_S_F" target="_blank" rel="noopener">X · @Real_Dennis_S_F</a>
+        <a href="https://t.me/SoneVibe" target="_blank" rel="noopener">Telegram</a>
+        <a href="https://github.com/SoneVibe/Lending" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </footer>
   </div>
 
   <script>
@@ -798,5 +847,7 @@
       if (e.key === 'Enter') sendMessage();
     });
   </script>
+
+  <script src="nav.js"></script>
 </body>
   </html>

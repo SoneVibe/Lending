@@ -2,10 +2,23 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>SoneVibe | Analytics Pro — Real APR & APY</title>
+  <title>Analytics Pro — Real APR &amp; APY | SoneVibe</title>
+  <link rel="canonical" href="https://sonevibe.github.io/Lending/analytics.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="SoneVibe">
+  <meta property="og:title" content="Analytics Pro — Real APR &amp; APY | SoneVibe">
+  <meta property="og:description" content="Live on-chain analytics for SoneVibe: TVL, real 24h/7d volume and LP fee APR/APY for every pool.">
+  <meta property="og:url" content="https://sonevibe.github.io/Lending/analytics.html">
+  <meta property="og:image" content="https://sonevibe.github.io/Lending/icons/sonevibe.png">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:site" content="@Sonevibe">
+  <meta name="twitter:creator" content="@Real_Dennis_S_F">
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="description" content="Live on-chain analytics for SoneVibe: TVL, real 24h/7d volume and LP fee APR/APY for every pool.">
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
   <link rel="icon" type="image/svg+xml" href="icons/vibe.svg">
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
+  <meta name="theme-color" content="#07080f">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -148,18 +161,28 @@
         <svg width="28" height="28" viewBox="0 0 64 64"><circle cx="32" cy="32" r="32" fill="#1a1f35"/><path d="M18 42 L32 18 L46 42 Z" fill="#00e0ff"/></svg>
         SoneVibe
       </div>
-      <a href="index.html" class="nav-link">Dashboard Home</a>
-      <a href="dashboard.html" class="nav-link">Lend/Borrow</a>
-      <a href="swap.html" class="nav-link">Trade & Swap</a>
+      <div class="nav-section-label">App</div>
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="swap.html" class="nav-link">Swap</a>
       <a href="pools.html" class="nav-link">Liquidity Pools</a>
-      
-      <a href="analytics.html" class="nav-link active" style="color:var(--success);">Analytics Pro</a>
-      <a href="markets.html" class="nav-link">Markets Overview</a>
-      <a href="marketplace.html" class="nav-link">NFT Market V3</a>
-      <a href="mint-svusd.html" class="nav-link">Mint SVUSD</a>
-      <a href="swapstabilizer.html" class="nav-link">Peg Stabilizer (SVUSD)</a>
-      <a href="vibe-vault.html" class="nav-link">Governance Vault</a>
-      <a href="liquidator.html" class="nav-link" style="color:var(--danger);">Liquidator Console</a>
+      <a href="dashboard.html" class="nav-link">Lend / Borrow</a>
+      <a href="analytics.html" class="nav-link active" aria-current="page">Analytics</a>
+      <a href="portal.html" class="nav-link">Portal</a>
+      <details class="nav-more">
+        <summary>More</summary>
+        <a href="markets.html" class="nav-link">Markets Overview</a>
+        <a href="marketplace.html" class="nav-link">NFT Market</a>
+        <a href="mint-svusd.html" class="nav-link">Mint SVUSD</a>
+        <a href="swapstabilizer.html" class="nav-link">Peg Stabilizer</a>
+        <a href="vibe-vault.html" class="nav-link">Governance Vault</a>
+        <a href="farm.html" class="nav-link">Yield Farms</a>
+        <a href="souschef.html" class="nav-link">Sous Chef Pools</a>
+        <a href="souschefv2.html" class="nav-link">Sous Chef V2 (Preview)</a>
+        <a href="SonevibeAI.html" class="nav-link">VIBE AI</a>
+        <a href="docs.html" class="nav-link">Docs</a>
+        <a href="https://sonevibe-ai.onrender.com/" class="nav-link" target="_blank" rel="noopener noreferrer">AI Control Center<span class="nav-ext" aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span></a>
+        <a href="liquidator.html" class="nav-link nav-danger">Liquidator Console</a>
+      </details>
       <div style="flex-grow:1"></div>
       <div style="padding:10px; font-size:.8rem; color:var(--text-muted);">
         Status: <span id="statusDot" style="color:var(--warning)">●</span> <span id="connStatus">Syncing…</span>
@@ -320,5 +343,17 @@
   <script src="config.js"></script>
   <script src="wallet-config.js"></script>
   <script src="analytics.js"></script>
+
+  <footer class="site-footer">
+    <span class="sf-fine">© 2026 SoneVibe · DeFi carries risk. Nothing on this site is financial advice.</span>
+    <div class="sf-links">
+      <a href="docs.html">Docs</a>
+      <a href="https://x.com/Sonevibe" target="_blank" rel="noopener">X · @Sonevibe</a>
+      <a href="https://x.com/Real_Dennis_S_F" target="_blank" rel="noopener">X · @Real_Dennis_S_F</a>
+      <a href="https://t.me/SoneVibe" target="_blank" rel="noopener">Telegram</a>
+      <a href="https://github.com/SoneVibe/Lending" target="_blank" rel="noopener">GitHub</a>
+    </div>
+  </footer>
+  <script src="nav.js"></script>
 </body>
 </html>

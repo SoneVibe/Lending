@@ -29,7 +29,11 @@
 /* =========================================
    2. RESET & BASE
    ========================================= */
-* { box-sizing: border-box; outline: none; }
+* { box-sizing: border-box; }
+:focus { outline: none; }
+:focus-visible { outline: 2px solid #00e0ff !important; outline-offset: 2px; }
+input:focus-visible, textarea:focus-visible { outline-offset: 0; }
+.token-input-box input:focus-visible, .token-input-box-pro input:focus-visible, .pt-field input:focus-visible { outline: none !important; }
 
 body {
   background: var(--bg-gradient);
@@ -125,6 +129,60 @@ header {
 .nav-link.active {
   border-left: 3px solid var(--success);
 }
+
+/* Unified sidebar groups */
+.sidebar { overflow-y: auto; scrollbar-width: thin; gap: 4px; }
+.sidebar .nav-link { flex-shrink: 0; }
+.nav-section-label {
+  font-size: .7rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--text-muted); opacity: .7; padding: 14px 16px 4px;
+}
+.nav-more { display: flex; flex-direction: column; }
+.nav-more > summary {
+  list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between;
+  min-height: 44px; padding: 10px 16px; border-radius: 12px;
+  font-size: .7rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text-muted);
+}
+.nav-more > summary::-webkit-details-marker { display: none; }
+.nav-more > summary::after { content: "▾"; font-size: .9rem; transition: transform .2s; }
+.nav-more[open] > summary::after { transform: rotate(180deg); }
+.nav-more > summary:hover { color: #fff; background: rgba(255,255,255,.04); }
+.nav-more[open] { gap: 4px; }
+.nav-ext { margin-left: 6px; font-size: .8em; opacity: .7; }
+.nav-link.nav-danger { color: var(--danger); }
+
+/* Mobile top bar + drawer backdrop (created by nav.js) */
+.mobile-bar {
+  display: none; align-items: center; justify-content: space-between; gap: 12px;
+  position: sticky; top: 8px; z-index: 60; padding: 8px 8px 8px 14px; border-radius: 16px;
+  background: rgba(7,8,15,.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--card-border);
+}
+.mobile-bar-brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.1rem; color: #fff; }
+.mobile-bar-brand img { border-radius: 50%; }
+.nav-toggle {
+  width: 44px; height: 44px; border-radius: 12px; cursor: pointer;
+  background: rgba(255,255,255,.05); border: 1px solid var(--card-border);
+  display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
+}
+.nav-toggle span { display: block; width: 20px; height: 2px; border-radius: 2px; background: #fff; transition: transform .2s, opacity .2s; }
+.nav-toggle[aria-expanded="true"] span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.nav-toggle[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
+.nav-toggle[aria-expanded="true"] span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+.nav-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.6); backdrop-filter: blur(3px); z-index: 999; }
+.nav-backdrop[hidden] { display: none; }
+body.nav-open { overflow: hidden; }
+
+/* Shared site footer */
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+.site-footer {
+  max-width: 1280px; margin: 20px auto 0; padding: 24px 20px 36px; text-align: left;
+  display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px 24px; align-items: center;
+}
+.site-footer .sf-links { display: flex; flex-wrap: wrap; gap: 4px 6px; }
+.site-footer a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 10px; border-radius: 10px; color: var(--text-muted); }
+.site-footer a:hover { color: #fff; background: rgba(255,255,255,.05); }
+.site-footer .sf-fine { font-size: .82rem; }
 
 /* =========================================
    5. UI COMPONENTS (Glass, Cards, Buttons)
@@ -321,6 +379,7 @@ tr:last-child td { border-bottom: none; }
   transition: all 0.2s;
 }
 .btn-close:hover { background: rgba(255,255,255,0.1); color: #fff; }
+@media (max-width: 600px) { .btn-close { width: 44px; height: 44px; } }
 
 .wallet-grid { display: grid; gap: 12px; }
 .wallet-btn {
@@ -508,18 +567,24 @@ footer { border-top: 1px solid var(--card-border); padding: 40px 20px; text-alig
   /* Layout reset */
   .app-container { grid-template-columns: 1fr; padding: 15px; gap: 20px; }
   
-  /* Sidebar becomes horizontal scroll nav */
+  /* Sidebar becomes an off-canvas drawer (toggled by nav.js) */
   .sidebar {
-    height: auto; position: relative; top: 0;
-    flex-direction: row; overflow-x: auto;
-    padding-bottom: 10px; white-space: nowrap;
-    align-items: center;
-    border-radius: 16px;
+    position: fixed; top: 0; left: 0; bottom: 0;
+    width: min(86vw, 300px); height: 100vh; height: 100dvh;
+    border-radius: 0 20px 20px 0;
+    background: #10121c;
+    padding: 20px 16px calc(20px + env(safe-area-inset-bottom));
+    gap: 4px;
+    overflow-y: auto; overscroll-behavior: contain;
+    transform: translateX(-105%); visibility: hidden;
+    transition: transform .25s ease, visibility 0s linear .25s;
+    z-index: 1000;
   }
-  .sidebar::-webkit-scrollbar { display: none; }
-  .logo-area { margin-bottom: 0; margin-right: 20px; font-size: 1.2rem; }
-  /* .action-panel { display: none; Hide sidebar widgets on mobile } */
-  .sidebar .nav-link { padding: 10px 14px; font-size: 0.9rem; }
+  .sidebar.is-open { transform: none; visibility: visible; transition: transform .25s ease; }
+  .logo-area { font-size: 1.2rem; margin-bottom: 12px; }
+  .sidebar .nav-link { min-height: 44px; padding: 10px 14px; font-size: 0.95rem; }
+  .sidebar .nav-link:hover, .sidebar .nav-link.active { transform: none; }
+  .mobile-bar { display: flex; }
   
   /* Grids to single column */
   .vault-grid, .liq-tables-grid { grid-template-columns: 1fr; }
@@ -614,7 +679,7 @@ footer { border-top: 1px solid var(--card-border); padding: 40px 20px; text-alig
 }
 
 /* Docs Table */
-.doc-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+.doc-table { width: 100%; min-width: 0; border-collapse: collapse; margin-top: 10px; }
 .doc-table th { background: rgba(0,0,0,0.3); color: #fff; text-align: left; padding: 12px; }
 .doc-table td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--text-muted); font-size: 0.9rem; }
 .doc-table tr:last-child td { border-bottom: none; }
