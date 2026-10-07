@@ -80,11 +80,11 @@ async function initApp() {
         NETWORKS_DATA = await window.loadSwapConfig();
         initNetworkSelector();
         
-        // Auto-select Default (Soneium)
-        ACTIVE = Object.values(NETWORKS_DATA).find(n => n.chainId == "1868" && n.enabled);
+        ACTIVE = await detectInitialNetwork();
         
         // Initial Asset Setup
         if(ACTIVE) {
+            if(getEl("networkSelect")) getEl("networkSelect").value = ACTIVE.chainId;
             setupAssets(ACTIVE);
             updateBalances(); 
             
@@ -102,6 +102,18 @@ async function initApp() {
             await window.checkAutoConnect(connectWallet);
         }
     } catch(e) { console.error("Init Error:", e); }
+}
+
+// Restored sessions start on the wallet's chain, so the first render never shows another network's pair.
+async function detectInitialNetwork() {
+    const enabled = Object.values(NETWORKS_DATA).filter(n => n.enabled);
+    let walletChainId = null;
+    if (window.SessionManager?.isActive() && window.ethereum) {
+        try { walletChainId = parseInt(await window.ethereum.request({ method: 'eth_chainId' }), 16); } catch (e) {}
+    }
+    return enabled.find(n => parseInt(n.chainId) === walletChainId)
+        || enabled.find(n => n.chainId == "1868")
+        || enabled[0];
 }
 
 function initNetworkSelector() {
@@ -294,7 +306,7 @@ function setupAssets(network) {
     if(pairData.base.isNative === undefined) pairData.base.isNative = true;
     
     updateSwapUI();
-    ensureRoutablePair();
+    pairReady = ensureRoutablePair().catch(() => {});
 }
 
 // === FUNCIÓN CORREGIDA: ORDEN DE ICONOS ASTR -> USDC ===
@@ -352,26 +364,33 @@ function updateSwapUI() {
     updateChartIcons();
 }
 
+let balanceSeq = 0;
 async function updateBalances() {
     if(!signer || !ACTIVE || !pairData.base || !pairData.quote) return;
-    try {
-        const tokenInObj = isEthToToken ? pairData.base : pairData.quote;
-        const tokenOutObj = isEthToToken ? pairData.quote : pairData.base;
+    const seq = ++balanceSeq;
+    const tokenInObj = isEthToToken ? pairData.base : pairData.quote;
+    const tokenOutObj = isEthToToken ? pairData.quote : pairData.base;
 
-        const getBalanceForToken = async (tokenObj) => {
-            if(tokenObj.isNative || tokenObj.address === 'NATIVE') return provider.getBalance(userAddress);
-            const c = new ethers.Contract(tokenObj.address, window.MIN_ERC20_ABI, provider);
-            return c.balanceOf(userAddress);
-        };
+    // Each token is read on its own (public RPC first, wallet RPC second) so one failure never blanks both.
+    const readers = [getReadProvider(), provider].filter((p, i, all) => p && all.indexOf(p) === i);
+    const getBalanceForToken = async (tokenObj) => {
+        for (const rp of readers) {
+            try {
+                if(tokenObj.isNative || tokenObj.address === 'NATIVE') return await rp.getBalance(userAddress);
+                return await new ethers.Contract(tokenObj.address, window.MIN_ERC20_ABI, rp).balanceOf(userAddress);
+            } catch(e) { /* try next reader */ }
+        }
+        console.warn(`Balance unavailable for ${tokenObj.symbol}`);
+        return null;
+    };
 
-        const [balIn, balOut] = await Promise.all([getBalanceForToken(tokenInObj), getBalanceForToken(tokenOutObj)]);
-        rawBal = { in: balIn, out: balOut };
+    const [balIn, balOut] = await Promise.all([getBalanceForToken(tokenInObj), getBalanceForToken(tokenOutObj)]);
+    if (seq !== balanceSeq) return;
+    rawBal = { in: balIn, out: balOut };
 
-        getEl('balIn').textContent = fmtWei(balIn, tokenInObj.decimals, 4);
-        getEl('balOut').textContent = fmtWei(balOut, tokenOutObj.decimals, 4);
-        refreshActionButton();
-
-    } catch(e) { console.error("Balance Error", e); }
+    getEl('balIn').textContent = balIn === null ? '—' : fmtWei(balIn, tokenInObj.decimals, 4);
+    getEl('balOut').textContent = balOut === null ? '—' : fmtWei(balOut, tokenOutObj.decimals, 4);
+    refreshActionButton();
 }
 
 // --- SWAP EXECUTION ---
@@ -400,8 +419,9 @@ let rawBal = { in: null, out: null };
 let rateInverted = false;
 const readProviders = {};
 
+// Reads use the network's public RPC even when a wallet is connected: wallets throttle their RPC
+// (MetaMask: "RPC endpoint returned too many errors") and the wallet stays reserved for signing.
 function getReadProvider() {
-    if (provider && signer) return provider;
     const url = ACTIVE?.rpcUrls?.[0];
     if (!url) return provider;
     if (!readProviders[ACTIVE.chainId]) {
@@ -431,9 +451,44 @@ function routeCandidates(tIn, tOut) {
     return paths;
 }
 
+let factoryAddrCache = {};
+function getFactoryAddress() {
+    const id = ACTIVE.chainId;
+    if (ACTIVE.factory) return Promise.resolve(ACTIVE.factory);
+    if (!factoryAddrCache[id]) {
+        factoryAddrCache[id] = new ethers.Contract(ACTIVE.router, ["function factory() view returns (address)"], getReadProvider())
+            .factory().catch((e) => { delete factoryAddrCache[id]; throw e; });
+    }
+    return factoryAddrCache[id];
+}
+
+// Pool existence per hop, cached for the session. Lookup errors count as "maybe" so quoting still decides.
+const pairExistsCache = {};
+function pairExists(a, b) {
+    const key = ACTIVE.chainId + ':' + [a.toLowerCase(), b.toLowerCase()].sort().join(':');
+    if (!pairExistsCache[key]) {
+        pairExistsCache[key] = getFactoryAddress()
+            .then(f => new ethers.Contract(f, FACTORY_ABI_IMPACT, getReadProvider()).getPair(a, b))
+            .then(p => p !== ethers.ZeroAddress)
+            .catch(() => { delete pairExistsCache[key]; return true; });
+    }
+    return pairExistsCache[key];
+}
+
+async function viablePaths(paths) {
+    const checked = await Promise.all(paths.map(async (path) => {
+        for (let i = 0; i < path.length - 1; i++) {
+            if (!(await pairExists(path[i], path[i + 1]))) return null;
+        }
+        return path;
+    }));
+    return checked.filter(Boolean);
+}
+
 async function bestRoute(amountWei, exactIn, tIn, tOut) {
     const router = new ethers.Contract(ACTIVE.router, QUOTE_ROUTER_ABI, getReadProvider());
-    const results = await Promise.all(routeCandidates(tIn, tOut).map(async (path) => {
+    const paths = await viablePaths(routeCandidates(tIn, tOut));
+    const results = await Promise.all(paths.map(async (path) => {
         try {
             const amounts = exactIn ? await router.getAmountsOut(amountWei, path) : await router.getAmountsIn(amountWei, path);
             return amounts[0] > 0n && amounts[amounts.length - 1] > 0n ? { path, amounts: [...amounts] } : null;
@@ -448,15 +503,10 @@ async function bestRoute(amountWei, exactIn, tIn, tOut) {
     return ok[0];
 }
 
-let factoryAddrCache = {};
 async function routeImpact(path, amounts) {
     try {
         const rp = getReadProvider();
-        let factoryAddr = ACTIVE.factory || factoryAddrCache[ACTIVE.chainId];
-        if (!factoryAddr) {
-            factoryAddr = await new ethers.Contract(ACTIVE.router, window.POOL_ROUTER_ABI, rp).factory();
-            factoryAddrCache[ACTIVE.chainId] = factoryAddr;
-        }
+        const factoryAddr = await getFactoryAddress();
         const factory = new ethers.Contract(factoryAddr, FACTORY_ABI_IMPACT, rp);
         let keep = 1;
         for (let i = 0; i < path.length - 1; i++) {
@@ -1071,18 +1121,16 @@ let chartInstance = null;
 let candleSeries = null;
 let chartInterval = null;
 let lastCandleData = null; 
-
-// Inicialización segura
-document.addEventListener('DOMContentLoaded', () => {
-    // Pequeño delay para asegurar que el DOM del contenedor existe
-    setTimeout(initHybridChart, 1000);
-});
+let chartSeq = 0;
+let pairReady = Promise.resolve();
 
 // Hacemos las funciones globales para initApp
 window.initChart = function() { initHybridChart(); };
 
 window.loadChartData = async function() {
+    const seq = ++chartSeq;
     if(chartInterval) clearInterval(chartInterval);
+    chartInterval = null;
     chartRoutePath = null;
 
     // Validar entorno básico
@@ -1090,6 +1138,13 @@ window.loadChartData = async function() {
 
     // Referencia al título
     const titleEl = document.getElementById('chartPairName');
+    if(titleEl) titleEl.innerText = 'Loading price…';
+
+    // The network's default pair may be replaced by a routable one; chart only the final pair.
+    await pairReady;
+    if (seq !== chartSeq || !pairData.base || !pairData.quote) return;
+    const net = ACTIVE;
+    const isStale = () => seq !== chartSeq || ACTIVE !== net;
     
     // Nombres de tokens actuales
     const tIn = isEthToToken ? pairData.base : pairData.quote; 
@@ -1101,11 +1156,15 @@ window.loadChartData = async function() {
         let price = null;
         let isFallback = false;
 
-        // 1. Intentar obtener PRECIO REAL de la Blockchain
+        // 1. Intentar obtener PRECIO REAL de la Blockchain (one retry for transient RPC errors)
         if(ACTIVE.rpcUrls && ACTIVE.rpcUrls.length > 0) {
-            const readProvider = new ethers.JsonRpcProvider(ACTIVE.rpcUrls[0]);
-            price = await fetchPriceFromBlockchain(readProvider);
+            price = await fetchPriceFromBlockchain(getReadProvider());
+            if (!price && !isStale()) {
+                await new Promise(r => setTimeout(r, 1500));
+                if (!isStale()) price = await fetchPriceFromBlockchain(getReadProvider());
+            }
         }
+        if (isStale()) return;
 
         // 2. Lógica de FALLBACK (Si no hay precio real)
         if (!price || price === 0) {
@@ -1138,7 +1197,9 @@ window.loadChartData = async function() {
 
         // 4. Loop Real-Time
         // Si es real, consultamos la blockchain. Si es fallback, simulamos movimiento.
+        let polling = false;
         chartInterval = setInterval(async () => {
+            if (document.hidden || polling || isStale()) return;
             let livePrice;
             
             if (isFallback) {
@@ -1147,12 +1208,14 @@ window.loadChartData = async function() {
                 livePrice = lastCandleData.close + change;
             } else {
                 // Consulta Real
-                const readProvider = new ethers.JsonRpcProvider(ACTIVE.rpcUrls[0]);
-                livePrice = await fetchPriceFromBlockchain(readProvider);
+                polling = true;
+                try { livePrice = await fetchPriceFromBlockchain(getReadProvider()); }
+                finally { polling = false; }
+                if (isStale()) return;
             }
 
             if(livePrice) updateRealTimeCandle(livePrice);
-        }, 5000); // 5 segundos para más fluidez
+        }, isFallback ? 5000 : 10000);
 
     } catch(e) {
         console.error("Chart Data Error:", e);
@@ -1161,7 +1224,7 @@ window.loadChartData = async function() {
 
 async function initHybridChart() {
     const container = document.getElementById('priceChart');
-    if(!container || !window.LightweightCharts) return;
+    if(!container || !window.LightweightCharts || chartInstance) return;
 
     container.innerHTML = ''; 
     
@@ -1216,12 +1279,13 @@ async function fetchPriceFromBlockchain(provider) {
         // so quote 1/10,000 of a unit (same route as the swap) and scale it back up.
         const probeExp = Number(tIn.decimals) >= 6 ? 4 : 0;
         const probe = ethers.parseUnits("1", Number(tIn.decimals) - probeExp);
+        const routeKey = [ACTIVE.chainId, tIn.address, tOut.address].join(':').toLowerCase();
         let amounts;
-        if (chartRoutePath) {
-            amounts = await router.getAmountsOut(probe, chartRoutePath);
+        if (chartRoutePath && chartRoutePath.key === routeKey) {
+            amounts = await router.getAmountsOut(probe, chartRoutePath.path);
         } else {
             const best = await bestRoute(probe, true, tIn, tOut);
-            chartRoutePath = best.path;
+            chartRoutePath = { key: routeKey, path: best.path };
             amounts = best.amounts;
         }
         
