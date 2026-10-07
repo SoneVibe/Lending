@@ -23,6 +23,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/swap-pro.css">
+  <link rel="stylesheet" href="css/pools-pro.css">
   
   <style>
     /* Estilos específicos para Pools */
@@ -133,7 +135,7 @@
       <header>
         <div>
           <h1 style="margin:0; font-size:1.8rem; background: linear-gradient(90deg, #fff, #00e0ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Liquidity Pools</h1>
-          <p style="margin:4px 0 0 0; color:var(--text-muted);">Manage your market making positions</p>
+          <p style="margin:4px 0 0 0; color:var(--text-muted);">Provide liquidity and earn 5/6 of the 0.25% fee on every swap</p>
            <!-- out warning <p style="margin:4px 0 0 0; color:var(--text-muted);">ONLY <span style="color:red;">ASTR/USDC ASTR/ETH on SONEIUM Available</span></p> 
           <p style="margin:4px 0 0 0; color:var(--text-muted);">ONLY <span style="color:red;">ASTR/DOT on Astar EVM Available</span></p> --> 
           
@@ -157,120 +159,130 @@
         </div>
       </header>
 
-      <div class="glass-panel pool-card">
-        
-        <div class="pool-tabs">
-            <div id="tabAdd" class="pool-tab active" onclick="setPoolMode('add')">Add Liquidity</div>
-            <div id="tabRemove" class="pool-tab" onclick="setPoolMode('remove')">Remove</div>
+      <div class="glass-panel pool-card pl-card">
+
+        <div class="pool-tabs" role="tablist" aria-label="Liquidity action">
+            <button type="button" id="tabAdd" class="pool-tab active" role="tab" aria-selected="true" onclick="setPoolMode('add')">Add liquidity</button>
+            <button type="button" id="tabRemove" class="pool-tab" role="tab" aria-selected="false" onclick="setPoolMode('remove')">Remove</button>
         </div>
 
-        <div style="display:flex; gap:10px; margin-bottom:20px; align-items:center; justify-content:center;">
-             <div style="background:rgba(255,255,255,0.1); padding:8px 12px; border-radius:12px;">
-                <select id="tokenA" class="token-select-custom"></select>
-             </div>
-             <span style="color:var(--text-muted)">+</span>
-             <div style="background:rgba(255,255,255,0.1); padding:8px 12px; border-radius:12px;">
-                <select id="tokenB" class="token-select-custom"></select>
-             </div>
+        <div class="pl-section-label">Select pair</div>
+        <div class="pl-pair">
+            <label class="pl-select">
+                <img id="plIconA" src="icons/token.svg" alt="" width="26" height="26" onerror="this.src='icons/token.svg'">
+                <select id="tokenA" class="token-select-custom" aria-label="First token"></select>
+                <svg class="pl-chev" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            </label>
+            <span class="pl-plus" aria-hidden="true">+</span>
+            <label class="pl-select">
+                <img id="plIconB" src="icons/token.svg" alt="" width="26" height="26" onerror="this.src='icons/token.svg'">
+                <select id="tokenB" class="token-select-custom" aria-label="Second token"></select>
+                <svg class="pl-chev" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            </label>
         </div>
+        <div id="plPairNote" class="pl-note" role="status" aria-live="polite"></div>
 
-        <!-- IMPORT TOKEN (pro) -->
-        <div class="pool-info" style="margin-top:0;">
-          <div class="detail-row"><span>Import Token (Any Address)</span></div>
+        <details class="pl-import">
+          <summary>Token not listed? Import by address</summary>
           <div class="import-row">
-            <input id="importAddressInput" class="action-input" placeholder="Paste token/cToken address (0x...)" />
+            <input id="importAddressInput" class="action-input" placeholder="Paste token/cToken address (0x...)" autocomplete="off" spellcheck="false" />
             <button id="btnOpenImport" class="btn-ghost">Import</button>
           </div>
-          <div id="importHint" style="margin-top:8px; font-size:0.8rem; color:var(--text-muted);">
+          <div id="importHint" class="pl-fine">
             Imports are stored per network (chainId) in your browser.
           </div>
-        </div>
+        </details>
 
         <div id="panelAdd">
-            <div style="background:rgba(0,0,0,0.3); padding:16px; border-radius:16px; border:1px solid rgba(255,255,255,0.05); margin-bottom:10px;">
-                <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
-                    <span style="font-size:0.8rem; color:var(--text-muted);" id="lblInputA">Token A</span>
-                    <span style="font-size:0.8rem; color:var(--text-muted);">Bal: <span id="balA">0.00</span></span>
+            <div class="pl-section-label">Deposit amounts</div>
+            <div class="pl-box">
+                <div class="pl-box-top">
+                    <input id="amountA" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="0" aria-label="Amount of first token" class="pl-input">
+                    <span class="pl-sym" id="lblInputA">Token A</span>
                 </div>
-                <input id="amountA" type="number" placeholder="0.0" style="background:transparent; border:none; color:#fff; font-size:1.4rem; width:100%; outline:none;">
+                <div class="pl-box-sub">
+                    <span>Balance: <span id="balA">0.00</span></span>
+                    <button type="button" class="sp-chip" id="plMaxA" hidden>MAX</button>
+                </div>
             </div>
 
-            <div class="plus-icon-circle">+</div>
+            <div class="plus-icon-circle" aria-hidden="true">+</div>
 
-            <div style="background:rgba(0,0,0,0.3); padding:16px; border-radius:16px; border:1px solid rgba(255,255,255,0.05);">
-                <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
-                    <span style="font-size:0.8rem; color:var(--text-muted);" id="lblInputB">Token B</span>
-                    <span style="font-size:0.8rem; color:var(--text-muted);">Bal: <span id="balB">0.00</span></span>
+            <div class="pl-box">
+                <div class="pl-box-top">
+                    <input id="amountB" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="0" aria-label="Amount of second token" class="pl-input">
+                    <span class="pl-sym" id="lblInputB">Token B</span>
                 </div>
-                <input id="amountB" type="number" placeholder="0.0" style="background:transparent; border:none; color:#fff; font-size:1.4rem; width:100%; outline:none;">
+                <div class="pl-box-sub">
+                    <span>Balance: <span id="balB">0.00</span></span>
+                    <button type="button" class="sp-chip" id="plMaxB" hidden>MAX</button>
+                </div>
             </div>
         </div>
 
         <div id="panelRemove" style="display:none;">
-            <div style="background:rgba(255, 85, 85, 0.05); padding:20px; border-radius:16px; border:1px solid rgba(255, 85, 85, 0.2);">
-                <div style="font-size:0.9rem; color:var(--text-muted); margin-bottom:10px;">Remove Amount</div>
-                <div style="font-size:2rem; font-weight:700; color:#fff;" id="removePercentDisplay">0%</div>
-                
+            <div class="pl-remove">
+                <div class="pl-section-label" style="margin:0 0 6px">Amount to remove</div>
+                <div class="pl-remove-pct" id="removePercentDisplay">0%</div>
+
                 <div class="range-wrap">
-                    <input type="range" id="removeRange" min="0" max="100" value="0" step="1">
+                    <input type="range" id="removeRange" min="0" max="100" value="0" step="1" aria-label="Percentage of your position to remove">
                 </div>
-                
-                <div style="display:flex; justify-content:space-between; gap:10px; margin-top:15px;">
-                    <button class="btn-ghost" onclick="setRemove(25)">25%</button>
-                    <button class="btn-ghost" onclick="setRemove(50)">50%</button>
-                    <button class="btn-ghost" onclick="setRemove(75)">75%</button>
-                    <button class="btn-ghost" onclick="setRemove(100)">Max</button>
+
+                <div class="pl-pct-row">
+                    <button type="button" class="btn-ghost" onclick="setRemove(25)">25%</button>
+                    <button type="button" class="btn-ghost" onclick="setRemove(50)">50%</button>
+                    <button type="button" class="btn-ghost" onclick="setRemove(75)">75%</button>
+                    <button type="button" class="btn-ghost" onclick="setRemove(100)">Max</button>
                 </div>
             </div>
-            
-            <div style="margin-top:15px; text-align:center; font-size:0.9rem;">
-                <div style="margin-bottom:5px;">You will receive:</div>
-                <div style="display:flex; justify-content:space-around; font-weight:600;">
-                    <div><span id="estRemoveA">0.00</span> <span id="lblRemA">A</span></div>
-                    <div><span id="estRemoveB">0.00</span> <span id="lblRemB">B</span></div>
-                </div>
+
+            <div class="pl-receive">
+                <div class="pl-section-label" style="margin:0 0 8px">You will receive</div>
+                <div class="pl-receive-row"><span id="estRemoveA">0.00</span> <span id="lblRemA">A</span></div>
+                <div class="pl-receive-row"><span id="estRemoveB">0.00</span> <span id="lblRemB">B</span></div>
             </div>
         </div>
 
-        <div class="pool-info">
-            <div class="detail-row"><span>Prices and Pool Share</span></div>
-            <div style="display:flex; justify-content:space-between; margin-top:10px; text-align:center;">
+        <div class="pool-info pl-info">
+            <div class="pl-info-title">Prices and pool share</div>
+            <div class="pl-info-grid">
                 <div>
-                    <div id="rateA" style="font-weight:600;">--</div>
-                    <div style="font-size:0.7rem; color:var(--text-muted);"><span id="lblRateA">A</span> per <span id="lblRateB">B</span></div>
+                    <div id="rateA" class="pl-info-val">--</div>
+                    <div class="pl-info-lbl"><span id="lblRateB">B</span> per <span id="lblRateA">A</span></div>
                 </div>
                 <div>
-                    <div id="rateB" style="font-weight:600;">--</div>
-                    <div style="font-size:0.7rem; color:var(--text-muted);"><span id="lblRateB2">B</span> per <span id="lblRateA2">A</span></div>
+                    <div id="rateB" class="pl-info-val">--</div>
+                    <div class="pl-info-lbl"><span id="lblRateA2">A</span> per <span id="lblRateB2">B</span></div>
                 </div>
                 <div>
-                    <div id="sharePool" style="font-weight:600; color:var(--success);">--%</div>
-                    <div style="font-size:0.7rem; color:var(--text-muted);">Share</div>
+                    <div id="sharePool" class="pl-info-val" style="color:var(--success);">--%</div>
+                    <div class="pl-info-lbl">Your share</div>
                 </div>
             </div>
-            <div style="margin-top:10px; border-top:1px solid rgba(255,255,255,0.1); padding-top:10px;">
-                <div style="display:flex; justify-content:space-between; font-size:0.8rem;">
-                    <span style="color:var(--text-muted)">Your Position (LP):</span>
-                    <span id="userLpBalance" style="color:var(--warning); font-weight:600;">0.0000</span>
-                </div>
+            <div class="pl-position">
+                <div class="detail-row"><span>Your LP tokens</span><span id="userLpBalance">0.0000</span></div>
+                <div class="detail-row" id="plPooledRow" hidden><span>Pooled</span><span id="plPooled"></span></div>
             </div>
         </div>
 
-        <div class="pool-info" style="margin-top: 10px; margin-bottom: 20px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                <span style="font-size:0.8rem; color:var(--text-muted);">Slippage Tolerance</span>
-                <span id="slippageDisplay" style="color:var(--success); font-weight:600;">0.5%</span>
+        <div class="pool-info pl-slippage">
+            <div class="pl-slip-head">
+                <span>Slippage tolerance</span>
+                <span id="slippageDisplay" class="pl-slip-val">0.5%</span>
             </div>
-            <div style="display:flex; gap:8px;">
-                <button class="btn-ghost" onclick="setSlippage(0.1)" style="flex:1; font-size:0.8rem;">0.1%</button>
-                <button class="btn-ghost" onclick="setSlippage(0.5)" style="flex:1; font-size:0.8rem; border:1px solid var(--success);">0.5%</button>
-                <button class="btn-ghost" onclick="setSlippage(1.0)" style="flex:1; font-size:0.8rem;">1.0%</button>
-                <button class="btn-ghost" onclick="setSlippage(5.0)" style="flex:1; font-size:0.8rem; color:var(--warning);">5.0%</button>
+            <div class="pl-slip-options" role="group" aria-label="Slippage tolerance">
+                <button type="button" class="btn-ghost pl-slip-btn" data-slip="0.1" onclick="setSlippage(0.1)">0.1%</button>
+                <button type="button" class="btn-ghost pl-slip-btn is-active" data-slip="0.5" onclick="setSlippage(0.5)">0.5%</button>
+                <button type="button" class="btn-ghost pl-slip-btn" data-slip="1" onclick="setSlippage(1.0)">1.0%</button>
+                <button type="button" class="btn-ghost pl-slip-btn" data-slip="5" onclick="setSlippage(5.0)">5.0%</button>
+                <label class="pl-slip-custom"><input id="slippageCustom" type="text" inputmode="decimal" placeholder="Custom" aria-label="Custom slippage in percent" autocomplete="off"><span>%</span></label>
             </div>
+            <div id="slippageWarn" class="pl-fine" hidden></div>
         </div>
 
-        <button id="btnMainAction" class="btn-primary" style="width:100%; margin-top:0; font-size:1.1rem; padding:16px;">Connect Wallet</button>
-        <div id="txStatus" class="action-status" style="margin-top:10px;"></div>
+        <button id="btnMainAction" class="btn-primary pl-action">Connect Wallet</button>
+        <div id="txStatus" class="action-status" role="status" aria-live="polite" style="margin-top:10px;"></div>
 
       </div>
 

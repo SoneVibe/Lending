@@ -28,6 +28,12 @@
     LOW_TVL_USD: 100,
     MINIMUM_LIQUIDITY: 100000n,
     STABLES: ['usdc', 'usdt', 'usdsc', 'svusd', 'dai', 'usds', 'busd'],
+    // Swap history only: networks whose default RPC refuses eth_getLogs.
+    // BNB dataseed answers "limit exceeded"; NodeReal's public endpoint (listed on chainlist.org)
+    // serves 50,000-block windows, so 7 days is ~27 calls. If it fails, the default RPC path runs as before.
+    LOG_RPC: {
+      56: { url: 'https://bsc-mainnet.nodereal.io/v1/64a9df0874fb4a93b9d0a3849de012d3', chunk: 50000, minChunk: 12500 },
+    },
   };
 
   const ZERO = '0x0000000000000000000000000000000000000000';
@@ -217,19 +223,18 @@
     return bpy > 0 ? (365 * 86400) / bpy : 2;
   }
 
-  async function fetchSwapLogs(addresses, fromBlock, toBlock, onProgress) {
-    let chunk = CFG.LOG_CHUNK;
+  async function fetchSwapLogs(addresses, fromBlock, toBlock, onProgress, rpc = S.rpc, chunk = CFG.LOG_CHUNK, minChunk = CFG.MIN_LOG_CHUNK) {
     const ranges = [];
     for (let f = fromBlock; f <= toBlock; f += chunk) ranges.push([f, Math.min(toBlock, f + chunk - 1)]);
     let done = 0;
 
     const getRange = async ([from, to]) => {
       try {
-        const logs = await S.rpc.getLogs({ address: addresses, topics: [SWAP_TOPIC], fromBlock: from, toBlock: to });
+        const logs = await rpc.getLogs({ address: addresses, topics: [SWAP_TOPIC], fromBlock: from, toBlock: to });
         return logs;
       } catch (e) {
         const size = to - from + 1;
-        if (size <= CFG.MIN_LOG_CHUNK) throw e;
+        if (size <= minChunk) throw e;
         const mid = from + Math.floor(size / 2);
         const [l, r] = await Promise.all([getRange([from, mid - 1]), getRange([mid, to])]);
         return l.concat(r);
@@ -309,7 +314,16 @@
       if (raw.length) {
         try {
           setProgress(0.35, 'Reading swap history (7d)');
-          logs = await fetchSwapLogs(raw.map((p) => p.address), fromBlock, latest, (f) => setProgress(0.35 + f * 0.5, `Reading swap history ${Math.round(f * 100)}%`));
+          const addresses = raw.map((p) => p.address);
+          const onLogProgress = (f) => setProgress(0.35 + f * 0.5, `Reading swap history ${Math.round(f * 100)}%`);
+          const logRpc = CFG.LOG_RPC[Number(chainId)];
+          if (logRpc) {
+            const lp = new ethers.JsonRpcProvider(logRpc.url, undefined, { staticNetwork: true, batchMaxCount: 1 });
+            try { logs = await fetchSwapLogs(addresses, fromBlock, latest, onLogProgress, lp, logRpc.chunk, logRpc.minChunk); }
+            catch (e) { console.warn('[analytics-pro] log RPC failed, trying default RPC', e); }
+            finally { lp.destroy(); }
+          }
+          if (!logs) logs = await fetchSwapLogs(addresses, fromBlock, latest, onLogProgress);
         } catch (e) {
           console.warn('[analytics-pro] getLogs unavailable, falling back to estimates', e);
         }
