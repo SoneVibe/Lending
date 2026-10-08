@@ -480,3 +480,59 @@ function startAutoRefresh() {
         if (document.visibilityState === "visible" && !claiming) updateVibeVault();
     }, REFRESH_MS);
 }
+
+// --- INFO TOOLTIPS (hover, keyboard focus and tap) ---
+(function initInfoTips() {
+    const tip = document.createElement("div");
+    tip.className = "vv-tooltip"; tip.id = "vvTooltip"; tip.setAttribute("role", "tooltip");
+    document.body.appendChild(tip);
+    let current = null;
+    let openedAt = 0;
+
+    function place(btn) {
+        const GAP = 10, M = 12;
+        const r = btn.getBoundingClientRect();
+        const vw = document.documentElement.clientWidth, vh = window.innerHeight;
+        const w = tip.offsetWidth, h = tip.offsetHeight;
+        const side = r.top - GAP - h >= M || r.bottom + GAP + h > vh - M ? "top" : "bottom";
+        const cx = r.left + r.width / 2;
+        const left = Math.min(Math.max(cx - w / 2, M), vw - w - M);
+        const top = side === "top" ? Math.max(r.top - GAP - h, M) : r.bottom + GAP;
+        tip.dataset.side = side;
+        tip.style.left = left + "px"; tip.style.top = top + "px";
+        tip.style.setProperty("--vv-arrow-x", Math.min(Math.max(cx - left, 14), w - 14) + "px");
+    }
+    function show(btn) {
+        if (current && current !== btn) current.setAttribute("aria-expanded", "false");
+        if (current !== btn || !tip.classList.contains("show")) openedAt = Date.now();
+        current = btn;
+        tip.textContent = btn.dataset.tip;
+        btn.setAttribute("aria-expanded", "true");
+        tip.classList.add("show");
+        place(btn);
+    }
+    function hide() {
+        if (current) current.setAttribute("aria-expanded", "false");
+        current = null;
+        tip.classList.remove("show");
+    }
+
+    document.querySelectorAll(".vv-info[data-tip]").forEach(btn => {
+        btn.setAttribute("aria-describedby", "vvTooltip");
+        btn.setAttribute("aria-expanded", "false");
+        if (!btn.getAttribute("aria-label")) btn.setAttribute("aria-label", "More info");
+        btn.addEventListener("mouseenter", () => show(btn));
+        btn.addEventListener("mouseleave", () => { if (document.activeElement !== btn) hide(); });
+        btn.addEventListener("focus", () => show(btn));
+        btn.addEventListener("blur", hide);
+        // On touch, a tap fires mouseenter/focus and then click; only a later, separate tap should close it.
+        btn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            if (current === btn && tip.classList.contains("show") && Date.now() - openedAt > 400) hide(); else show(btn);
+        });
+    });
+    document.addEventListener("click", (e) => { if (current && !e.target.closest(".vv-info")) hide(); });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape") hide(); });
+    window.addEventListener("resize", () => current && place(current));
+    window.addEventListener("scroll", () => current && place(current), { passive: true, capture: true });
+})();
