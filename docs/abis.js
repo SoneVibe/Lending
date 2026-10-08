@@ -179,4 +179,4 @@ window.CSVUSD_MINTABLE_ABI = [
   { "inputs": [{ "internalType": "uint256", "name": "amount", "type": "uint256" }], "name": "repay", "outputs": [], "stateMutability": "nonpayable", "type": "function" }
 ];
 
-window.REWARDS_ADDRESS = "0xCe4a761e8673928E40F9C573777590b7d7e2212D";
+window.REWARDS_ADDRESS = "0x68Bcb0b5F8840EfA6e4406f6A11947B0de292613";
