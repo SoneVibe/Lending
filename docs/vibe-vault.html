@@ -23,6 +23,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/vault.css">
 </head>
 <body>
 
@@ -64,7 +65,7 @@
       <header>
         <div>
           <h1 style="margin:0; font-size:1.8rem;">Governance Vault</h1>
-          <p style="margin:4px 0 0 0; color:var(--text-muted);">Stake & Earn VIBE Rewards</p>
+          <p style="margin:4px 0 0 0; color:var(--text-muted);">Earn VIBE for supplying &amp; borrowing</p>
         </div>
         
         <div class="nav-group">
@@ -84,34 +85,108 @@
         </div>
       </header>
 
-      <div class="vault-grid">
-        <div class="vault-stat-card">
-          <div style="text-transform:uppercase; letter-spacing:1px; font-size:0.85rem; color:rgba(255,255,255,0.6);">Unclaimed Rewards</div>
-          <div class="vault-value"><span id="vaultVibeRewards">0.00</span> <span style="font-size:1rem;">VIBE</span></div>
-          <div style="font-size:0.9rem; color:var(--text-muted); margin-bottom:10px;">
-            Wallet Balance: <span id="vaultVibeWallet" style="color:#fff;">--</span> VIBE
+      <!-- HERO / PROTOCOL OVERVIEW -->
+      <section class="vv-hero" aria-labelledby="vvHeroTitle">
+        <div class="vv-hero-top">
+          <div class="vv-hero-id">
+            <div class="vv-token-logo"><img src="icons/vibe.svg" alt="" width="44" height="44"></div>
+            <div>
+              <div class="vv-eyebrow">VIBE Incentives · <span id="vvNetName">—</span></div>
+              <h2 id="vvHeroTitle" class="vv-hero-title"><span id="vvTokenName">Vibe Governance Token</span> <span class="vv-chip" id="vvTokenSymbol">VIBE</span></h2>
+            </div>
           </div>
-          <button id="btnVaultClaimVibe" class="btn-claim" disabled>Claim Rewards</button>
-          <div id="vaultVibeStatus" style="margin-top:10px; font-size:0.85rem; min-height:1.2em; color:var(--success);"></div>
-        </div>
-        <div class="glass-panel">
-          <h3 style="margin:0 0 15px 0; color:var(--warning); display:flex; align-items:center; gap:10px;"><span>🔥</span> Current Incentive Rates</h3>
-          <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:20px;">Extra APY paid in VIBE tokens on top of normal lending interest.</p>
-          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
-            <div><h4 style="margin:0 0 10px 0; font-size:0.8rem; text-transform:uppercase; color:var(--text-muted);">Supply APY</h4><div id="supplyApyList" class="apy-list">Loading...</div></div>
-            <div><h4 style="margin:0 0 10px 0; font-size:0.8rem; text-transform:uppercase; color:var(--text-muted);">Borrow APY</h4><div id="borrowApyList" class="apy-list">Loading...</div></div>
+          <div class="vv-token-actions">
+            <button type="button" class="vv-pill" id="vvCopyToken" title="Copy token address"><span class="vv-mono" id="vvTokenAddrShort">0x…</span> <span aria-hidden="true">⧉</span></button>
+            <a class="vv-pill" id="vvTokenExplorer" href="#" target="_blank" rel="noopener">Explorer <span aria-hidden="true">↗</span></a>
+            <button type="button" class="vv-pill vv-pill-accent" id="vvAddToken">+ Add to wallet</button>
           </div>
         </div>
-      </div>
 
-      <div class="glass-panel">
-        <h3 style="margin:0 0 15px 0;">How it works</h3>
-        <ul style="color:var(--text-muted); line-height:1.6; padding-left:20px;">
-          <li>VIBE tokens are distributed every block to suppliers and borrowers.</li>
-          <li>Claiming transfers your accrued VIBE tokens directly to your wallet.</li>
-          <li>Use VIBE tokens to vote on protocol proposals or stake for more rewards.</li>
-        </ul>
-      </div>
+        <div class="vv-kpis">
+          <div class="vv-kpi"><span class="vv-kpi-label">Daily Emissions</span><span class="vv-kpi-value" id="kpiDaily"><i class="vv-sk"></i></span><span class="vv-kpi-sub">VIBE / day, all markets</span></div>
+          <div class="vv-kpi"><span class="vv-kpi-label">Incentivized TVL</span><span class="vv-kpi-value" id="kpiTvl"><i class="vv-sk"></i></span><span class="vv-kpi-sub">Supply in rewarded markets</span></div>
+          <div class="vv-kpi"><span class="vv-kpi-label">Rewarded Markets</span><span class="vv-kpi-value" id="kpiMarkets"><i class="vv-sk"></i></span><span class="vv-kpi-sub" id="kpiMarketsSub">of — listed</span></div>
+          <div class="vv-kpi"><span class="vv-kpi-label">VIBE Total Supply</span><span class="vv-kpi-value" id="kpiSupply"><i class="vv-sk"></i></span><span class="vv-kpi-sub">Minted via emissions</span></div>
+        </div>
+      </section>
+
+      <!-- USER REWARDS -->
+      <section class="vv-grid">
+        <div class="vv-card vv-rewards" aria-live="polite">
+          <div class="vv-card-head">
+            <h3>Your Rewards</h3>
+            <span class="vv-badge" id="vvUserBadge">Not connected</span>
+          </div>
+
+          <div class="vv-claim-label">Claimable now</div>
+          <div class="vv-claim-value"><span id="vaultVibeRewards">0.00</span><span class="vv-unit" data-vv-symbol>VIBE</span></div>
+
+          <div class="vv-rows">
+            <div class="vv-row"><span>Accruing <button type="button" class="vv-info" data-tip="Rewards earned since your last interaction. They settle into “Claimable” automatically the next time you supply, withdraw, borrow or repay in that market.">?</button></span><strong><span id="vvAccruing">—</span> <span data-vv-symbol>VIBE</span></strong></div>
+            <div class="vv-row"><span>Your earning rate</span><strong><span id="vvUserDaily">—</span> <span data-vv-symbol>VIBE</span>/day</strong></div>
+            <div class="vv-row"><span>Wallet balance</span><strong><span id="vaultVibeWallet">—</span> <span data-vv-symbol>VIBE</span></strong></div>
+          </div>
+
+          <button id="btnVaultClaimVibe" class="btn-claim vv-btn-claim" disabled>Connect wallet to claim</button>
+          <div id="vaultVibeStatus" class="vv-status" role="status"></div>
+        </div>
+
+        <div class="vv-card">
+          <div class="vv-card-head">
+            <h3>Your Earning Positions</h3>
+            <a href="dashboard.html" class="vv-link">Manage in Lend / Borrow →</a>
+          </div>
+          <div id="vvPositions" class="vv-positions">
+            <div class="vv-empty">Connect your wallet to see the positions earning VIBE.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- MARKETS TABLE -->
+      <section class="vv-card">
+        <div class="vv-card-head">
+          <div>
+            <h3>Incentivized Markets</h3>
+            <p class="vv-sub">VIBE is streamed every block to suppliers and borrowers, on top of the base lending APY.</p>
+          </div>
+          <div class="vv-meta"><span class="vv-live-dot" id="vvLiveDot"></span><span id="vvUpdated">Loading…</span></div>
+        </div>
+        <div class="vv-table-wrap">
+          <table class="vv-table">
+            <thead>
+              <tr>
+                <th scope="col">Asset</th>
+                <th scope="col" class="r">Total Supplied</th>
+                <th scope="col" class="r">Supply VIBE APR <button type="button" class="vv-info" data-tip="Token-denominated: yearly VIBE emitted ÷ underlying supplied (same formula as Lend / Borrow). Not converted to USD.">?</button></th>
+                <th scope="col" class="r">Total Borrowed</th>
+                <th scope="col" class="r">Borrow VIBE APR</th>
+                <th scope="col" class="r">VIBE / day</th>
+                <th scope="col" class="r"><span class="sr-only">Actions</span></th>
+              </tr>
+            </thead>
+            <tbody id="vvMarketsBody">
+              <tr class="vv-sk-row"><td colspan="7"><i class="vv-sk vv-sk-wide"></i></td></tr>
+              <tr class="vv-sk-row"><td colspan="7"><i class="vv-sk vv-sk-wide"></i></td></tr>
+              <tr class="vv-sk-row"><td colspan="7"><i class="vv-sk vv-sk-wide"></i></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- HOW IT WORKS -->
+      <section class="vv-card">
+        <div class="vv-card-head"><h3>How it works</h3></div>
+        <div class="vv-steps">
+          <div class="vv-step"><span class="vv-step-n">1</span><h4>Supply or borrow</h4><p>Use any incentivized market in <a href="dashboard.html">Lend / Borrow</a>. Your share of each market determines your share of its emissions.</p></div>
+          <div class="vv-step"><span class="vv-step-n">2</span><h4>Accrue every block</h4><p>VIBE accrues per block. It settles into your claimable balance whenever you interact with a market.</p></div>
+          <div class="vv-step"><span class="vv-step-n">3</span><h4>Claim &amp; govern</h4><p>Claiming mints VIBE straight to your wallet. Use it to vote on proposals or stake for more yield.</p></div>
+        </div>
+        <div class="vv-contracts">
+          <div><span>Rewards distributor</span><a id="vvMasterLink" class="vv-mono" href="#" target="_blank" rel="noopener">—</a></div>
+          <div><span>VIBE token</span><a id="vvTokenLink" class="vv-mono" href="#" target="_blank" rel="noopener">—</a></div>
+          <div><span>Block</span><span id="vvBlock" class="vv-mono">—</span></div>
+        </div>
+      </section>
     </div> 
   </div>
 

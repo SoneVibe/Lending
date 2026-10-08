@@ -300,8 +300,9 @@ async function renderMarkets() {
   const master = new ethers.Contract(ACTIVE.master, window.MASTER_ABI, provider);
   
   let vault = null;
-  if (window.REWARDS_ADDRESS && window.REWARDS_ADDRESS !== "0x0000000000000000000000000000000000000000") {
-      vault = new ethers.Contract(window.REWARDS_ADDRESS, window.REWARDS_ABI, provider);
+  const rewardsAddr = window.getRewardsAddress ? window.getRewardsAddress(ACTIVE) : null;
+  if (rewardsAddr) {
+      vault = new ethers.Contract(rewardsAddr, window.REWARDS_ABI, provider);
   }
   
   let oracle = null;
@@ -534,12 +535,13 @@ async function renderAccountStats() {
 }
 
 async function renderVibeVault() {
-  if (!window.REWARDS_ADDRESS || window.REWARDS_ADDRESS === "0x0000000000000000000000000000000000000000" || !userAddress) {
+  const rewardsAddr = window.getRewardsAddress ? window.getRewardsAddress(ACTIVE) : null;
+  if (!rewardsAddr || !userAddress) {
       getEl("vibeRewards").textContent = "—";
       return;
   }
   try {
-    const vault = new ethers.Contract(window.REWARDS_ADDRESS, window.REWARDS_ABI, provider);
+    const vault = new ethers.Contract(rewardsAddr, window.REWARDS_ABI, provider);
     const pending = await vault.vibeAccrued(userAddress);
     const pendingFmt = Number(pending.toString())/1e18;
     getEl("vibeRewards").textContent = pendingFmt.toLocaleString('en-US', {maximumFractionDigits:4});
@@ -548,7 +550,7 @@ async function renderVibeVault() {
     
     btn.onclick = async () => {
        if(!signer) return;
-       const vS = new ethers.Contract(window.REWARDS_ADDRESS, window.REWARDS_ABI, signer);
+       const vS = new ethers.Contract(rewardsAddr, window.REWARDS_ABI, signer);
        try { 
          btn.textContent = "Claiming..."; 
          const tx = await vS.claimVIBE(userAddress);

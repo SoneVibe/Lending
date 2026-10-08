@@ -117,7 +117,15 @@
     }
   }
 
+  // VIBE rewards are distributed by the network's Master (comptroller).
+  // An optional per-network "rewards" key in networks.json overrides it.
+  function getRewardsAddress(net) {
+    const addr = net && (net.rewards || net.master);
+    return addr && !/^0x0{40}$/i.test(addr) ? addr : null;
+  }
+
   // Exponer en window
+  window.getRewardsAddress = getRewardsAddress;
   window.loadNetworks = loadNetworks;
   window.getActiveNetworkByChainId = getActiveNetworkByChainId;
   window.setupNetworkSwitcher = setupNetworkSwitcher;

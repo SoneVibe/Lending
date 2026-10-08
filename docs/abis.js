@@ -83,7 +83,12 @@ window.REWARDS_ABI = [
   { "inputs":[{"internalType":"address","name":"user","type":"address"}], "name":"claimVIBE", "outputs":[], "stateMutability":"nonpayable", "type":"function" },
   { "inputs":[{"internalType":"address","name":"cToken","type":"address"}], "name":"vibeSupplySpeed", "outputs":[{"internalType":"uint256","name":"","type":"uint256"}], "stateMutability":"view", "type":"function" },
   { "inputs":[{"internalType":"address","name":"cToken","type":"address"}], "name":"vibeBorrowSpeed", "outputs":[{"internalType":"uint256","name":"","type":"uint256"}], "stateMutability":"view", "type":"function" },
-  { "inputs":[], "name":"vibeTokenExternal", "outputs":[{"internalType":"address","name":"","type":"address"}], "stateMutability":"view", "type":"function" }
+  { "inputs":[], "name":"vibeTokenExternal", "outputs":[{"internalType":"address","name":"","type":"address"}], "stateMutability":"view", "type":"function" },
+  { "inputs":[{"internalType":"address","name":"","type":"address"}], "name":"vibeSupplyIndex", "outputs":[{"internalType":"uint256","name":"","type":"uint256"}], "stateMutability":"view", "type":"function" },
+  { "inputs":[{"internalType":"address","name":"","type":"address"}], "name":"vibeBorrowIndex", "outputs":[{"internalType":"uint256","name":"","type":"uint256"}], "stateMutability":"view", "type":"function" },
+  { "inputs":[{"internalType":"address","name":"","type":"address"}], "name":"lastRewardBlock", "outputs":[{"internalType":"uint256","name":"","type":"uint256"}], "stateMutability":"view", "type":"function" },
+  { "inputs":[{"internalType":"address","name":"","type":"address"},{"internalType":"address","name":"","type":"address"}], "name":"userSupplyIndex", "outputs":[{"internalType":"uint256","name":"","type":"uint256"}], "stateMutability":"view", "type":"function" },
+  { "inputs":[{"internalType":"address","name":"","type":"address"},{"internalType":"address","name":"","type":"address"}], "name":"userBorrowIndex", "outputs":[{"internalType":"uint256","name":"","type":"uint256"}], "stateMutability":"view", "type":"function" }
 ];
 
 window.ORACLE_ABI = [
@@ -179,4 +184,7 @@ window.CSVUSD_MINTABLE_ABI = [
   { "inputs": [{ "internalType": "uint256", "name": "amount", "type": "uint256" }], "name": "repay", "outputs": [], "stateMutability": "nonpayable", "type": "function" }
 ];
 
-window.REWARDS_ADDRESS = "0x1126859aB6911Fc3b4f86f2F65E7B6F2eEDe5185";
+// VIBE Governance Token (ERC20) on Soneium. NOT the rewards distributor:
+// VIBE rewards (vibeAccrued / claimVIBE / speeds) live in each network's Master
+// (comptroller). Resolve it with window.getRewardsAddress(ACTIVE) from config.js.
+window.VIBE_TOKEN_ADDRESS = "0x68Bcb0b5F8840EfA6e4406f6A11947B0de292613";

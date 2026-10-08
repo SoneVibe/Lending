@@ -3,7 +3,7 @@ const C_TOKEN_ABI   = window.C_TOKEN_ABI;
 const MASTER_ABI    = window.MASTER_ABI;
 const MIN_ERC20_ABI = window.MIN_ERC20_ABI;
 const REWARDS_ABI   = window.REWARDS_ABI;
-let VIBE_VAULT_ADDR = window.REWARDS_ADDRESS;
+let VIBE_VAULT_ADDR = null; // resolved per network via window.getRewardsAddress(ACTIVE)
 
 let provider, signer, userAddress, NETWORKS_DATA, ACTIVE;
 
@@ -310,6 +310,7 @@ if(btnDo) {
 }
 
 async function updateVibeVault() {
+  VIBE_VAULT_ADDR = window.getRewardsAddress ? window.getRewardsAddress(ACTIVE) : null;
   if (!provider || !userAddress || !VIBE_VAULT_ADDR) return;
   const vault = new ethers.Contract(VIBE_VAULT_ADDR, REWARDS_ABI, provider);
   try {
