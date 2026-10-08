@@ -171,6 +171,26 @@
     .lp-chip i { background: var(--c) !important; }
     .lp-chip.on { border-color: color-mix(in srgb, var(--c) 45%, transparent); }
 
+    .lp-partner { display: grid; grid-template-columns: minmax(240px, 380px) 1fr; align-items: center; gap: 36px; padding: 28px; border-radius: 24px; color: inherit; text-decoration: none; background: linear-gradient(135deg, rgba(0,224,255,.07), rgba(45,108,223,.05) 55%, rgba(255,255,255,.015)); border: 1px solid rgba(255,255,255,.08); transition: transform .2s, border-color .2s, box-shadow .2s; }
+    .lp-partner:hover { transform: translateY(-4px); border-color: rgba(0,224,255,.35); box-shadow: 0 18px 48px rgba(0,0,0,.35); }
+    .lp-partner:focus-visible { outline: 2px solid var(--success); outline-offset: 3px; }
+    .lp-partner-logo { display: grid; place-items: center; aspect-ratio: 16 / 7; padding: 22px 28px; border-radius: 18px; background: #fff; box-shadow: inset 0 0 0 1px rgba(0,0,0,.04), 0 10px 30px rgba(0,0,0,.25); }
+    .lp-partner-logo img { display: block; width: 100%; height: auto; max-height: 100%; object-fit: contain; }
+    .lp-partner-badge { display: inline-flex; align-items: center; gap: 6px; font-size: .7rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 5px 10px; border-radius: 999px; color: var(--success); background: rgba(0,224,255,.1); border: 1px solid rgba(0,224,255,.25); }
+    .lp-partner-badge::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--success); box-shadow: 0 0 8px var(--success); }
+    .lp-partner-body h3 { margin: 14px 0 8px; font-size: 1.5rem; letter-spacing: -.02em; }
+    .lp-partner-body p { margin: 0 0 16px; color: var(--text-muted); font-size: .95rem; line-height: 1.6; max-width: 560px; }
+    .lp-partner-hubs { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; margin: 0 0 18px; padding: 0; }
+    .lp-partner-hubs li { font-size: .74rem; font-weight: 600; letter-spacing: .8px; text-transform: uppercase; padding: 5px 10px; border-radius: 8px; color: #c9d6e6; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.07); }
+    .lp-partner .go { color: var(--success); font-weight: 600; font-size: .9rem; overflow-wrap: anywhere; }
+    @media (max-width: 760px) {
+      .lp-partner { grid-template-columns: 1fr; gap: 22px; padding: 18px; }
+      .lp-partner-logo { aspect-ratio: auto; padding: 22px; }
+      .lp-partner-logo img { max-width: 320px; margin: 0 auto; }
+      .lp-partner-body h3 { font-size: 1.3rem; }
+    }
+    @media (prefers-reduced-motion: reduce) { .lp-partner, .lp-partner:hover { transition: none; transform: none; } }
+
     @media (max-width: 1000px) {
       .lp-chains { grid-template-columns: 1fr 1fr; }
       .lp-chain.flagship .lp-chain-stats { grid-template-columns: repeat(3, 1fr); row-gap: 18px; }
@@ -313,6 +333,26 @@
           <div class="lp-risk">DeFi carries risk, including smart-contract bugs, oracle failures and impermanent loss. Only deposit what you can afford to lose.</div>
         </div>
       </div>
+    </section>
+
+    <section class="lp-section" id="partners">
+      <div class="lp-eyebrow">Partnerships</div>
+      <h2>Built with partners in the real economy</h2>
+      <p class="lead">SoneVibe works alongside established companies to connect on-chain finance with global trade.</p>
+      <a class="lp-partner" href="https://hydraglobalexports.com" target="_blank" rel="noopener" aria-label="Hydra Global, joint venture partner. Opens hydraglobalexports.com in a new tab">
+        <div class="lp-partner-logo">
+          <img src="icons/hydra-global.png" alt="Hydra Global" width="470" height="151" loading="lazy" decoding="async">
+        </div>
+        <div class="lp-partner-body">
+          <span class="lp-partner-badge">Joint Venture Partner</span>
+          <h3>Hydra Global</h3>
+          <p>International export and trade company and SoneVibe's joint venture partner, operating across North America, Europe, the Middle East and South Asia.</p>
+          <ul class="lp-partner-hubs" aria-label="Offices">
+            <li>Chicago</li><li>Miami</li><li>London</li><li>Dubai</li><li>Lahore</li>
+          </ul>
+          <span class="go">hydraglobalexports.com ↗</span>
+        </div>
+      </a>
     </section>
 
     <section class="lp-final">
