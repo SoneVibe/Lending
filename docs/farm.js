@@ -277,11 +277,10 @@ function applyFarmChrome() {
     if (advanced) { advanced.hidden = false; advanced.open = false; }
     setHidden("pctRow", false);
     setHidden("btnMax", true);
-    setHidden("unstakeHint", false);
     setHidden("userStakedUsd", false);
     setHidden("userEarnedUsd", false);
     setHidden("walletLpUsd", false);
-    setText("unstakeHint", "Unstake returns your LP and pays any pending LIGHT.");
+    syncFarmMode();
     setText("userStaked", "—");
     setText("userEarned", "—");
     setText("walletLP", "—");
@@ -575,20 +574,32 @@ async function switchNetwork(targetChainId) {
 
 // --- 3. FARM LOGIC ---
 
-window.setFarmMode = (mode) => {
-  isStakeMode = (mode === "stake");
+function syncFarmMode() {
   const tStake = getEl("tabStake");
   const tUnstake = getEl("tabUnstake");
-  if (!tStake || !tUnstake) return;
-  if (isStakeMode) {
-    tStake.classList.add("active");
-    tUnstake.classList.remove("active", "unstake-mode");
-    setText("balLabel", "Wallet");
-  } else {
-    tStake.classList.remove("active");
-    tUnstake.classList.add("active", "unstake-mode");
-    setText("balLabel", "Staked");
+  if (tStake && tUnstake) {
+    tStake.classList.toggle("active", isStakeMode);
+    tUnstake.classList.toggle("active", !isStakeMode);
+    tUnstake.classList.toggle("unstake-mode", !isStakeMode);
+    tStake.setAttribute("aria-pressed", isStakeMode ? "true" : "false");
+    tUnstake.setAttribute("aria-pressed", isStakeMode ? "false" : "true");
   }
+  setText("balLabel", isStakeMode ? "Wallet" : "Staked");
+  if (isMinato() && currentFarm) {
+    setHidden("unstakeHint", false);
+    setText(
+      "unstakeHint",
+      isStakeMode
+        ? "Stake deposits LP from your wallet."
+        : "Unstake returns your LP and pays the pending LIGHT the farm can cover; any rest stays credited."
+    );
+  }
+}
+
+window.setFarmMode = (mode) => {
+  if (txBusy) return;
+  isStakeMode = (mode === "stake");
+  syncFarmMode();
   const input = getEl("stakeAmount");
   if (input) input.value = "";
   if (isMinato()) paintMinatoActions();
@@ -1095,6 +1106,7 @@ async function handleEmergencyWithdraw() {
 }
 
 function fillAmount(raw) {
+  if (txBusy) return;
   if (raw == null || !userAddress) return;
   const input = getEl("stakeAmount");
   if (!input) return;
