@@ -102,30 +102,32 @@ function formatRate(wei) {
 function rewardPhase(now, start, end, funded) {
   if (now < start) return "not-started";
   if (end > 0 && now >= end) return "ended";
-  if (!(funded > 0) || now >= funded) return "not-funded";
+  // end === 0 is an open-ended MINT chef. fundedUntil() then returns 0 as well,
+  // which means "no end", not "unfunded". PREFUND always has end > 0.
+  if (end > 0 && (!(funded > 0) || now >= funded)) return "not-funded";
   return "active";
 }
 
 // APR% with 2 decimal places, scaled by 100 (157680 = 1,576.80%).
 // poolLightPerSecond * secondsPerYear * LIGHT price / (totalStaked * LP price).
-// Both prices come from the pair: USDC.e side is ~$1, so the stable reserve cancels and
-// APR = rate * 31536000 * 10^lightDecimals * lpSupply / (10^18 * lightReserve * totalStaked * 2).
-function computeAprScaled(poolLightPerSecond, reserveLight, lightDecimals, lpSupply, totalStaked) {
+// USDC.e (~$1) prices both sides, so its 6 decimals cancel. Rate and the LIGHT
+// reserve are both raw LIGHT units (18 decimals), and lpSupply and totalStaked
+// are both raw LP units (18 decimals), so those decimals cancel too:
+// APR = rate * 31536000 * lpSupply / (lightReserve * totalStaked * 2).
+function computeAprScaled(poolLightPerSecond, reserveLight, lpSupply, totalStaked) {
   if (poolLightPerSecond == null || reserveLight == null || lpSupply == null || totalStaked == null) return null;
-  let rate, lightReserve, supply, staked, dec;
+  let rate, lightReserve, supply, staked;
   try {
     rate = BigInt(poolLightPerSecond);
     lightReserve = BigInt(reserveLight);
     supply = BigInt(lpSupply);
     staked = BigInt(totalStaked);
-    dec = BigInt(lightDecimals);
   } catch {
     return null;
   }
   if (rate <= 0n || lightReserve <= 0n || supply <= 0n || staked <= 0n) return null;
-  if (dec > 36n) return null;
-  const num = rate * SECONDS_PER_YEAR * (10n ** dec) * supply * 10000n;
-  const den = (10n ** 18n) * lightReserve * staked * 2n;
+  const num = rate * SECONDS_PER_YEAR * supply * 10000n;
+  const den = lightReserve * staked * 2n;
   if (den === 0n) return null;
   return num / den;
 }
@@ -141,11 +143,33 @@ function formatAprScaled(scaled) {
 }
 
 function parseAmount(value, decimals) {
-  const v = String(value ?? "").trim();
+  let v = String(value ?? "").trim().replace(",", ".");
   if (!v) return null;
-  if (!/^\d+(\.\d+)?$/.test(v)) return undefined;
+  if (!/^(?:\d*\.?\d+|\d+\.)$/.test(v)) return undefined;
+  if (v.endsWith(".")) v = v.slice(0, -1);
+  if (v.startsWith(".")) v = "0" + v;
   try { return ethers.parseUnits(v, Number(decimals)); }
   catch { return undefined; }
+}
+
+const walletWatch = new WeakSet();
+
+function bindWalletEvents(ethProvider) {
+  if (!ethProvider || typeof ethProvider.on !== "function" || walletWatch.has(ethProvider)) return;
+  walletWatch.add(ethProvider);
+  ethProvider.on("chainChanged", () => window.location.reload());
+  ethProvider.on("accountsChanged", () => window.location.reload());
+}
+
+async function assertMinato() {
+  let chainId = null;
+  try {
+    const net = await provider.getNetwork();
+    chainId = net.chainId;
+  } catch { /* wallet changed network, or the read failed */ }
+  if (chainId !== BigInt(MINATO_CHAIN_ID)) {
+    throw new Error("Wrong network. Switch to Minato (1946).");
+  }
 }
 
 function errorText(e) {
@@ -305,8 +329,10 @@ function initNetworkSelector() {
   });
   sel.onchange = async (e) => {
     const targetChainId = e.target.value;
-    if (userAddress) await switchNetwork(targetChainId);
-    else {
+    if (userAddress) {
+      await switchNetwork(targetChainId);
+      if (ACTIVE) sel.value = String(ACTIVE.chainId);
+    } else {
       ACTIVE = Object.values(NETWORKS_DATA).find(n => n.chainId == targetChainId);
       currentFarm = ACTIVE && ACTIVE.farms ? ACTIVE.farms[0] : null;
       applyFarmChrome();
@@ -417,6 +443,7 @@ async function connectWallet() {
 
   try {
     provider = new ethers.BrowserProvider(ethProvider);
+    bindWalletEvents(ethProvider);
     if (!NETWORKS_DATA) NETWORKS_DATA = await window.loadNetworks();
 
     await provider.send("eth_requestAccounts", []);
@@ -443,11 +470,6 @@ async function connectWallet() {
     applyFarmChrome();
     syncPoll();
     await refreshFarmUI();
-
-    if (ethProvider.on) {
-      ethProvider.on("chainChanged", () => window.location.reload());
-      ethProvider.on("accountsChanged", () => window.location.reload());
-    }
   } catch (e) { console.error(e); updateStatus(false); }
 }
 
@@ -746,26 +768,12 @@ async function refreshMinato() {
   if (!still()) return;
 
   let lightReserve = null;
-  let lightDecimals = Number(currentFarm.token1Decimals ?? 18);
   if (reserves && token0 && token1 && currentFarm.token0 && currentFarm.token1) {
     const stable = currentFarm.token0;
     const light = currentFarm.token1;
-    let lightAddr = null;
-    if (sameAddr(token0, light) && sameAddr(token1, stable)) {
-      lightReserve = reserves[0];
-      lightAddr = token0;
-    } else if (sameAddr(token1, light) && sameAddr(token0, stable)) {
-      lightReserve = reserves[1];
-      lightAddr = token1;
-    }
-    if (lightAddr && window.MIN_ERC20_ABI) {
-      try {
-        const dec = await new ethers.Contract(lightAddr, window.MIN_ERC20_ABI, read).decimals();
-        lightDecimals = Number(dec);
-      } catch { /* keep the configured fallback */ }
-    }
+    if (sameAddr(token0, light) && sameAddr(token1, stable)) lightReserve = reserves[0];
+    else if (sameAddr(token1, light) && sameAddr(token0, stable)) lightReserve = reserves[1];
   }
-  if (!still()) return;
 
   const startN = Number(start);
   const endN = Number(end);
@@ -773,7 +781,7 @@ async function refreshMinato() {
   const phase = rewardPhase(now, startN, endN, fundedN);
 
   const aprAllowed = poolReady && !poolReadFailed && !mismatch && phase === "active" && totalStaked != null && totalStaked > 0n && poolRate != null && poolRate > 0n;
-  const aprScaled = aprAllowed ? computeAprScaled(poolRate, lightReserve, lightDecimals, lpSupply, totalStaked) : null;
+  const aprScaled = aprAllowed ? computeAprScaled(poolRate, lightReserve, lpSupply, totalStaked) : null;
 
   farmState = {
     readable: true,
@@ -833,6 +841,7 @@ async function handleApprove() {
     const lpToken = new ethers.Contract(currentFarm.lpToken, window.MIN_ERC20_ABI, signer);
     let amount = ethers.MaxUint256;
     if (isMinato()) {
+      await assertMinato();
       const dec = farmState && farmState.lpDecimals != null ? farmState.lpDecimals : 18;
       const parsed = parseAmount(getEl("stakeAmount").value, dec);
       if (parsed == null || parsed <= 0n) {
@@ -862,6 +871,7 @@ async function handleDeposit() {
   try {
     if (btn) btn.textContent = "Staking...";
     showTx("");
+    if (isMinato()) await assertMinato();
     const abi = isMinato() ? MASTERCHEF_V2_ABI : window.MASTERCHEF_ABI;
     const master = new ethers.Contract(ACTIVE.masterChef, abi, signer);
     const dec = isMinato() && farmState && farmState.lpDecimals != null ? farmState.lpDecimals : 18;
@@ -892,6 +902,7 @@ async function handleWithdraw() {
   try {
     if (btn) btn.textContent = "Withdrawing...";
     showTx("");
+    if (isMinato()) await assertMinato();
     const abi = isMinato() ? MASTERCHEF_V2_ABI : window.MASTERCHEF_ABI;
     const master = new ethers.Contract(ACTIVE.masterChef, abi, signer);
     const dec = isMinato() && farmState && farmState.lpDecimals != null ? farmState.lpDecimals : 18;
@@ -920,6 +931,7 @@ async function handleHarvest() {
   try {
     if (btn) btn.textContent = "Harvesting...";
     showTx("");
+    if (isMinato()) await assertMinato();
     const abi = isMinato() ? MASTERCHEF_V2_ABI : window.MASTERCHEF_ABI;
     const master = new ethers.Contract(ACTIVE.masterChef, abi, signer);
     const tx = isMinato()
@@ -945,6 +957,7 @@ async function handleEmergencyWithdraw() {
   try {
     if (btn) btn.textContent = "Emergency withdrawing...";
     showTx("");
+    await assertMinato();
     const master = new ethers.Contract(ACTIVE.masterChef, MASTERCHEF_V2_ABI, signer);
     const tx = await master.emergencyWithdraw(currentFarm.pid);
     await tx.wait();
