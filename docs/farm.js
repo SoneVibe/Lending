@@ -597,6 +597,7 @@ function syncFarmMode() {
 }
 
 window.setFarmMode = (mode) => {
+  if (txBusy) return;
   isStakeMode = (mode === "stake");
   syncFarmMode();
   const input = getEl("stakeAmount");
@@ -1105,6 +1106,7 @@ async function handleEmergencyWithdraw() {
 }
 
 function fillAmount(raw) {
+  if (txBusy) return;
   if (raw == null || !userAddress) return;
   const input = getEl("stakeAmount");
   if (!input) return;
