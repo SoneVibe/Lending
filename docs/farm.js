@@ -10,6 +10,7 @@ let refreshGen = 0;
 let pollTimer = null;
 let farmState = null;
 let farmEpoch = 0;
+let emergencyMark = null;
 let readProviderCache = null;
 
 let balanceWallet = 0n;
@@ -352,6 +353,7 @@ function renderFarmPicker() {
 
 function clearFarmPosition() {
   farmEpoch++;
+  emergencyMark = null;
   farmState = null;
   balanceWallet = 0n;
   balanceStaked = 0n;
@@ -612,7 +614,14 @@ function openWalletModal() {
 window.closeWalletModal = () => { const modal = getEl("walletModal"); if (modal) modal.classList.remove("open"); };
 
 function openEmergency() {
-  if (!isMinato() || !farmState || farmState.staked == null || farmState.staked <= 0n) return;
+  if (!usesV2Chef() || !farmState || farmState.staked == null || farmState.staked <= 0n) return;
+  if (isSoneium()) {
+    emergencyMark = captureSoneiumUse();
+    if (!emergencyMark) {
+      rejectStaleFarm();
+      return;
+    }
+  }
   const dec = farmState.lpDecimals ?? 18;
   setText(
     "emergencyDetail",
@@ -622,6 +631,7 @@ function openEmergency() {
   if (modal) modal.classList.add("open");
 }
 function closeEmergency() {
+  emergencyMark = null;
   const modal = getEl("emergencyModal");
   if (modal) modal.classList.remove("open");
 }
@@ -658,7 +668,12 @@ if (getEl("btnDisconnect")) getEl("btnDisconnect").onclick = () => {
 };
 if (getEl("btnEmergencyClose")) getEl("btnEmergencyClose").onclick = closeEmergency;
 if (getEl("btnEmergencyCancel")) getEl("btnEmergencyCancel").onclick = closeEmergency;
-if (getEl("btnEmergencyConfirm")) getEl("btnEmergencyConfirm").onclick = () => { closeEmergency(); handleEmergencyWithdraw(); };
+if (getEl("btnEmergencyConfirm")) getEl("btnEmergencyConfirm").onclick = () => {
+  const mark = emergencyMark;
+  closeEmergency();
+  emergencyMark = mark;
+  handleEmergencyWithdraw();
+};
 
 async function connectWallet() {
   const ethProvider = selectedProvider || window.ethereum;
@@ -1551,6 +1566,10 @@ window.handleHarvest = handleHarvest;
 
 async function handleEmergencyWithdraw() {
   if (!signer || txBusy || !usesV2Chef()) return;
+  if (isSoneium() && !soneiumUseMatches(emergencyMark)) {
+    rejectStaleFarm();
+    return;
+  }
   if (!farmState || farmState.staked == null || farmState.staked <= 0n) return;
   const btn = getEl("btnEmergency");
   txBusy = true;
@@ -1558,8 +1577,12 @@ async function handleEmergencyWithdraw() {
     if (btn) btn.textContent = "Emergency withdrawing...";
     showTx("");
     await assertFarmNetwork();
+    if (isSoneium() && !soneiumUseMatches(emergencyMark)) {
+      rejectStaleFarm();
+      return;
+    }
     const master = new ethers.Contract(ACTIVE.masterChef, MASTERCHEF_V2_ABI, signer);
-    const tx = await master.emergencyWithdraw(currentFarm.pid);
+    const tx = await master.emergencyWithdraw(isSoneium() ? emergencyMark.pid : currentFarm.pid);
     await tx.wait();
   } catch (e) {
     console.error(e);
