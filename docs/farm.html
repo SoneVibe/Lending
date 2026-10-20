@@ -81,7 +81,18 @@
     }
     .farm-advanced summary::-webkit-details-marker { display: none; }
     .farm-card.is-minato .toggle-group { flex: 1; }
-    .farm-card.is-minato .toggle-btn { flex: 1; min-height: 44px; }
+    .farm-card.is-minato .toggle-btn {
+        flex: 1; min-height: 44px;
+        background: transparent; color: var(--text-muted); opacity: 0.7;
+    }
+    .farm-card.is-minato .toggle-btn.active {
+        background: var(--accent); color: #fff; opacity: 1;
+        box-shadow: 0 0 0 1px var(--accent);
+    }
+    .farm-card.is-minato .toggle-btn.active.unstake-mode {
+        background: var(--danger); color: #fff; opacity: 1;
+        box-shadow: 0 0 0 1px var(--danger);
+    }
     .farm-card.is-minato #stakeAmount { padding-right: 16px !important; }
     @media (max-width: 600px) {
         .farm-head { flex-direction: column; align-items: flex-start; }
@@ -206,13 +217,13 @@
         <!-- Actions Area (Con Tabs) -->
         <div>
             <div class="action-header">
-                <div class="toggle-group">
-                    <button type="button" class="toggle-btn active" id="tabStake" onclick="setFarmMode('stake')">Stake</button>
-                    <button type="button" class="toggle-btn" id="tabUnstake" onclick="setFarmMode('unstake')">Unstake</button>
+                <div class="toggle-group" role="group" aria-label="Stake or unstake">
+                    <button type="button" class="toggle-btn active" id="tabStake" aria-pressed="true" onclick="setFarmMode('stake')">Stake</button>
+                    <button type="button" class="toggle-btn" id="tabUnstake" aria-pressed="false" onclick="setFarmMode('unstake')">Unstake</button>
                 </div>
                 <span style="font-size:0.8rem; color:var(--text-muted);"><span id="balLabel">Wallet</span>: <span id="walletLP" class="farm-amount" style="color:#fff;">0.00</span> <span id="walletLpUsd" class="farm-only" hidden></span></span>
             </div>
-            <p id="unstakeHint" class="farm-hint farm-only" hidden>Unstake returns your LP and pays any pending LIGHT.</p>
+            <p id="unstakeHint" class="farm-hint farm-only" hidden>Stake deposits LP from your wallet.</p>
 
             <div id="pctRow" class="pct-row farm-only" hidden>
                 <button type="button" id="btnPct25">25%</button>
