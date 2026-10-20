@@ -33,7 +33,7 @@
     // serves 50,000-block windows, so 7 days is ~27 calls. If it fails, the default RPC path runs as before.
     LOG_RPC: {
       56: { url: 'https://bsc-mainnet.nodereal.io/v1/64a9df0874fb4a93b9d0a3849de012d3', chunk: 50000, minChunk: 12500 },
-      1868: { url: 'https://soneium-mainnet.rpc.sentio.xyz', chunk: 10000, minChunk: 500 },
+      1868: { url: 'https://soneium-mainnet.rpc.sentio.xyz', chunk: 1000, minChunk: 250 },
     },
   };
 
