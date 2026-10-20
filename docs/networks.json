@@ -353,14 +353,20 @@
         
     },
    
-    "masterChef": "0x5D9Eb0547f1914EB71d69ae68C9c36e9221D02c9", 
+    "masterChef": "0xE7C0ce381882C3CD5e5f8baF591cC240ba673119",
     "farms": [
       {
         "pid": 0,
-        "lpToken": "0xec02438F5C2D09AbcE6A988331471bb371CDede4", 
-        "lpSymbol": "VIBE-ETH LP",
+        "lpToken": "0xf7c6fFE026FB210Fe40F0061757EcFF3688Fa08B",
+        "lpSymbol": "LIGHT-USDC.e LP",
         "icon1": "icons/vibe.svg",
-        "icon2": "icons/weth.svg"
+        "icon2": "icons/usdc.e.svg",
+        "token0": "0xE9A198d38483aD727ABC8b0B1e16B2d338CF0391",
+        "token0Symbol": "USDC.e",
+        "token0Decimals": 6,
+        "token1": "0xed82c5856Cb9189379357887D58b933Ba7B04F88",
+        "token1Symbol": "LIGHT",
+        "token1Decimals": 18
       }
     ],
 
