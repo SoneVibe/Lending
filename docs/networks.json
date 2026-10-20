@@ -27,10 +27,10 @@
             "isNative": false
         }
     },
-    "masterChef": null,
+    "masterChef": "0x8f2F9B17b173C91c7B9195096030a39227B94f62",
     "farms": [
       {
-        "pid": null,
+        "pid": 0,
         "allocPoint": 60,
         "lpToken": "0xc58ce2E71D0D64fC016DbB826714530B475adc0C",
         "lpSymbol": "WETH-USDC.e LP",
@@ -45,7 +45,7 @@
         "merklNote": true
       },
       {
-        "pid": null,
+        "pid": 1,
         "allocPoint": 20,
         "lpToken": "0x0E629590259feeFD6Da31b0Ff4c7a80F08F0D767",
         "lpSymbol": "ASTR-USDC.e LP",
@@ -59,9 +59,9 @@
         "token1Decimals": 6
       },
       {
-        "pid": null,
+        "pid": 2,
         "allocPoint": 20,
-        "lpToken": null,
+        "lpToken": "0x0684621A0cB5b8A8d791258a060f0c87F94e4D70",
         "lpSymbol": "LIGHT-USDC.e LP",
         "icon1": "icons/sonevibe.png",
         "icon2": "icons/usdc.e.svg",
