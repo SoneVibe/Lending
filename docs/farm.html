@@ -62,12 +62,33 @@
     .farm-only[hidden] { display: none !important; }
     .emergency-copy { margin: 0 0 10px; color: var(--text-muted); font-size: 0.92rem; line-height: 1.45; }
     .emergency-copy strong { color: var(--danger); }
+    .farm-usd { font-size: 0.78rem; color: var(--text-muted); margin-top: 4px; line-height: 1.35; overflow-wrap: anywhere; }
+    .farm-hint { font-size: 0.8rem; color: var(--text-muted); line-height: 1.45; margin: 8px 0 0; }
+    .pct-row { display: flex; gap: 8px; margin: 0 0 10px; }
+    .pct-row button {
+        flex: 1; min-height: 44px; background: rgba(255,255,255,0.06);
+        border: 1px solid rgba(255,255,255,0.1); color: var(--accent);
+        border-radius: 10px; font-weight: 600; cursor: pointer;
+    }
+    .farm-advanced {
+        margin-top: 14px; border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 12px; padding: 0 12px;
+    }
+    .farm-advanced[open] { padding-bottom: 12px; }
+    .farm-advanced summary {
+        cursor: pointer; min-height: 44px; display: flex; align-items: center;
+        font-weight: 600; color: var(--text-muted); list-style: none;
+    }
+    .farm-advanced summary::-webkit-details-marker { display: none; }
+    .farm-card.is-minato .toggle-group { flex: 1; }
+    .farm-card.is-minato .toggle-btn { flex: 1; min-height: 44px; }
+    .farm-card.is-minato #stakeAmount { padding-right: 16px !important; }
     @media (max-width: 600px) {
         .farm-head { flex-direction: column; align-items: flex-start; }
         .farm-apr { text-align: left; }
         .farm-apr-note { max-width: none; }
         .farm-stats, .farm-actions { grid-template-columns: 1fr; flex-direction: column; }
-        #btnMainAction, #btnHarvest, .toggle-btn, .btn-emergency { min-height: 44px; }
+        #btnMainAction, #btnHarvest, .toggle-btn, .btn-emergency, .pct-row button { min-height: 44px; }
         #btnMainAction { width: 100%; }
     }
   </style>
@@ -153,13 +174,13 @@
             <div class="farm-apr">
                 <div style="font-size:0.8rem; color:var(--text-muted);">APR</div>
                 <div id="aprValue" class="farm-apr-value">🔥 420%</div>
-                <div id="aprNote" class="farm-apr-note farm-only" hidden>variable, no garantizado</div>
+                <div id="aprNote" class="farm-apr-note farm-only" hidden>variable, not guaranteed</div>
             </div>
         </div>
 
         <div id="farmMeta" class="farm-meta farm-only" hidden>
-            <div>Reward period / Periodo: <strong id="farmPeriod">—</strong></div>
-            <div>Funded until / Fondos hasta: <strong id="farmFunded">—</strong></div>
+            <div>Reward period: <strong id="farmPeriod">—</strong></div>
+            <div>Funded until: <strong id="farmFunded">—</strong></div>
             <div>Pool LIGHT/s: <strong id="farmPoolRate">—</strong></div>
             <div>Chef LIGHT/s: <strong id="farmChefRate">—</strong></div>
         </div>
@@ -171,10 +192,13 @@
             <div style="background:rgba(0,0,0,0.2); padding:15px; border-radius:12px;">
                 <div style="font-size:0.8rem; color:var(--text-muted);">My Staked LP</div>
                 <div id="userStaked" class="farm-amount" style="font-size:1.4rem; font-weight:600;">0.0000</div>
+                <div id="userStakedUsd" class="farm-usd farm-only" hidden>—</div>
             </div>
             <div style="background:rgba(249, 224, 97, 0.05); border:1px solid rgba(249, 224, 97, 0.2); padding:15px; border-radius:12px;">
                 <div style="font-size:0.8rem; color:var(--warning);">Earned LIGHT</div>
                 <div id="userEarned" class="farm-amount" style="font-size:1.4rem; font-weight:600; color:#fff;">0.0000</div>
+                <div id="userEarnedUsd" class="farm-usd farm-only" hidden>—</div>
+                <p id="earnedHint" class="farm-hint farm-only" hidden></p>
                 <button type="button" id="btnHarvest" class="btn-primary" style="width:100%; margin-top:10px; padding:6px; font-size:0.85rem; background:var(--warning); color:#000; box-shadow:none;" disabled>Harvest</button>
             </div>
         </div>
@@ -186,7 +210,14 @@
                     <button type="button" class="toggle-btn active" id="tabStake" onclick="setFarmMode('stake')">Stake</button>
                     <button type="button" class="toggle-btn" id="tabUnstake" onclick="setFarmMode('unstake')">Unstake</button>
                 </div>
-                <span style="font-size:0.8rem; color:var(--text-muted);"><span id="balLabel">Wallet</span>: <span id="walletLP" class="farm-amount" style="color:#fff;">0.00</span></span>
+                <span style="font-size:0.8rem; color:var(--text-muted);"><span id="balLabel">Wallet</span>: <span id="walletLP" class="farm-amount" style="color:#fff;">0.00</span> <span id="walletLpUsd" class="farm-only" hidden></span></span>
+            </div>
+            <p id="unstakeHint" class="farm-hint farm-only" hidden>Unstake returns your LP and pays any pending LIGHT.</p>
+
+            <div id="pctRow" class="pct-row farm-only" hidden>
+                <button type="button" id="btnPct25">25%</button>
+                <button type="button" id="btnPct50">50%</button>
+                <button type="button" id="btnPctMax">MAX</button>
             </div>
 
             <div class="farm-actions">
@@ -196,7 +227,11 @@
                 </div>
                 <button type="button" id="btnMainAction" class="btn-primary" style="min-width:120px;">Approve</button>
             </div>
-            <button type="button" id="btnEmergency" class="btn-emergency farm-only" hidden disabled>Emergency withdraw</button>
+            <details id="farmAdvanced" class="farm-advanced farm-only" hidden>
+                <summary>Advanced</summary>
+                <p class="farm-hint">Emergency withdraw returns your LP and forfeits pending LIGHT. Those rewards are not paid. Use Unstake to exit and receive pending LIGHT.</p>
+                <button type="button" id="btnEmergency" class="btn-emergency" disabled>Emergency withdraw</button>
+            </details>
             <p id="farmTx" class="farm-tx farm-only" hidden></p>
         </div>
 
@@ -212,7 +247,6 @@
       </div>
       <p id="emergencyDetail" class="emergency-copy"></p>
       <p class="emergency-copy">This returns your staked LP and <strong>forfeits all unclaimed LIGHT rewards</strong>. Those rewards are not paid out.</p>
-      <p class="emergency-copy">Esto devuelve tu LP y <strong>pierdes las recompensas LIGHT no cobradas</strong>. No se pagan.</p>
       <div style="display:flex; gap:10px; margin-top:16px; flex-wrap:wrap;">
         <button type="button" id="btnEmergencyCancel" class="btn-ghost" style="flex:1; min-height:44px;">Cancel</button>
         <button type="button" id="btnEmergencyConfirm" class="btn-emergency" style="flex:1; margin-top:0;">Forfeit rewards and withdraw</button>

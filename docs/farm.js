@@ -142,6 +142,56 @@ function formatAprScaled(scaled) {
   return grouped + "." + frac + "%";
 }
 
+// USD cents, truncated. LP value = amount / supply * (stable reserve as dollars * 2).
+// LIGHT value = amount * stable dollars / light reserve. USDC.e is treated as about $1.
+function lpUsdCents(amount, lpSupply, stableReserve, stableDecimals) {
+  if (amount == null || lpSupply == null || stableReserve == null || stableDecimals == null) return null;
+  let amt, supply, stable, dec;
+  try {
+    amt = BigInt(amount);
+    supply = BigInt(lpSupply);
+    stable = BigInt(stableReserve);
+    dec = BigInt(stableDecimals);
+  } catch { return null; }
+  if (supply <= 0n || stable < 0n || dec < 0n || dec > 36n) return null;
+  if (amt <= 0n) return 0n;
+  return amt * 2n * stable * 100n / (supply * (10n ** dec));
+}
+
+function lightUsdCents(amount, lightReserve, stableReserve, stableDecimals) {
+  if (amount == null || lightReserve == null || stableReserve == null || stableDecimals == null) return null;
+  let amt, light, stable, dec;
+  try {
+    amt = BigInt(amount);
+    light = BigInt(lightReserve);
+    stable = BigInt(stableReserve);
+    dec = BigInt(stableDecimals);
+  } catch { return null; }
+  if (light <= 0n || stable < 0n || dec < 0n || dec > 36n) return null;
+  if (amt <= 0n) return 0n;
+  return amt * stable * 100n / (light * (10n ** dec));
+}
+
+function formatUsdEstimate(cents, amount) {
+  if (cents == null) return "—";
+  const v = BigInt(cents);
+  if (v < 0n) return "—";
+  if (amount === 0n || amount === 0) return "≈ $0.00 estimated";
+  if (v === 0n) return "≈ <$0.01 estimated";
+  const whole = v / 100n;
+  const frac = (v % 100n).toString().padStart(2, "0");
+  const grouped = whole.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return "≈ $" + grouped + "." + frac + " estimated";
+}
+
+function fractionOf(amount, numer, denom) {
+  if (amount == null) return null;
+  const base = BigInt(amount);
+  if (denom === 1n) return base;
+  if (base <= 0n) return 0n;
+  return base * numer / denom;
+}
+
 function parseAmount(value, decimals) {
   let v = String(value ?? "").trim().replace(",", ".");
   if (!v) return null;
@@ -174,7 +224,7 @@ async function assertMinato() {
 
 function errorText(e) {
   const code = e && (e.code || (e.info && e.info.error && e.info.error.code));
-  if (code === 4001 || code === "ACTION_REJECTED") return "Cancelled / Cancelado";
+  if (code === 4001 || code === "ACTION_REJECTED") return "Cancelled";
   const msg = (e && (e.shortMessage || e.reason || e.message)) || "Failed";
   return String(msg).replace(/^execution reverted:?\s*/i, "").slice(0, 220);
 }
@@ -204,23 +254,41 @@ function showTx(text) {
   el.textContent = text;
 }
 
+function setHidden(id, hidden) {
+  const el = getEl(id);
+  if (el) el.hidden = hidden;
+}
+
 function applyFarmChrome() {
-  const v2 = isMinato();
+  const v2 = isMinato() && !!currentFarm;
+  const card = getEl("farmCard");
+  if (card) card.classList.toggle("is-minato", v2);
   const note = getEl("aprNote");
   const meta = getEl("farmMeta");
-  const emergency = getEl("btnEmergency");
-  if (v2 && currentFarm) {
+  const advanced = getEl("farmAdvanced");
+  if (v2) {
     setText("farmTitle", currentFarm.lpSymbol || "LP");
     setText("farmBadge", "Minato testnet");
     setIcon("farmIcon1", currentFarm.icon1 || "icons/vibe.svg");
     setIcon("farmIcon2", currentFarm.icon2 || "icons/usdc.e.svg");
     setText("aprValue", "—");
-    if (note) { note.hidden = false; note.textContent = "variable, no garantizado"; }
+    if (note) { note.hidden = false; note.textContent = "variable, not guaranteed"; }
     if (meta) meta.hidden = false;
-    if (emergency) emergency.hidden = false;
+    if (advanced) { advanced.hidden = false; advanced.open = false; }
+    setHidden("pctRow", false);
+    setHidden("btnMax", true);
+    setHidden("unstakeHint", false);
+    setHidden("userStakedUsd", false);
+    setHidden("userEarnedUsd", false);
+    setHidden("walletLpUsd", false);
+    setText("unstakeHint", "Unstake returns your LP and pays any pending LIGHT.");
     setText("userStaked", "—");
     setText("userEarned", "—");
     setText("walletLP", "—");
+    setText("userStakedUsd", "—");
+    setText("userEarnedUsd", "—");
+    setText("walletLpUsd", "");
+    setHidden("earnedHint", true);
   } else {
     setText("farmTitle", "LIGHT-ETH LP");
     setText("farmBadge", "40x Multiplier");
@@ -229,7 +297,14 @@ function applyFarmChrome() {
     setText("aprValue", "🔥 420%");
     if (note) note.hidden = true;
     if (meta) meta.hidden = true;
-    if (emergency) emergency.hidden = true;
+    if (advanced) { advanced.hidden = true; advanced.open = false; }
+    setHidden("pctRow", true);
+    setHidden("btnMax", false);
+    setHidden("unstakeHint", true);
+    setHidden("earnedHint", true);
+    setHidden("userStakedUsd", true);
+    setHidden("userEarnedUsd", true);
+    setHidden("walletLpUsd", true);
     showBanner("");
     showTx("");
     farmState = null;
@@ -586,18 +661,43 @@ function paintMinatoActions() {
     emergency.onclick = canEmergency ? openEmergency : null;
   }
 
+  const hint = getEl("earnedHint");
   if (!userAddress || !s || !s.readable) {
     setText("userStaked", "—");
     setText("userEarned", "—");
     setText("walletLP", "—");
+    setText("userStakedUsd", "—");
+    setText("userEarnedUsd", "—");
+    setText("walletLpUsd", "");
+    if (hint) { hint.hidden = true; hint.textContent = ""; }
     return;
   }
-  if (!s.poolReady || s.poolReadFailed || s.mismatch || s.staked == null) setText("userStaked", "—");
-  else setText("userStaked", formatAmount(s.staked, dec));
-  if (!s.poolReady || s.poolReadFailed || s.mismatch || s.pending == null) setText("userEarned", "—");
-  else setText("userEarned", formatAmount(s.pending, 18));
+  const positionKnown = s.poolReady && !s.poolReadFailed && !s.mismatch && s.staked != null;
+  if (!positionKnown) {
+    setText("userStaked", "—");
+    setText("userStakedUsd", "—");
+  } else {
+    setText("userStaked", formatAmount(s.staked, dec) + " LP");
+    setText("userStakedUsd", formatUsdEstimate(s.stakedUsdCents, s.staked));
+  }
+  if (!positionKnown || s.pending == null) {
+    setText("userEarned", "—");
+    setText("userEarnedUsd", "—");
+    if (hint) { hint.hidden = true; hint.textContent = ""; }
+  } else {
+    setText("userEarned", formatAmount(s.pending, 18));
+    setText("userEarnedUsd", formatUsdEstimate(s.pendingUsdCents, s.pending));
+    if (hint) {
+      hint.hidden = s.pending <= 0n;
+      hint.textContent = s.pending > 0n
+        ? "Unstake pays this LIGHT with your LP. Anything the farm cannot pay yet stays credited. Emergency withdraw forfeits it."
+        : "";
+    }
+  }
   const shown = isStakeMode ? s.wallet : s.staked;
+  const shownCents = isStakeMode ? s.walletUsdCents : s.stakedUsdCents;
   setText("walletLP", shown == null ? "—" : formatAmount(shown, dec));
+  setText("walletLpUsd", shown == null ? "" : formatUsdEstimate(shownCents, shown));
 }
 
 async function refreshFarmUI() {
@@ -684,7 +784,7 @@ async function refreshMinato() {
   const read = readProvider();
   if (!read || !ACTIVE || !ACTIVE.masterChef || !currentFarm || !currentFarm.lpToken) {
     farmState = { readable: false };
-    showBanner("Minato farm is not configured. / La farm de Minato no está configurada.", "danger");
+    showBanner("Minato farm is not configured.", "danger");
     setText("aprValue", "—");
     paintMinatoActions();
     return;
@@ -725,7 +825,7 @@ async function refreshMinato() {
 
   if (poolLength == null || start == null || end == null) {
     farmState = { readable: false };
-    showBanner("Could not read the farm contract on Minato. / No se pudo leer el contrato de la farm.", "danger");
+    showBanner("Could not read the farm contract on Minato.", "danger");
     setText("aprValue", "—");
     setText("farmPeriod", "—");
     setText("farmFunded", "—");
@@ -768,11 +868,31 @@ async function refreshMinato() {
   if (!still()) return;
 
   let lightReserve = null;
+  let stableReserve = null;
+  let stableAddr = null;
   if (reserves && token0 && token1 && currentFarm.token0 && currentFarm.token1) {
     const stable = currentFarm.token0;
     const light = currentFarm.token1;
-    if (sameAddr(token0, light) && sameAddr(token1, stable)) lightReserve = reserves[0];
-    else if (sameAddr(token1, light) && sameAddr(token0, stable)) lightReserve = reserves[1];
+    if (sameAddr(token0, light) && sameAddr(token1, stable)) {
+      lightReserve = reserves[0];
+      stableReserve = reserves[1];
+      stableAddr = token1;
+    } else if (sameAddr(token1, light) && sameAddr(token0, stable)) {
+      lightReserve = reserves[1];
+      stableReserve = reserves[0];
+      stableAddr = token0;
+    }
+  }
+  let stableDecimals = null;
+  if (stableAddr && window.MIN_ERC20_ABI) {
+    try {
+      stableDecimals = Number(await new ethers.Contract(stableAddr, window.MIN_ERC20_ABI, read).decimals());
+    } catch { /* use the configured scale below */ }
+  }
+  if (!still()) return;
+  if (!Number.isInteger(stableDecimals) && stableAddr && sameAddr(stableAddr, currentFarm.token0)) {
+    const configured = Number(currentFarm.token0Decimals);
+    if (Number.isInteger(configured) && configured >= 0 && configured <= 36) stableDecimals = configured;
   }
 
   const startN = Number(start);
@@ -796,7 +916,10 @@ async function refreshMinato() {
     staked,
     pending,
     totalStaked,
-    poolRate
+    poolRate,
+    stakedUsdCents: lpUsdCents(staked, lpSupply, stableReserve, stableDecimals),
+    walletUsdCents: lpUsdCents(wallet, lpSupply, stableReserve, stableDecimals),
+    pendingUsdCents: lightUsdCents(pending, lightReserve, stableReserve, stableDecimals)
   };
   balanceWallet = wallet || 0n;
   balanceStaked = staked || 0n;
@@ -807,24 +930,24 @@ async function refreshMinato() {
   setText("farmChefRate", formatRate(chefRate));
   setText("aprValue", formatAprScaled(aprScaled));
   const note = getEl("aprNote");
-  if (note) { note.hidden = false; note.textContent = "variable, no garantizado"; }
+  if (note) { note.hidden = false; note.textContent = "variable, not guaranteed"; }
 
   const lines = [];
   if (!poolReady) {
-    lines.push("Pool not added yet. Deposit stays disabled until the owner calls add().\nEl pool todavía no está añadido.");
+    lines.push("Pool not added yet. Deposit stays disabled until the owner calls add().");
   } else if (poolReadFailed) {
-    lines.push("Could not read this pool. Staking and APR stay hidden.\nNo se pudo leer este pool.");
+    lines.push("Could not read this pool. Staking and APR stay hidden.");
   } else if (mismatch) {
-    lines.push("Pool pid " + currentFarm.pid + " does not match the configured LP. Staking and APR are hidden.\nEl pool no coincide con el LP configurado.");
+    lines.push("Pool pid " + currentFarm.pid + " does not match the configured LP. Staking and APR are hidden.");
   }
   if (paused === true) {
-    lines.push("Paused. New deposits are disabled. Withdraw, harvest and emergency withdraw still work.\nEn pausa. No se puede depositar. Retirar, cobrar y el retiro de emergencia siguen activos.");
+    lines.push("Paused. New deposits are disabled. Withdraw, harvest and emergency withdraw still work.");
   }
-  if (phase === "not-started") lines.push("Not started / Aún no empieza.");
-  else if (phase === "ended") lines.push("Ended / Terminado.");
-  else if (phase === "not-funded") lines.push("Not funded / Sin fondos para recompensas.");
+  if (phase === "not-started") lines.push("Not started.");
+  else if (phase === "ended") lines.push("Ended.");
+  else if (phase === "not-funded") lines.push("Not funded.");
   else if (poolReady && !poolReadFailed && !mismatch && (totalStaked == null || totalStaked === 0n)) {
-    lines.push("No LP staked yet, so APR is unavailable.\nNadie tiene LP en stake, así que el APR no se muestra.");
+    lines.push("No LP staked yet, so APR is unavailable.");
   }
   if (!still()) return;
   showBanner(lines.join("\n"), "warn");
@@ -971,19 +1094,35 @@ async function handleEmergencyWithdraw() {
   await refreshFarmUI();
 }
 
+function fillAmount(raw) {
+  if (raw == null || !userAddress) return;
+  const input = getEl("stakeAmount");
+  if (!input) return;
+  const dec = isMinato() && farmState && farmState.lpDecimals != null ? farmState.lpDecimals : 18;
+  input.value = isMinato() ? ethers.formatUnits(raw, dec) : ethers.formatEther(raw);
+  if (isMinato()) paintMinatoActions();
+  else refreshFarmUI();
+}
+
+function fillFraction(numer, denom) {
+  if (!isMinato() || !farmState) return;
+  const base = isStakeMode ? farmState.wallet : farmState.staked;
+  fillAmount(fractionOf(base, numer, denom));
+}
+
 const btnMax = getEl("btnMax");
 if (btnMax) {
   btnMax.onclick = () => {
     if (!userAddress) return;
-    const amt = isStakeMode ? balanceWallet : balanceStaked;
-    const dec = isMinato() && farmState && farmState.lpDecimals != null ? farmState.lpDecimals : 18;
-    const input = getEl("stakeAmount");
-    if (!input) return;
-    input.value = isMinato() ? ethers.formatUnits(amt, dec) : ethers.formatEther(amt);
-    if (isMinato()) paintMinatoActions();
-    else refreshFarmUI();
+    fillAmount(isStakeMode ? balanceWallet : balanceStaked);
   };
 }
+const btnPct25 = getEl("btnPct25");
+const btnPct50 = getEl("btnPct50");
+const btnPctMax = getEl("btnPctMax");
+if (btnPct25) btnPct25.onclick = () => fillFraction(25n, 100n);
+if (btnPct50) btnPct50.onclick = () => fillFraction(50n, 100n);
+if (btnPctMax) btnPctMax.onclick = () => fillFraction(1n, 1n);
 
 const stakeInput = getEl("stakeAmount");
 if (stakeInput) {
