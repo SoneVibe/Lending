@@ -307,6 +307,7 @@ function setupAssets(network) {
     
     updateSwapUI();
     pairReady = ensureRoutablePair().catch(() => {});
+    if (window.renderFeaturedPairs) window.renderFeaturedPairs(network).catch(() => {});
 }
 
 // === FUNCIÓN CORREGIDA: ORDEN DE ICONOS ASTR -> USDC ===
@@ -548,7 +549,7 @@ async function ensureRoutablePair() {
     };
     if (await probe(quote)) return;
     const W = (base.underlyingAddress || '').toLowerCase();
-    const pref = ['USDC', 'USDT', 'DOT', 'ASTR'];
+    const pref = ['USDC', 'USDC.E', 'USDT', 'DOT', 'ASTR'];
     const rank = (s) => { const i = pref.indexOf(String(s).toUpperCase()); return i === -1 ? pref.length : i; };
     const list = (net.swapTokenList || [])
         .filter(t => t.address.toLowerCase() !== W && t.address.toLowerCase() !== String(quote.address).toLowerCase())
@@ -718,6 +719,15 @@ async function runQuote(seq) {
         dependent.value = '';
         lastQuote = null;
         quoteError = "Insufficient liquidity for this trade";
+        try {
+            const a = isNativeTok(tIn) ? ACTIVE.swapTokens.base.underlyingAddress : tIn.address;
+            const b = isNativeTok(tOut) ? ACTIVE.swapTokens.base.underlyingAddress : tOut.address;
+            if (a && b && String(a).toLowerCase() !== String(b).toLowerCase() && ACTIVE.factory) {
+                const factory = new ethers.Contract(ACTIVE.factory, ["function getPair(address,address) view returns (address)"], getReadProvider());
+                const pair = await factory.getPair(a, b);
+                if (pair === ethers.ZeroAddress) quoteError = "Not created yet";
+            }
+        } catch (err) { /* keep the liquidity message */ }
         if (details) details.style.display = 'none';
         const impactEl = getEl('impactDisplay');
         if (impactEl) impactEl.textContent = "--";

@@ -36,7 +36,7 @@
         // --- PREPARAR LISTA DE TOKENS (FIXED) ---
         const baseTokens = net.swapTokens || {
             base: { symbol: "ETH", underlyingAddress: "0x4200000000000000000000000000000000000006", decimals: 18, isNative: true },
-            quote: { symbol: "LIGHT", address: "0x957E619104a03552d767430F2F9a2D17C847310d", decimals: 18, isNative: false }
+            quote: { symbol: "LIGHT", address: "0x84998bf491C80a79B99540666569F360d5Acae6E", decimals: 18, isNative: false }
         };
 
         dashTokenList = [

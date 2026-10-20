@@ -143,7 +143,7 @@ async function updateBalances() {
         
         // 2. Balance Token (LIGHT)
         // OJO: Asegúrate que esta dirección está bien en tu código
-        const LIGHT = "0x957E619104a03552d767430F2F9a2D17C847310d"; 
+        const LIGHT = "0x84998bf491C80a79B99540666569F360d5Acae6E"; 
         const token = new ethers.Contract(LIGHT, window.MIN_ERC20_ABI, provider);
         const tokenBal = await token.balanceOf(userAddress);
         const tokenFmt = parseFloat(ethers.formatEther(tokenBal)).toFixed(2);
@@ -193,7 +193,7 @@ if(amountIn) {
         try {
             const router = new ethers.Contract(ACTIVE.router, window.ROUTER_ABI, provider);
             const WETH = "0x4200000000000000000000000000000000000006"; 
-            const LIGHT = "0x957E619104a03552d767430F2F9a2D17C847310d"; 
+            const LIGHT = "0x84998bf491C80a79B99540666569F360d5Acae6E"; 
             
             const path = isEthToToken ? [WETH, LIGHT] : [LIGHT, WETH];
             const amountWei = ethers.parseEther(val);
@@ -241,7 +241,7 @@ if(btnSwap) {
         try {
             const router = new ethers.Contract(ACTIVE.router, window.ROUTER_ABI, signer);
             const WETH = "0x4200000000000000000000000000000000000006";
-            const LIGHT = "0x957E619104a03552d767430F2F9a2D17C847310d"; 
+            const LIGHT = "0x84998bf491C80a79B99540666569F360d5Acae6E"; 
             
             const amountWei = ethers.parseEther(val);
             const deadline = Math.floor(Date.now() / 1000) + 600;
@@ -300,7 +300,7 @@ if(btnZap) {
         
         try {
             const zap = new ethers.Contract(ACTIVE.zap, window.ZAP_ABI, signer);
-            const LIGHT = "0x957E619104a03552d767430F2F9a2D17C847310d"; 
+            const LIGHT = "0x84998bf491C80a79B99540666569F360d5Acae6E"; 
             const val = ethers.parseEther(zapInput.value);
             
             getEl('zapStatus').innerText = "Zapping...";

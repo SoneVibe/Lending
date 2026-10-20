@@ -80,6 +80,8 @@
         font-weight: 600; color: var(--text-muted); list-style: none;
     }
     .farm-advanced summary::-webkit-details-marker { display: none; }
+    .farm-picker { flex-wrap: wrap; margin: 0 0 14px; }
+    .farm-picker button { flex: 1 1 140px; }
     .farm-card.is-minato .toggle-group { flex: 1; }
     .farm-card.is-minato .toggle-btn {
         flex: 1; min-height: 44px;
@@ -169,6 +171,7 @@
       <div id="farmCard" class="glass-panel farm-card">
 
         <div id="farmBanner" class="farm-banner farm-only" hidden></div>
+        <div id="farmPicker" class="pct-row farm-picker farm-only" hidden></div>
 
         <!-- Header Pool. Non-Minato networks keep the previous static card. -->
         <div class="farm-head">
@@ -195,6 +198,8 @@
             <div>Pool LIGHT/s: <strong id="farmPoolRate">—</strong></div>
             <div>Chef LIGHT/s: <strong id="farmChefRate">—</strong></div>
         </div>
+        <p id="farmMerkl" class="farm-hint farm-only" hidden>Staking this LP in the farm removes it from the Merkl campaign while that campaign runs.</p>
+        <p id="farmPairStatus" class="farm-hint farm-only" hidden></p>
 
         <div style="height:1px; background:rgba(255,255,255,0.1); margin:20px 0;"></div>
 
@@ -215,7 +220,7 @@
         </div>
 
         <!-- Actions Area (Con Tabs) -->
-        <div>
+        <div id="farmActionBlock">
             <div class="action-header">
                 <div class="toggle-group" role="group" aria-label="Stake or unstake">
                     <button type="button" class="toggle-btn active" id="tabStake" aria-pressed="true" onclick="setFarmMode('stake')">Stake</button>
