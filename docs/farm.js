@@ -9,6 +9,8 @@ let txBusy = false;
 let refreshGen = 0;
 let pollTimer = null;
 let farmState = null;
+let farmEpoch = 0;
+let emergencyMark = null;
 let readProviderCache = null;
 
 let balanceWallet = 0n;
@@ -29,6 +31,7 @@ const MASTERCHEF_V2_ABI = [
   "function fundedUntil() view returns (uint256)",
   "function paused() view returns (bool)",
   "function lightPerSecond() view returns (uint256)",
+  "function totalAllocPoint() view returns (uint256)",
   "function deposit(uint256 pid, uint256 amount)",
   "function withdraw(uint256 pid, uint256 amount)",
   "function harvest(uint256 pid)",
@@ -55,8 +58,39 @@ const PAIR_READ_ABI = [
 
 const getEl = (id) => document.getElementById(id);
 
+const SONEIUM_CHAIN_ID = 1868;
+
 function isMinato() {
   return !!(ACTIVE && Number(ACTIVE.chainId) === MINATO_CHAIN_ID);
+}
+
+function isSoneium() {
+  return !!(ACTIVE && Number(ACTIVE.chainId) === SONEIUM_CHAIN_ID);
+}
+
+function isZeroAddr(addr) {
+  return !addr || /^0x0{40}$/i.test(String(addr));
+}
+
+function chefAddress() {
+  const c = ACTIVE && ACTIVE.masterChef;
+  if (typeof c !== "string" || isZeroAddr(c)) return null;
+  return c;
+}
+
+function farmPid(farm) {
+  if (!farm || farm.pid == null || farm.pid === "") return null;
+  const n = Number(farm.pid);
+  return Number.isInteger(n) && n >= 0 ? n : null;
+}
+
+// Interactive V2 actions need a deployed chef and a confirmed pool id.
+function usesV2Chef() {
+  return (isMinato() || isSoneium()) && !!chefAddress() && !!currentFarm && farmPid(currentFarm) != null;
+}
+
+function isV2Farm() {
+  return (isMinato() || isSoneium()) && !!(ACTIVE && Array.isArray(ACTIVE.farms) && ACTIVE.farms.length && currentFarm);
 }
 
 function setText(id, value) {
@@ -128,6 +162,29 @@ function computeAprScaled(poolLightPerSecond, reserveLight, lpSupply, totalStake
   if (rate <= 0n || lightReserve <= 0n || supply <= 0n || staked <= 0n) return null;
   const num = rate * SECONDS_PER_YEAR * supply * 10000n;
   const den = lightReserve * staked * 2n;
+  if (den === 0n) return null;
+  return num / den;
+}
+
+// Same scale as computeAprScaled. LIGHT price comes from the LIGHT/USDC.e pair.
+// LP value comes from that farm's own USDC.e reserve. USDC.e is $1.
+// APR = rate * year * lightStable * lpSupply / (lightReserve * staked * 2 * lpStable).
+// Planned allocPoint in networks.json is not an input. rate must be the on-chain
+// poolLightPerSecond (lightPerSecond * allocPoint / totalAllocPoint while emitting).
+function computeAprScaledGeneral(rate, lightReserve, lightStableReserve, lpSupply, lpStableReserve, totalStaked) {
+  if (rate == null || lightReserve == null || lightStableReserve == null || lpSupply == null || lpStableReserve == null || totalStaked == null) return null;
+  let emission, light, lightStable, supply, lpStable, staked;
+  try {
+    emission = BigInt(rate);
+    light = BigInt(lightReserve);
+    lightStable = BigInt(lightStableReserve);
+    supply = BigInt(lpSupply);
+    lpStable = BigInt(lpStableReserve);
+    staked = BigInt(totalStaked);
+  } catch { return null; }
+  if (emission <= 0n || light <= 0n || lightStable <= 0n || supply <= 0n || lpStable <= 0n || staked <= 0n) return null;
+  const num = emission * SECONDS_PER_YEAR * lightStable * supply * 10000n;
+  const den = light * staked * 2n * lpStable;
   if (den === 0n) return null;
   return num / den;
 }
@@ -222,6 +279,22 @@ async function assertMinato() {
   }
 }
 
+async function assertSoneium() {
+  let chainId = null;
+  try {
+    const net = await provider.getNetwork();
+    chainId = net.chainId;
+  } catch { /* wallet changed network, or the read failed */ }
+  if (chainId !== BigInt(SONEIUM_CHAIN_ID)) {
+    throw new Error("Wrong network. Switch to Soneium (1868).");
+  }
+}
+
+async function assertFarmNetwork() {
+  if (isMinato()) return assertMinato();
+  if (isSoneium()) return assertSoneium();
+}
+
 function errorText(e) {
   const code = e && (e.code || (e.info && e.info.error && e.info.error.code));
   if (code === 4001 || code === "ACTION_REJECTED") return "Cancelled";
@@ -232,7 +305,7 @@ function errorText(e) {
 function showBanner(text, kind) {
   const el = getEl("farmBanner");
   if (!el) return;
-  if (!isMinato() || !text) {
+  if (!(isMinato() || isSoneium()) || !text) {
     el.hidden = true;
     el.textContent = "";
     return;
@@ -245,7 +318,7 @@ function showBanner(text, kind) {
 function showTx(text) {
   const el = getEl("farmTx");
   if (!el) return;
-  if (!isMinato() || !text) {
+  if (!(isMinato() || isSoneium()) || !text) {
     el.hidden = true;
     el.textContent = "";
     return;
@@ -259,28 +332,102 @@ function setHidden(id, hidden) {
   if (el) el.hidden = hidden;
 }
 
+function renderFarmPicker() {
+  const row = getEl("farmPicker");
+  if (!row) return;
+  const farms = (ACTIVE && ACTIVE.farms) || [];
+  const show = (isMinato() || isSoneium()) && farms.length > 1 && !!currentFarm;
+  row.hidden = !show;
+  row.replaceChildren();
+  if (!show) return;
+  farms.forEach((farm, i) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "toggle-btn" + (farm === currentFarm ? " active" : "");
+    btn.setAttribute("aria-pressed", farm === currentFarm ? "true" : "false");
+    btn.textContent = farm.lpSymbol || ("Farm " + (i + 1));
+    btn.onclick = () => selectFarm(i);
+    row.appendChild(btn);
+  });
+}
+
+function clearFarmPosition() {
+  farmEpoch++;
+  emergencyMark = null;
+  farmState = null;
+  balanceWallet = 0n;
+  balanceStaked = 0n;
+  const input = getEl("stakeAmount");
+  if (input) input.value = "";
+  const pair = getEl("farmPairStatus");
+  if (pair) pair.textContent = "";
+  paintIdleAmounts();
+}
+
+function captureSoneiumUse() {
+  if (!isSoneium() || !usesV2Chef() || !farmState || !currentFarm) return null;
+  if (farmState.epoch !== farmEpoch) return null;
+  const pid = farmPid(currentFarm);
+  const lp = farmState.pairAddress;
+  if (pid == null || farmState.pid !== pid || isZeroAddr(lp)) return null;
+  const configured = currentFarm.lpToken;
+  if (configured && !isZeroAddr(configured) && !sameAddr(configured, lp)) return null;
+  return { epoch: farmEpoch, farm: currentFarm, lp, pid };
+}
+
+function soneiumUseMatches(mark) {
+  if (!mark || mark.epoch !== farmEpoch || mark.farm !== currentFarm || !farmState) return false;
+  if (farmState.epoch !== mark.epoch || farmState.pid !== mark.pid) return false;
+  if (farmPid(currentFarm) !== mark.pid || !sameAddr(farmState.pairAddress, mark.lp)) return false;
+  const configured = currentFarm.lpToken;
+  if (configured && !isZeroAddr(configured) && !sameAddr(configured, mark.lp)) return false;
+  return true;
+}
+
+function rejectStaleFarm() {
+  showTx("Farm changed. Refreshing.");
+}
+
+function selectFarm(index) {
+  if (txBusy) return;
+  const farms = ACTIVE && ACTIVE.farms;
+  if (!farms || !farms[index] || farms[index] === currentFarm) return;
+  currentFarm = farms[index];
+  clearFarmPosition();
+  applyFarmChrome();
+  if (usesV2Chef()) paintMinatoActions();
+  refreshFarmUI();
+}
+
 function applyFarmChrome() {
-  const v2 = isMinato() && !!currentFarm;
+  const v2 = isV2Farm();
+  const live = usesV2Chef();
   const card = getEl("farmCard");
   if (card) card.classList.toggle("is-minato", v2);
+  renderFarmPicker();
   const note = getEl("aprNote");
   const meta = getEl("farmMeta");
   const advanced = getEl("farmAdvanced");
   if (v2) {
     setText("farmTitle", currentFarm.lpSymbol || "LP");
-    setText("farmBadge", "Minato testnet");
+    setText("farmBadge", isMinato() ? "Minato testnet" : (live ? "Soneium" : "Coming soon"));
     setIcon("farmIcon1", currentFarm.icon1 || "icons/vibe.svg");
     setIcon("farmIcon2", currentFarm.icon2 || "icons/usdc.e.svg");
     setText("aprValue", "—");
     if (note) { note.hidden = false; note.textContent = "variable, not guaranteed"; }
     if (meta) meta.hidden = false;
-    if (advanced) { advanced.hidden = false; advanced.open = false; }
-    setHidden("pctRow", false);
+    if (advanced) { advanced.hidden = !live; advanced.open = false; }
+    setHidden("pctRow", !live);
     setHidden("btnMax", true);
+    setHidden("farmActionBlock", !live);
+    setHidden("btnHarvest", !live);
     setHidden("userStakedUsd", false);
     setHidden("userEarnedUsd", false);
     setHidden("walletLpUsd", false);
-    syncFarmMode();
+    const merkl = getEl("farmMerkl");
+    if (merkl) merkl.hidden = !currentFarm.merklNote;
+    if (live) syncFarmMode();
+    else setHidden("unstakeHint", true);
     setText("userStaked", "—");
     setText("userEarned", "—");
     setText("walletLP", "—");
@@ -304,6 +451,12 @@ function applyFarmChrome() {
     setHidden("userStakedUsd", true);
     setHidden("userEarnedUsd", true);
     setHidden("walletLpUsd", true);
+    setHidden("farmActionBlock", false);
+    setHidden("btnHarvest", false);
+    const merklOff = getEl("farmMerkl");
+    if (merklOff) merklOff.hidden = true;
+    const pairOff = getEl("farmPairStatus");
+    if (pairOff) { pairOff.hidden = true; pairOff.textContent = ""; }
     showBanner("");
     showTx("");
     farmState = null;
@@ -334,7 +487,7 @@ function syncPoll() {
     clearInterval(pollTimer);
     pollTimer = null;
   }
-  if (!isMinato()) return;
+  if (!(isMinato() || isSoneium())) return;
   pollTimer = setInterval(() => {
     if (document.hidden || txBusy) return;
     refreshFarmUI();
@@ -384,7 +537,7 @@ async function initApp() {
     if (sel && ACTIVE) sel.value = String(ACTIVE.chainId);
     applyFarmChrome();
     syncPoll();
-    if (isMinato()) await refreshFarmUI();
+    if (isMinato() || isSoneium()) await refreshFarmUI();
     if (window.checkAutoConnect) await window.checkAutoConnect(connectWallet);
   } catch (e) { console.error("Init Error", e); }
 }
@@ -461,7 +614,14 @@ function openWalletModal() {
 window.closeWalletModal = () => { const modal = getEl("walletModal"); if (modal) modal.classList.remove("open"); };
 
 function openEmergency() {
-  if (!isMinato() || !farmState || farmState.staked == null || farmState.staked <= 0n) return;
+  if (!usesV2Chef() || !farmState || farmState.staked == null || farmState.staked <= 0n) return;
+  if (isSoneium()) {
+    emergencyMark = captureSoneiumUse();
+    if (!emergencyMark) {
+      rejectStaleFarm();
+      return;
+    }
+  }
   const dec = farmState.lpDecimals ?? 18;
   setText(
     "emergencyDetail",
@@ -471,6 +631,7 @@ function openEmergency() {
   if (modal) modal.classList.add("open");
 }
 function closeEmergency() {
+  emergencyMark = null;
   const modal = getEl("emergencyModal");
   if (modal) modal.classList.remove("open");
 }
@@ -507,7 +668,12 @@ if (getEl("btnDisconnect")) getEl("btnDisconnect").onclick = () => {
 };
 if (getEl("btnEmergencyClose")) getEl("btnEmergencyClose").onclick = closeEmergency;
 if (getEl("btnEmergencyCancel")) getEl("btnEmergencyCancel").onclick = closeEmergency;
-if (getEl("btnEmergencyConfirm")) getEl("btnEmergencyConfirm").onclick = () => { closeEmergency(); handleEmergencyWithdraw(); };
+if (getEl("btnEmergencyConfirm")) getEl("btnEmergencyConfirm").onclick = () => {
+  const mark = emergencyMark;
+  closeEmergency();
+  emergencyMark = mark;
+  handleEmergencyWithdraw();
+};
 
 async function connectWallet() {
   const ethProvider = selectedProvider || window.ethereum;
@@ -585,7 +751,7 @@ function syncFarmMode() {
     tUnstake.setAttribute("aria-pressed", isStakeMode ? "false" : "true");
   }
   setText("balLabel", isStakeMode ? "Wallet" : "Staked");
-  if (isMinato() && currentFarm) {
+  if (usesV2Chef()) {
     setHidden("unstakeHint", false);
     setText(
       "unstakeHint",
@@ -711,9 +877,266 @@ function paintMinatoActions() {
   setText("walletLpUsd", shown == null ? "" : formatUsdEstimate(shownCents, shown));
 }
 
+function stableToken(farm) {
+  if (!farm) return null;
+  if (/usdc/i.test(farm.token0Symbol || "")) return { address: farm.token0, decimals: farm.token0Decimals, symbol: farm.token0Symbol };
+  if (/usdc/i.test(farm.token1Symbol || "")) return { address: farm.token1, decimals: farm.token1Decimals, symbol: farm.token1Symbol };
+  return null;
+}
+
+function lightTokenAddress(farm) {
+  if (!farm) return null;
+  if (/^light$/i.test(farm.token0Symbol || "")) return farm.token0;
+  if (/^light$/i.test(farm.token1Symbol || "")) return farm.token1;
+  return null;
+}
+
+function reserveOf(reserves, token0, token1, want) {
+  if (!reserves || !token0 || !token1 || !want) return null;
+  if (sameAddr(token0, want)) return reserves[0];
+  if (sameAddr(token1, want)) return reserves[1];
+  return null;
+}
+
+async function resolvePair(read, farm) {
+  if (!farm) return { failed: true };
+  if (!isZeroAddr(farm.lpToken)) return { address: farm.lpToken };
+  if (!read || !ACTIVE || !ACTIVE.factory || isZeroAddr(farm.token0) || isZeroAddr(farm.token1)) return { missing: true };
+  try {
+    const factory = new ethers.Contract(ACTIVE.factory, ["function getPair(address,address) view returns (address)"], read);
+    const pair = await factory.getPair(farm.token0, farm.token1);
+    return isZeroAddr(pair) ? { missing: true } : { address: pair };
+  } catch { return { failed: true }; }
+}
+
+async function readPairSnapshot(read, farm) {
+  const resolved = await resolvePair(read, farm);
+  if (!resolved || resolved.failed) return { failed: true };
+  if (resolved.missing || !resolved.address) return { missing: true };
+  try {
+    const pair = new ethers.Contract(resolved.address, PAIR_READ_ABI, read);
+    const [token0, token1, reserves, supply, decimals] = await Promise.all([
+      pair.token0(),
+      pair.token1(),
+      pair.getReserves(),
+      pair.totalSupply(),
+      pair.decimals().then(v => v, () => 18)
+    ]);
+    const stable = stableToken(farm);
+    return {
+      address: resolved.address,
+      token0,
+      token1,
+      reserves,
+      supply,
+      lpDecimals: Number(decimals),
+      stableReserve: stable ? reserveOf(reserves, token0, token1, stable.address) : null,
+      stableDecimals: stable && Number.isInteger(Number(stable.decimals)) ? Number(stable.decimals) : null,
+      stableAddress: stable ? stable.address : null
+    };
+  } catch { return { failed: true }; }
+}
+
+function setPairStatus(snap, farm) {
+  const el = getEl("farmPairStatus");
+  if (!el) return;
+  if (!isSoneium()) { el.hidden = true; el.textContent = ""; return; }
+  el.hidden = false;
+  if (!snap || snap.failed) { el.textContent = "Could not read this pair"; return; }
+  if (snap.missing || !snap.reserves) { el.textContent = "Not created yet"; return; }
+  const stable = stableToken(farm);
+  if (!stable || snap.stableReserve == null) { el.textContent = "Could not read this pair"; return; }
+  const otherAddr = sameAddr(stable.address, farm.token0) ? farm.token1 : farm.token0;
+  const otherDec = sameAddr(stable.address, farm.token0) ? farm.token1Decimals : farm.token0Decimals;
+  const otherSym = sameAddr(stable.address, farm.token0) ? farm.token1Symbol : farm.token0Symbol;
+  const otherReserve = reserveOf(snap.reserves, snap.token0, snap.token1, otherAddr);
+  if (otherReserve == null) { el.textContent = "Could not read this pair"; return; }
+  if (snap.stableReserve === 0n && otherReserve === 0n) { el.textContent = "Not created yet"; return; }
+  el.textContent = "Reserves: " + formatAmount(otherReserve, otherDec ?? 18) + " " + (otherSym || "") + " · " + formatAmount(snap.stableReserve, snap.stableDecimals ?? 6) + " " + (stable.symbol || "USDC.e");
+}
+
+function paintIdleAmounts() {
+  setText("userStaked", "—");
+  setText("userEarned", "—");
+  setText("walletLP", "—");
+  setText("userStakedUsd", "—");
+  setText("userEarnedUsd", "—");
+  setText("walletLpUsd", "");
+  setText("aprValue", "—");
+  const hint = getEl("earnedHint");
+  if (hint) { hint.hidden = true; hint.textContent = ""; }
+}
+
+async function refreshSoneium() {
+  if (txBusy) return;
+  const gen = ++refreshGen;
+  const epoch = farmEpoch;
+  const farm = currentFarm;
+  const still = () => gen === refreshGen && epoch === farmEpoch && currentFarm === farm && isSoneium();
+  const read = readProvider();
+  if (!read || !currentFarm) {
+    paintIdleAmounts();
+    showBanner("Soneium farm is not configured.", "danger");
+    return;
+  }
+  const snap = await readPairSnapshot(read, currentFarm);
+  if (!still()) return;
+  setPairStatus(snap, currentFarm);
+
+  const chef = chefAddress();
+  const pid = farmPid(currentFarm);
+  if (!chef || pid == null) {
+    farmState = { epoch, pid, readable: true, poolReady: false, lpDecimals: snap && Number.isInteger(snap.lpDecimals) ? snap.lpDecimals : 18, pairAddress: snap && snap.address || null };
+    paintIdleAmounts();
+    setText("farmPeriod", "—");
+    setText("farmFunded", "—");
+    setText("farmPoolRate", "—");
+    setText("farmChefRate", "—");
+    const note = getEl("aprNote");
+    if (note) { note.hidden = false; note.textContent = "variable, not guaranteed"; }
+    showBanner(chef ? "Pool id is not confirmed yet." : "Coming soon. Deposit, withdraw and harvest stay off until the farm contract is deployed.", "warn");
+    return;
+  }
+
+  const pairAddr = snap && snap.address;
+  if (!pairAddr || snap.failed || snap.missing) {
+    farmState = { epoch, pid, readable: false, poolReady: false, pairAddress: null };
+    paintIdleAmounts();
+    showBanner(snap && snap.missing ? "Not created yet." : "Could not read this pair.", "warn");
+    return;
+  }
+
+  const chefC = new ethers.Contract(chef, MASTERCHEF_V2_ABI, read);
+  const pair = new ethers.Contract(pairAddr, PAIR_READ_ABI, read);
+  const pidBig = BigInt(pid);
+  const base = await Promise.allSettled([
+    chefC.poolLength(),
+    chefC.startTime(),
+    chefC.endTime(),
+    chefC.fundedUntil(),
+    chefC.paused(),
+    chefC.lightPerSecond(),
+    read.getBlock("latest")
+  ]);
+  if (!still()) return;
+  const poolLength = settled(base[0]);
+  const start = settled(base[1]);
+  const end = settled(base[2]);
+  const funded = settled(base[3]);
+  const paused = settled(base[4]);
+  const chefRate = settled(base[5]);
+  const block = settled(base[6]);
+  if (poolLength == null || start == null || end == null) {
+    farmState = { epoch, pid, readable: false, pairAddress: pairAddr || null };
+    paintIdleAmounts();
+    showBanner("Could not read the farm contract on Soneium.", "danger");
+    return;
+  }
+
+  const now = block && block.timestamp != null ? Number(block.timestamp) : Math.floor(Date.now() / 1000);
+  const lpDecimals = Number.isInteger(snap.lpDecimals) ? snap.lpDecimals : 18;
+  const poolReady = pidBig >= 0n && pidBig < BigInt(poolLength);
+  let poolRate = null;
+  let totalStaked = null;
+  let mismatch = false;
+  let poolReadFailed = false;
+  let wallet = null;
+  let allowance = null;
+  let staked = null;
+  let pending = null;
+  if (poolReady) {
+    const info = await chefC.poolInfo(pidBig).then(v => v, () => null);
+    poolRate = await chefC.poolLightPerSecond(pidBig).then(v => v, () => null);
+    if (!info) poolReadFailed = true;
+    else if (!sameAddr(info.lpToken, pairAddr)) mismatch = true;
+    else totalStaked = info.totalStaked;
+  }
+  if (userAddress) {
+    wallet = await pair.balanceOf(userAddress).then(v => v, () => null);
+    if (poolReady && !mismatch && !poolReadFailed) {
+      allowance = await pair.allowance(userAddress, chef).then(v => v, () => null);
+      const userInfo = await chefC.userInfo(pidBig, userAddress).then(v => v, () => null);
+      pending = await chefC.pendingLight(pidBig, userAddress).then(v => v, () => null);
+      staked = userInfo ? userInfo.amount : null;
+    }
+  }
+  if (!still()) return;
+
+  const lightCfg = (ACTIVE.farms || []).find(f => lightTokenAddress(f));
+  let lightReserve = null;
+  let lightStable = null;
+  let lightStableDecimals = snap.stableDecimals;
+  if (lightCfg) {
+    const samePair = sameAddr(lightCfg.token0, currentFarm.token0) && sameAddr(lightCfg.token1, currentFarm.token1);
+    const lightSnap = samePair ? snap : await readPairSnapshot(read, lightCfg);
+    if (!still()) return;
+    if (lightSnap && lightSnap.reserves) {
+      lightReserve = reserveOf(lightSnap.reserves, lightSnap.token0, lightSnap.token1, lightTokenAddress(lightCfg));
+      lightStable = lightSnap.stableReserve;
+      if (lightSnap.stableDecimals != null) lightStableDecimals = lightSnap.stableDecimals;
+    }
+  }
+
+  const startN = Number(start);
+  const endN = Number(end);
+  const fundedN = funded == null ? 0 : Number(funded);
+  const phase = rewardPhase(now, startN, endN, fundedN);
+  const rate = poolRate != null && poolRate > 0n ? poolRate : null;
+  const aprAllowed = poolReady && !poolReadFailed && !mismatch && phase === "active" && totalStaked != null && totalStaked > 0n && rate != null && lightReserve != null && lightStable != null && snap.stableReserve != null && snap.supply != null;
+  const aprScaled = aprAllowed ? computeAprScaledGeneral(rate, lightReserve, lightStable, snap.supply, snap.stableReserve, totalStaked) : null;
+  if (!still()) return;
+
+  farmState = {
+    epoch,
+    pid,
+    readable: true,
+    poolReady,
+    poolReadFailed,
+    mismatch,
+    paused: paused === true,
+    phase,
+    lpDecimals,
+    pairAddress: pairAddr,
+    wallet,
+    allowance,
+    staked,
+    pending,
+    totalStaked,
+    poolRate: rate,
+    stakedUsdCents: lpUsdCents(staked, snap.supply, snap.stableReserve, snap.stableDecimals),
+    walletUsdCents: lpUsdCents(wallet, snap.supply, snap.stableReserve, snap.stableDecimals),
+    pendingUsdCents: lightUsdCents(pending, lightReserve, lightStable, lightStableDecimals)
+  };
+  balanceWallet = wallet || 0n;
+  balanceStaked = staked || 0n;
+
+  setText("farmPeriod", formatUnix(start) + " → " + formatUnix(end));
+  setText("farmFunded", formatUnix(funded));
+  setText("farmPoolRate", poolReady && !poolReadFailed && !mismatch ? formatRate(rate) : "—");
+  setText("farmChefRate", formatRate(chefRate));
+  setText("aprValue", formatAprScaled(aprScaled));
+  const note = getEl("aprNote");
+  if (note) { note.hidden = false; note.textContent = "variable, not guaranteed"; }
+
+  const lines = [];
+  if (!poolReady) lines.push("Pool not added yet. Deposit stays disabled until the owner calls add().");
+  else if (poolReadFailed) lines.push("Could not read this pool. Staking and APR stay hidden.");
+  else if (mismatch) lines.push("Pool pid " + pid + " does not match the configured LP. Staking and APR are hidden.");
+  if (paused === true) lines.push("Paused. New deposits are disabled. Withdraw, harvest and emergency withdraw still work.");
+  if (phase === "not-started") lines.push("Not started.");
+  else if (phase === "ended") lines.push("Ended.");
+  else if (phase === "not-funded") lines.push("Not funded.");
+  else if (lightReserve == null || lightStable == null) lines.push("No LIGHT price yet, so APR is unavailable.");
+  else if (poolReady && !poolReadFailed && !mismatch && (totalStaked == null || totalStaked === 0n)) lines.push("No LP staked yet, so APR is unavailable.");
+  if (!still()) return;
+  showBanner(lines.join("\n"), "warn");
+  paintMinatoActions();
+}
+
 async function refreshFarmUI() {
   if (!ACTIVE) return;
   if (isMinato()) return refreshMinato();
+  if (isSoneium() && isV2Farm()) return refreshSoneium();
   return refreshLegacy();
 }
 
@@ -967,15 +1390,28 @@ async function refreshMinato() {
 
 async function handleApprove() {
   if (!signer || txBusy) return;
+  if ((isMinato() || isSoneium()) && !usesV2Chef()) return;
+  const farmMark = isSoneium() ? captureSoneiumUse() : null;
+  if (isSoneium() && !farmMark) {
+    rejectStaleFarm();
+    await refreshFarmUI();
+    return;
+  }
   const btn = getEl("btnMainAction");
   txBusy = true;
   try {
     if (btn) btn.textContent = "Approving...";
     showTx("");
-    const lpToken = new ethers.Contract(currentFarm.lpToken, window.MIN_ERC20_ABI, signer);
+    const lpAddr = isSoneium() ? farmMark.lp : currentFarm.lpToken;
+    if (isZeroAddr(lpAddr)) return;
+    const lpToken = new ethers.Contract(lpAddr, window.MIN_ERC20_ABI, signer);
     let amount = ethers.MaxUint256;
-    if (isMinato()) {
-      await assertMinato();
+    if (isMinato() || isSoneium()) {
+      await assertFarmNetwork();
+      if (isSoneium() && !soneiumUseMatches(farmMark)) {
+        rejectStaleFarm();
+        return;
+      }
       const dec = farmState && farmState.lpDecimals != null ? farmState.lpDecimals : 18;
       const parsed = parseAmount(getEl("stakeAmount").value, dec);
       if (parsed == null || parsed <= 0n) {
@@ -984,12 +1420,16 @@ async function handleApprove() {
       }
       amount = parsed;
     }
+    if (isSoneium() && !soneiumUseMatches(farmMark)) {
+      rejectStaleFarm();
+      return;
+    }
     const tx = await lpToken.approve(ACTIVE.masterChef, amount);
     await tx.wait();
   } catch (e) {
     console.error(e);
     if (btn) btn.textContent = "Failed";
-    if (isMinato()) showTx(errorText(e));
+    if (isMinato() || isSoneium()) showTx(errorText(e));
   } finally {
     txBusy = false;
   }
@@ -998,6 +1438,13 @@ async function handleApprove() {
 
 async function handleDeposit() {
   if (!signer || txBusy) return;
+  if ((isMinato() || isSoneium()) && !usesV2Chef()) return;
+  const farmMark = isSoneium() ? captureSoneiumUse() : null;
+  if (isSoneium() && !farmMark) {
+    rejectStaleFarm();
+    await refreshFarmUI();
+    return;
+  }
   const val = getEl("stakeAmount").value;
   if (!val) return;
   const btn = getEl("btnMainAction");
@@ -1005,22 +1452,30 @@ async function handleDeposit() {
   try {
     if (btn) btn.textContent = "Staking...";
     showTx("");
-    if (isMinato()) await assertMinato();
-    const abi = isMinato() ? MASTERCHEF_V2_ABI : window.MASTERCHEF_ABI;
+    if (isMinato() || isSoneium()) await assertFarmNetwork();
+    if (isSoneium() && !soneiumUseMatches(farmMark)) {
+      rejectStaleFarm();
+      return;
+    }
+    const abi = (isMinato() || isSoneium()) ? MASTERCHEF_V2_ABI : window.MASTERCHEF_ABI;
     const master = new ethers.Contract(ACTIVE.masterChef, abi, signer);
-    const dec = isMinato() && farmState && farmState.lpDecimals != null ? farmState.lpDecimals : 18;
-    const amount = isMinato() ? parseAmount(val, dec) : ethers.parseEther(val);
+    const dec = (isMinato() || isSoneium()) && farmState && farmState.lpDecimals != null ? farmState.lpDecimals : 18;
+    const amount = (isMinato() || isSoneium()) ? parseAmount(val, dec) : ethers.parseEther(val);
     if (amount == null || amount === undefined || amount <= 0n) {
       if (btn) btn.textContent = "Invalid amount";
       return;
     }
-    const tx = await master.deposit(currentFarm.pid, amount);
+    if (isSoneium() && !soneiumUseMatches(farmMark)) {
+      rejectStaleFarm();
+      return;
+    }
+    const tx = await master.deposit(isSoneium() ? farmMark.pid : currentFarm.pid, amount);
     await tx.wait();
     getEl("stakeAmount").value = "";
   } catch (e) {
     console.error(e);
     if (btn) btn.textContent = "Failed";
-    if (isMinato()) showTx(errorText(e));
+    if (isMinato() || isSoneium()) showTx(errorText(e));
   } finally {
     txBusy = false;
   }
@@ -1029,6 +1484,13 @@ async function handleDeposit() {
 
 async function handleWithdraw() {
   if (!signer || txBusy) return;
+  if ((isMinato() || isSoneium()) && !usesV2Chef()) return;
+  const farmMark = isSoneium() ? captureSoneiumUse() : null;
+  if (isSoneium() && !farmMark) {
+    rejectStaleFarm();
+    await refreshFarmUI();
+    return;
+  }
   const val = getEl("stakeAmount").value;
   if (!val) return;
   const btn = getEl("btnMainAction");
@@ -1036,22 +1498,30 @@ async function handleWithdraw() {
   try {
     if (btn) btn.textContent = "Withdrawing...";
     showTx("");
-    if (isMinato()) await assertMinato();
-    const abi = isMinato() ? MASTERCHEF_V2_ABI : window.MASTERCHEF_ABI;
+    if (isMinato() || isSoneium()) await assertFarmNetwork();
+    if (isSoneium() && !soneiumUseMatches(farmMark)) {
+      rejectStaleFarm();
+      return;
+    }
+    const abi = (isMinato() || isSoneium()) ? MASTERCHEF_V2_ABI : window.MASTERCHEF_ABI;
     const master = new ethers.Contract(ACTIVE.masterChef, abi, signer);
-    const dec = isMinato() && farmState && farmState.lpDecimals != null ? farmState.lpDecimals : 18;
-    const amount = isMinato() ? parseAmount(val, dec) : ethers.parseEther(val);
+    const dec = (isMinato() || isSoneium()) && farmState && farmState.lpDecimals != null ? farmState.lpDecimals : 18;
+    const amount = (isMinato() || isSoneium()) ? parseAmount(val, dec) : ethers.parseEther(val);
     if (amount == null || amount === undefined || amount <= 0n) {
       if (btn) btn.textContent = "Invalid amount";
       return;
     }
-    const tx = await master.withdraw(currentFarm.pid, amount);
+    if (isSoneium() && !soneiumUseMatches(farmMark)) {
+      rejectStaleFarm();
+      return;
+    }
+    const tx = await master.withdraw(isSoneium() ? farmMark.pid : currentFarm.pid, amount);
     await tx.wait();
     getEl("stakeAmount").value = "";
   } catch (e) {
     console.error(e);
     if (btn) btn.textContent = "Failed";
-    if (isMinato()) showTx(errorText(e));
+    if (isMinato() || isSoneium()) showTx(errorText(e));
   } finally {
     txBusy = false;
   }
@@ -1060,22 +1530,33 @@ async function handleWithdraw() {
 
 async function handleHarvest() {
   if (!signer || txBusy) return;
+  if ((isMinato() || isSoneium()) && !usesV2Chef()) return;
+  const farmMark = isSoneium() ? captureSoneiumUse() : null;
+  if (isSoneium() && !farmMark) {
+    rejectStaleFarm();
+    await refreshFarmUI();
+    return;
+  }
   const btn = getEl("btnHarvest");
   txBusy = true;
   try {
     if (btn) btn.textContent = "Harvesting...";
     showTx("");
-    if (isMinato()) await assertMinato();
-    const abi = isMinato() ? MASTERCHEF_V2_ABI : window.MASTERCHEF_ABI;
+    if (isMinato() || isSoneium()) await assertFarmNetwork();
+    if (isSoneium() && !soneiumUseMatches(farmMark)) {
+      rejectStaleFarm();
+      return;
+    }
+    const abi = (isMinato() || isSoneium()) ? MASTERCHEF_V2_ABI : window.MASTERCHEF_ABI;
     const master = new ethers.Contract(ACTIVE.masterChef, abi, signer);
-    const tx = isMinato()
-      ? await master.harvest(currentFarm.pid)
+    const tx = (isMinato() || isSoneium())
+      ? await master.harvest(isSoneium() ? farmMark.pid : currentFarm.pid)
       : await master.deposit(currentFarm.pid, 0);
     await tx.wait();
   } catch (e) {
     console.error(e);
     if (btn) btn.textContent = "Failed";
-    if (isMinato()) showTx(errorText(e));
+    if (isMinato() || isSoneium()) showTx(errorText(e));
   } finally {
     txBusy = false;
   }
@@ -1084,16 +1565,24 @@ async function handleHarvest() {
 window.handleHarvest = handleHarvest;
 
 async function handleEmergencyWithdraw() {
-  if (!signer || !isMinato() || txBusy) return;
+  if (!signer || txBusy || !usesV2Chef()) return;
+  if (isSoneium() && !soneiumUseMatches(emergencyMark)) {
+    rejectStaleFarm();
+    return;
+  }
   if (!farmState || farmState.staked == null || farmState.staked <= 0n) return;
   const btn = getEl("btnEmergency");
   txBusy = true;
   try {
     if (btn) btn.textContent = "Emergency withdrawing...";
     showTx("");
-    await assertMinato();
+    await assertFarmNetwork();
+    if (isSoneium() && !soneiumUseMatches(emergencyMark)) {
+      rejectStaleFarm();
+      return;
+    }
     const master = new ethers.Contract(ACTIVE.masterChef, MASTERCHEF_V2_ABI, signer);
-    const tx = await master.emergencyWithdraw(currentFarm.pid);
+    const tx = await master.emergencyWithdraw(isSoneium() ? emergencyMark.pid : currentFarm.pid);
     await tx.wait();
   } catch (e) {
     console.error(e);
@@ -1110,14 +1599,14 @@ function fillAmount(raw) {
   if (raw == null || !userAddress) return;
   const input = getEl("stakeAmount");
   if (!input) return;
-  const dec = isMinato() && farmState && farmState.lpDecimals != null ? farmState.lpDecimals : 18;
-  input.value = isMinato() ? ethers.formatUnits(raw, dec) : ethers.formatEther(raw);
-  if (isMinato()) paintMinatoActions();
+  const dec = usesV2Chef() && farmState && farmState.lpDecimals != null ? farmState.lpDecimals : 18;
+  input.value = usesV2Chef() ? ethers.formatUnits(raw, dec) : ethers.formatEther(raw);
+  if (usesV2Chef()) paintMinatoActions();
   else refreshFarmUI();
 }
 
 function fillFraction(numer, denom) {
-  if (!isMinato() || !farmState) return;
+  if (!usesV2Chef() || !farmState) return;
   const base = isStakeMode ? farmState.wallet : farmState.staked;
   fillAmount(fractionOf(base, numer, denom));
 }
@@ -1139,7 +1628,7 @@ if (btnPctMax) btnPctMax.onclick = () => fillFraction(1n, 1n);
 const stakeInput = getEl("stakeAmount");
 if (stakeInput) {
   stakeInput.addEventListener("input", () => {
-    if (isMinato()) paintMinatoActions();
-    else refreshFarmUI();
+    if (usesV2Chef()) paintMinatoActions();
+    else if (!isSoneium()) refreshFarmUI();
   });
 }
