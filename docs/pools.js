@@ -1019,19 +1019,16 @@ async function updateBalances() {
   }
   if (note) {
     const same = sameToken(tA, tB);
-    const missing = !same && !pairAddress;
-    const empty = !same && !!pairAddress && (reserves.rA === 0n || reserves.rB === 0n);
-    note.classList.toggle('is-new', (missing || empty) && isAddMode);
+    const isNew = !same && (!pairAddress || reserves.rA === 0n || reserves.rB === 0n);
+    note.classList.toggle('is-new', isNew && isAddMode);
     note.textContent = same ? 'Choose two different tokens.'
-      : missing ? 'Not created yet'
-      : empty ? (isAddMode ? 'This pool has no liquidity yet. You are the first provider: the ratio you deposit sets the starting price.' : 'This pool has no liquidity yet.')
+      : isNew ? (isAddMode ? 'This pool has no liquidity yet. You are the first provider: the ratio you deposit sets the starting price.' : 'This pool has no liquidity yet.')
       : `Pool reserves: ${fmtDisplay(reserves.rA, tA.decimals)} ${tA.symbol} · ${fmtDisplay(reserves.rB, tB.decimals)} ${tB.symbol}`;
   }
 
   syncDependent();
   if (!isAddMode) handleRemoveInput();
   refreshMainButton();
-  if (window.renderFeaturedPairs && ACTIVE) window.renderFeaturedPairs(ACTIVE).catch(() => {});
 }
 
 // -------------------- REMOVE ESTIMATION --------------------

@@ -30,10 +30,10 @@
     {
       "chainId": 1868,
       "address": "0xbA9986D2381edf1DA03B0B9c1f8b00dc4AacC369",
-      "symbol": "USDC.e",
-      "name": "Bridged USDC (Soneium)",
+      "symbol": "USDC",
+      "name": "USD Coin",
       "decimals": 6,
-      "logoURI": "icons/usdc.e.svg"
+      "logoURI": "icons/usdc.svg"
     },
     {
       "chainId": 1868,
