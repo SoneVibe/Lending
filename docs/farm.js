@@ -9,6 +9,7 @@ let txBusy = false;
 let refreshGen = 0;
 let pollTimer = null;
 let farmState = null;
+let farmEpoch = 0;
 let readProviderCache = null;
 
 let balanceWallet = 0n;
@@ -349,14 +350,50 @@ function renderFarmPicker() {
   });
 }
 
+function clearFarmPosition() {
+  farmEpoch++;
+  farmState = null;
+  balanceWallet = 0n;
+  balanceStaked = 0n;
+  const input = getEl("stakeAmount");
+  if (input) input.value = "";
+  const pair = getEl("farmPairStatus");
+  if (pair) pair.textContent = "";
+  paintIdleAmounts();
+}
+
+function captureSoneiumUse() {
+  if (!isSoneium() || !usesV2Chef() || !farmState || !currentFarm) return null;
+  if (farmState.epoch !== farmEpoch) return null;
+  const pid = farmPid(currentFarm);
+  const lp = farmState.pairAddress;
+  if (pid == null || farmState.pid !== pid || isZeroAddr(lp)) return null;
+  const configured = currentFarm.lpToken;
+  if (configured && !isZeroAddr(configured) && !sameAddr(configured, lp)) return null;
+  return { epoch: farmEpoch, farm: currentFarm, lp, pid };
+}
+
+function soneiumUseMatches(mark) {
+  if (!mark || mark.epoch !== farmEpoch || mark.farm !== currentFarm || !farmState) return false;
+  if (farmState.epoch !== mark.epoch || farmState.pid !== mark.pid) return false;
+  if (farmPid(currentFarm) !== mark.pid || !sameAddr(farmState.pairAddress, mark.lp)) return false;
+  const configured = currentFarm.lpToken;
+  if (configured && !isZeroAddr(configured) && !sameAddr(configured, mark.lp)) return false;
+  return true;
+}
+
+function rejectStaleFarm() {
+  showTx("Farm changed. Refreshing.");
+}
+
 function selectFarm(index) {
   if (txBusy) return;
   const farms = ACTIVE && ACTIVE.farms;
   if (!farms || !farms[index] || farms[index] === currentFarm) return;
   currentFarm = farms[index];
-  const input = getEl("stakeAmount");
-  if (input) input.value = "";
+  clearFarmPosition();
   applyFarmChrome();
+  if (usesV2Chef()) paintMinatoActions();
   refreshFarmUI();
 }
 
@@ -918,7 +955,9 @@ function paintIdleAmounts() {
 async function refreshSoneium() {
   if (txBusy) return;
   const gen = ++refreshGen;
-  const still = () => gen === refreshGen && isSoneium();
+  const epoch = farmEpoch;
+  const farm = currentFarm;
+  const still = () => gen === refreshGen && epoch === farmEpoch && currentFarm === farm && isSoneium();
   const read = readProvider();
   if (!read || !currentFarm) {
     paintIdleAmounts();
@@ -932,7 +971,7 @@ async function refreshSoneium() {
   const chef = chefAddress();
   const pid = farmPid(currentFarm);
   if (!chef || pid == null) {
-    farmState = { readable: true, poolReady: false, lpDecimals: snap && Number.isInteger(snap.lpDecimals) ? snap.lpDecimals : 18, pairAddress: snap && snap.address || null };
+    farmState = { epoch, pid, readable: true, poolReady: false, lpDecimals: snap && Number.isInteger(snap.lpDecimals) ? snap.lpDecimals : 18, pairAddress: snap && snap.address || null };
     paintIdleAmounts();
     setText("farmPeriod", "—");
     setText("farmFunded", "—");
@@ -946,7 +985,7 @@ async function refreshSoneium() {
 
   const pairAddr = snap && snap.address;
   if (!pairAddr || snap.failed || snap.missing) {
-    farmState = { readable: false, poolReady: false };
+    farmState = { epoch, pid, readable: false, poolReady: false, pairAddress: null };
     paintIdleAmounts();
     showBanner(snap && snap.missing ? "Not created yet." : "Could not read this pair.", "warn");
     return;
@@ -973,7 +1012,7 @@ async function refreshSoneium() {
   const chefRate = settled(base[5]);
   const block = settled(base[6]);
   if (poolLength == null || start == null || end == null) {
-    farmState = { readable: false };
+    farmState = { epoch, pid, readable: false, pairAddress: pairAddr || null };
     paintIdleAmounts();
     showBanner("Could not read the farm contract on Soneium.", "danger");
     return;
@@ -1030,8 +1069,11 @@ async function refreshSoneium() {
   const rate = poolRate != null && poolRate > 0n ? poolRate : null;
   const aprAllowed = poolReady && !poolReadFailed && !mismatch && phase === "active" && totalStaked != null && totalStaked > 0n && rate != null && lightReserve != null && lightStable != null && snap.stableReserve != null && snap.supply != null;
   const aprScaled = aprAllowed ? computeAprScaledGeneral(rate, lightReserve, lightStable, snap.supply, snap.stableReserve, totalStaked) : null;
+  if (!still()) return;
 
   farmState = {
+    epoch,
+    pid,
     readable: true,
     poolReady,
     poolReadFailed,
@@ -1334,17 +1376,27 @@ async function refreshMinato() {
 async function handleApprove() {
   if (!signer || txBusy) return;
   if ((isMinato() || isSoneium()) && !usesV2Chef()) return;
+  const farmMark = isSoneium() ? captureSoneiumUse() : null;
+  if (isSoneium() && !farmMark) {
+    rejectStaleFarm();
+    await refreshFarmUI();
+    return;
+  }
   const btn = getEl("btnMainAction");
   txBusy = true;
   try {
     if (btn) btn.textContent = "Approving...";
     showTx("");
-    const lpAddr = (isSoneium() && farmState && farmState.pairAddress) || currentFarm.lpToken;
+    const lpAddr = isSoneium() ? farmMark.lp : currentFarm.lpToken;
     if (isZeroAddr(lpAddr)) return;
     const lpToken = new ethers.Contract(lpAddr, window.MIN_ERC20_ABI, signer);
     let amount = ethers.MaxUint256;
     if (isMinato() || isSoneium()) {
       await assertFarmNetwork();
+      if (isSoneium() && !soneiumUseMatches(farmMark)) {
+        rejectStaleFarm();
+        return;
+      }
       const dec = farmState && farmState.lpDecimals != null ? farmState.lpDecimals : 18;
       const parsed = parseAmount(getEl("stakeAmount").value, dec);
       if (parsed == null || parsed <= 0n) {
@@ -1352,6 +1404,10 @@ async function handleApprove() {
         return;
       }
       amount = parsed;
+    }
+    if (isSoneium() && !soneiumUseMatches(farmMark)) {
+      rejectStaleFarm();
+      return;
     }
     const tx = await lpToken.approve(ACTIVE.masterChef, amount);
     await tx.wait();
@@ -1368,6 +1424,12 @@ async function handleApprove() {
 async function handleDeposit() {
   if (!signer || txBusy) return;
   if ((isMinato() || isSoneium()) && !usesV2Chef()) return;
+  const farmMark = isSoneium() ? captureSoneiumUse() : null;
+  if (isSoneium() && !farmMark) {
+    rejectStaleFarm();
+    await refreshFarmUI();
+    return;
+  }
   const val = getEl("stakeAmount").value;
   if (!val) return;
   const btn = getEl("btnMainAction");
@@ -1376,6 +1438,10 @@ async function handleDeposit() {
     if (btn) btn.textContent = "Staking...";
     showTx("");
     if (isMinato() || isSoneium()) await assertFarmNetwork();
+    if (isSoneium() && !soneiumUseMatches(farmMark)) {
+      rejectStaleFarm();
+      return;
+    }
     const abi = (isMinato() || isSoneium()) ? MASTERCHEF_V2_ABI : window.MASTERCHEF_ABI;
     const master = new ethers.Contract(ACTIVE.masterChef, abi, signer);
     const dec = (isMinato() || isSoneium()) && farmState && farmState.lpDecimals != null ? farmState.lpDecimals : 18;
@@ -1384,7 +1450,11 @@ async function handleDeposit() {
       if (btn) btn.textContent = "Invalid amount";
       return;
     }
-    const tx = await master.deposit(currentFarm.pid, amount);
+    if (isSoneium() && !soneiumUseMatches(farmMark)) {
+      rejectStaleFarm();
+      return;
+    }
+    const tx = await master.deposit(isSoneium() ? farmMark.pid : currentFarm.pid, amount);
     await tx.wait();
     getEl("stakeAmount").value = "";
   } catch (e) {
@@ -1400,6 +1470,12 @@ async function handleDeposit() {
 async function handleWithdraw() {
   if (!signer || txBusy) return;
   if ((isMinato() || isSoneium()) && !usesV2Chef()) return;
+  const farmMark = isSoneium() ? captureSoneiumUse() : null;
+  if (isSoneium() && !farmMark) {
+    rejectStaleFarm();
+    await refreshFarmUI();
+    return;
+  }
   const val = getEl("stakeAmount").value;
   if (!val) return;
   const btn = getEl("btnMainAction");
@@ -1408,6 +1484,10 @@ async function handleWithdraw() {
     if (btn) btn.textContent = "Withdrawing...";
     showTx("");
     if (isMinato() || isSoneium()) await assertFarmNetwork();
+    if (isSoneium() && !soneiumUseMatches(farmMark)) {
+      rejectStaleFarm();
+      return;
+    }
     const abi = (isMinato() || isSoneium()) ? MASTERCHEF_V2_ABI : window.MASTERCHEF_ABI;
     const master = new ethers.Contract(ACTIVE.masterChef, abi, signer);
     const dec = (isMinato() || isSoneium()) && farmState && farmState.lpDecimals != null ? farmState.lpDecimals : 18;
@@ -1416,7 +1496,11 @@ async function handleWithdraw() {
       if (btn) btn.textContent = "Invalid amount";
       return;
     }
-    const tx = await master.withdraw(currentFarm.pid, amount);
+    if (isSoneium() && !soneiumUseMatches(farmMark)) {
+      rejectStaleFarm();
+      return;
+    }
+    const tx = await master.withdraw(isSoneium() ? farmMark.pid : currentFarm.pid, amount);
     await tx.wait();
     getEl("stakeAmount").value = "";
   } catch (e) {
@@ -1432,16 +1516,26 @@ async function handleWithdraw() {
 async function handleHarvest() {
   if (!signer || txBusy) return;
   if ((isMinato() || isSoneium()) && !usesV2Chef()) return;
+  const farmMark = isSoneium() ? captureSoneiumUse() : null;
+  if (isSoneium() && !farmMark) {
+    rejectStaleFarm();
+    await refreshFarmUI();
+    return;
+  }
   const btn = getEl("btnHarvest");
   txBusy = true;
   try {
     if (btn) btn.textContent = "Harvesting...";
     showTx("");
     if (isMinato() || isSoneium()) await assertFarmNetwork();
+    if (isSoneium() && !soneiumUseMatches(farmMark)) {
+      rejectStaleFarm();
+      return;
+    }
     const abi = (isMinato() || isSoneium()) ? MASTERCHEF_V2_ABI : window.MASTERCHEF_ABI;
     const master = new ethers.Contract(ACTIVE.masterChef, abi, signer);
     const tx = (isMinato() || isSoneium())
-      ? await master.harvest(currentFarm.pid)
+      ? await master.harvest(isSoneium() ? farmMark.pid : currentFarm.pid)
       : await master.deposit(currentFarm.pid, 0);
     await tx.wait();
   } catch (e) {
