@@ -4,6 +4,8 @@ Read-only quote, then a swap transaction that sets `amountOutMin` and a deadline
 
 Addresses are the Soneium mainnet values from `docs/networks.json`. ABIs are the fragments in `docs/abi/`.
 
+Pools are thin, so integrators should check price impact before swapping and keep amounts small.
+
 ```js
 import { createPublicClient, http, parseUnits } from "viem";
 import routerAbi from "../abi/router.json" with { type: "json" };
@@ -42,13 +44,14 @@ const deadline = BigInt(Math.floor(Date.now() / 1000) + 20 * 60);
 // This process never sees a private key. The wallet shows the transaction and the user signs it.
 
 // WETH is an ERC20 here, so the wallet must approve the router for amountIn first.
-await walletClient.writeContract({
+const hash = await walletClient.writeContract({
   account,
   address: WETH,
   abi: erc20Abi,
   functionName: "approve",
   args: [ROUTER, amountIn]
 });
+await publicClient.waitForTransactionReceipt({ hash });
 
 await walletClient.writeContract({
   account,
