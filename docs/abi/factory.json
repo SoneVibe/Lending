@@ -1,0 +1,26 @@
+[
+  {
+    "name": "getPair",
+    "type": "function",
+    "stateMutability": "view",
+    "inputs": [
+      { "name": "", "type": "address" },
+      { "name": "", "type": "address" }
+    ],
+    "outputs": [{ "name": "", "type": "address" }]
+  },
+  {
+    "name": "allPairs",
+    "type": "function",
+    "stateMutability": "view",
+    "inputs": [{ "name": "", "type": "uint256" }],
+    "outputs": [{ "name": "", "type": "address" }]
+  },
+  {
+    "name": "allPairsLength",
+    "type": "function",
+    "stateMutability": "view",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "uint256" }]
+  }
+]

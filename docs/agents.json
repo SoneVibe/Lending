@@ -1,0 +1,56 @@
+{
+  "name": "SoneVibe",
+  "chainId": 1868,
+  "network": "Soneium Mainnet",
+  "rpcUrl": "https://rpc.soneium.org",
+  "blockExplorer": "https://soneium.blockscout.com/",
+  "router": "0xa393E76bE079cF1ccf684D0f815795Dde248f157",
+  "factory": "0x06C0b58287794a0bdce20ce768b601CA974618DC",
+  "masterChef": {
+    "name": "VibeMasterChefV2",
+    "address": "0x8f2F9B17b173C91c7B9195096030a39227B94f62"
+  },
+  "pools": [
+    {
+      "pid": 0,
+      "allocPoint": 60,
+      "lpToken": "0xc58ce2E71D0D64fC016DbB826714530B475adc0C",
+      "lpSymbol": "WETH-USDC.e LP",
+      "token0": { "symbol": "WETH", "address": "0x4200000000000000000000000000000000000006", "decimals": 18 },
+      "token1": { "symbol": "USDC.e", "address": "0xbA9986D2381edf1DA03B0B9c1f8b00dc4AacC369", "decimals": 6 }
+    },
+    {
+      "pid": 1,
+      "allocPoint": 20,
+      "lpToken": "0x0E629590259feeFD6Da31b0Ff4c7a80F08F0D767",
+      "lpSymbol": "ASTR-USDC.e LP",
+      "token0": { "symbol": "ASTR", "address": "0x2CAE934a1e84F693fbb78CA5ED3B0A6893259441", "decimals": 18 },
+      "token1": { "symbol": "USDC.e", "address": "0xbA9986D2381edf1DA03B0B9c1f8b00dc4AacC369", "decimals": 6 }
+    },
+    {
+      "pid": 2,
+      "allocPoint": 20,
+      "lpToken": "0x0684621A0cB5b8A8d791258a060f0c87F94e4D70",
+      "lpSymbol": "LIGHT-USDC.e LP",
+      "token0": { "symbol": "LIGHT", "address": "0x84998bf491C80a79B99540666569F360d5Acae6E", "decimals": 18 },
+      "token1": { "symbol": "USDC.e", "address": "0xbA9986D2381edf1DA03B0B9c1f8b00dc4AacC369", "decimals": 6 }
+    }
+  ],
+  "tokens": [
+    { "symbol": "WETH", "address": "0x4200000000000000000000000000000000000006", "decimals": 18 },
+    { "symbol": "LIGHT", "address": "0x84998bf491C80a79B99540666569F360d5Acae6E", "decimals": 18 },
+    { "symbol": "USDC.e", "address": "0xbA9986D2381edf1DA03B0B9c1f8b00dc4AacC369", "decimals": 6 },
+    { "symbol": "ASTR", "address": "0x2CAE934a1e84F693fbb78CA5ED3B0A6893259441", "decimals": 18 },
+    { "symbol": "USDSC", "address": "0x3f99231dD03a9F0E7e3421c92B7b90fbe012985a", "decimals": 6 }
+  ],
+  "lending": {
+    "master": "0x1126859aB6911Fc3b4f86f2F65E7B6F2eEDe5185",
+    "stabilityModule": "0x7F1aF1382899263aF50Bc6d3601bdaB1E17Ba20D",
+    "cTokens": [
+      { "symbol": "cASTR", "address": "0x7CA06966B0c07C5e35aA180643E98bB3057EBb27", "underlying": "0x2CAE934a1e84F693fbb78CA5ED3B0A6893259441" },
+      { "symbol": "cUSDSC", "address": "0xDB3e66b87c42C7F3599fbdcBFe08DfF0689A6D77", "underlying": "0x3f99231dD03a9F0E7e3421c92B7b90fbe012985a" },
+      { "symbol": "cUSDC", "address": "0x96ae93Df119c131469b38e3d558899F23678dCFb", "underlying": "0xbA9986D2381edf1DA03B0B9c1f8b00dc4AacC369" }
+    ]
+  },
+  "yields": "variable, not guaranteed"
+}

@@ -437,10 +437,10 @@ function applyFarmChrome() {
     setHidden("earnedHint", true);
   } else {
     setText("farmTitle", "LIGHT-ETH LP");
-    setText("farmBadge", "40x Multiplier");
+    setText("farmBadge", "—");
     setIcon("farmIcon1", "icons/vibe.svg");
     setIcon("farmIcon2", "icons/weth.svg");
-    setText("aprValue", "🔥 420%");
+    setText("aprValue", "—");
     if (note) note.hidden = true;
     if (meta) meta.hidden = true;
     if (advanced) { advanced.hidden = true; advanced.open = false; }
