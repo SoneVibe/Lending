@@ -1,0 +1,26 @@
+# SoneVibe
+
+SoneVibe is a Uniswap V2-style constant-product DEX on Soneium (chain ID 1868). Each swap pays a flat 0.25% fee (9975/10000), taken from the input and left in the pool. Liquidity providers earn 5/6 of that fee. The protocol treasury receives 1/6. Yields and APR are variable, not guaranteed. The factory init code hash is 0xa62c15518ad5af48799fb77c27e4842a2e89b712da003c13a836899d76a89a38. A flash swap calls vibeCall, not uniswapV2Call.
+
+Public RPC: https://rpc.soneium.org
+Block explorer: https://soneium.blockscout.com/
+
+Contracts on Soneium mainnet, copied from docs/networks.json:
+- Router: 0xa393E76bE079cF1ccf684D0f815795Dde248f157
+- Factory: 0x06C0b58287794a0bdce20ce768b601CA974618DC
+- Farm chef (VibeMasterChefV2): 0x8f2F9B17b173C91c7B9195096030a39227B94f62
+
+Farm pools, LP tokens, and token addresses are in the machine-readable index:
+https://sonevibe.github.io/Lending/agents.json
+
+Minimal ABIs (Router, Pair, Factory, ERC20):
+https://sonevibe.github.io/Lending/abi/router.json
+https://sonevibe.github.io/Lending/abi/pair.json
+https://sonevibe.github.io/Lending/abi/factory.json
+https://sonevibe.github.io/Lending/abi/erc20.json
+
+A read-only quote and a swap transaction with amountOutMin and a deadline:
+https://sonevibe.github.io/Lending/examples/swap-viem.md
+The user's own wallet signs. Private keys never belong in code.
+
+A pools.json data feed is coming. The backend owns that file. It is not published here yet.
