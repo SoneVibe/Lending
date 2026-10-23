@@ -6,6 +6,13 @@
   "blockExplorer": "https://soneium.blockscout.com/",
   "router": "0xa393E76bE079cF1ccf684D0f815795Dde248f157",
   "factory": "0x06C0b58287794a0bdce20ce768b601CA974618DC",
+  "factoryInitCodeHash": "0xa62c15518ad5af48799fb77c27e4842a2e89b712da003c13a836899d76a89a38",
+  "flashSwapCallback": "vibeCall",
+  "swapFee": {
+    "percent": "0.25%",
+    "numerator": 9975,
+    "denominator": 10000
+  },
   "masterChef": {
     "name": "VibeMasterChefV2",
     "address": "0x8f2F9B17b173C91c7B9195096030a39227B94f62"

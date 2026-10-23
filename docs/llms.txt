@@ -1,6 +1,6 @@
 # SoneVibe
 
-SoneVibe is a Uniswap V2-style constant-product DEX on Soneium (chain ID 1868). Each swap pays a flat 0.25% fee, taken from the input and left in the pool. Liquidity providers earn 5/6 of that fee. The protocol treasury receives 1/6. Yields and APR are variable, not guaranteed.
+SoneVibe is a Uniswap V2-style constant-product DEX on Soneium (chain ID 1868). Each swap pays a flat 0.25% fee (9975/10000), taken from the input and left in the pool. Liquidity providers earn 5/6 of that fee. The protocol treasury receives 1/6. Yields and APR are variable, not guaranteed. The factory init code hash is 0xa62c15518ad5af48799fb77c27e4842a2e89b712da003c13a836899d76a89a38. A flash swap calls vibeCall, not uniswapV2Call.
 
 Public RPC: https://rpc.soneium.org
 Block explorer: https://soneium.blockscout.com/
