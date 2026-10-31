@@ -1,0 +1,5 @@
+# Jekyll does not publish dot-directories unless they are listed here.
+# .htaccess is Jekyll's built-in include; keep it so this file does not replace that default.
+include:
+  - .htaccess
+  - .well-known
