@@ -1,0 +1,26 @@
+{
+  "type": "https://eips.ethereum.org/EIPS/eip-8004#registration-v1",
+  "name": "SoneVibe DeFi",
+  "description": "SoneVibe is a non-custodial DeFi protocol: a DEX with a 0.25% swap fee on Soneium and BNB Chain, plus lending markets on Soneium. Agents can read pool, router and token data from llms.txt and agents.json and interact directly with the verified contracts. SoneVibe never holds user keys or funds.",
+  "image": "https://sonevibe.github.io/Lending/icons/sonevibe.png",
+  "services": [
+    {
+      "name": "web",
+      "endpoint": "https://sonevibe.github.io/Lending/"
+    },
+    {
+      "name": "llms.txt",
+      "endpoint": "https://sonevibe.github.io/Lending/llms.txt"
+    },
+    {
+      "name": "agents.json",
+      "endpoint": "https://sonevibe.github.io/Lending/agents.json"
+    }
+  ],
+  "x402Support": false,
+  "active": true,
+  "registrations": [],
+  "supportedTrust": [
+    "reputation"
+  ]
+}
