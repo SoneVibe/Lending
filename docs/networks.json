@@ -451,5 +451,36 @@
     ],
     "blocksPerYear": 15768000,
     "enabled": true
+  },
+  "Arbitrum One": {
+    "slug": "arbitrum",
+    "label": "Arbitrum One",
+    "chainId": "42161",
+    "rpcUrls": ["https://arb1.arbitrum.io/rpc", "https://arbitrum-one.publicnode.com"],
+    "blockExplorerUrls": ["https://arbiscan.io"],
+    "nativeCurrency": { "name": "Ether", "symbol": "ETH", "decimals": 18 },
+    "master": "",
+    "stabilityModule": "",
+    "router": "0x8BE6469287A872B34665F5c0c8fbce73c0Dcbf72",
+    "factory": "0xA95107ebE4e54480bA755061eF3207c3421150f0",
+    "swapTokens": {
+        "base": {
+            "symbol": "ETH",
+            "underlyingAddress": "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
+            "decimals": 18,
+            "icon": "icons/weth.svg",
+            "isNative": true
+        },
+        "quote": {
+            "symbol": "USDC",
+            "address": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+            "decimals": 6,
+            "icon": "icons/usdc.svg",
+            "isNative": false
+        }
+    },
+    "cTokens": [],
+    "blocksPerYear": 105120000,
+    "enabled": true
   }
 }
