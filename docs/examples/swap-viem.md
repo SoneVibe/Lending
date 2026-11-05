@@ -72,3 +72,37 @@ await walletClient.writeContract({
 //   value: amountIn
 // });
 ```
+
+## Arbitrum One (chain ID 42161)
+
+Use the same quote and swap calls as the Soneium example. Only the chain and addresses change. The connected wallet still signs. Do not put a private key in this file.
+
+Checked on `https://arb1.arbitrum.io/rpc`:
+
+- Router: `0x8BE6469287A872B34665F5c0c8fbce73c0Dcbf72`
+- Factory: `0xA95107ebE4e54480bA755061eF3207c3421150f0`
+- WETH: `0x82aF49447D8a07e3bd95BD0d56f35241523fBab1`
+- USDC: `0xaf88d065e77c8cC2239327C5EDb3A432268e5831`
+- WETH/USDC pair: `0x4DF5bcAC28b8898988Ba576B8463664b53ddb9F7` (`factory.getPair` returns this pair; token0 is WETH and token1 is USDC)
+- Swap fee: 0.25% (`amountIn * 9975 / 10000`)
+- Factory init code hash: `0x87b780b5d19df9ad0d4c866dcd6b169f14846fb24232a128b678c5bdb395b012` (`factory.getInitCodeHash()`)
+- Sourcify exact match. The factory fund-rescue function is removed (`rescueFundsFromPair` exists on the Soneium factory and not on this one). Router `rescueFunds(address)` remains owner-only and moves only ETH or ERC-20 already held by the router.
+- Pair creation is closed (`factory.isPairCreationOpen()` returns false). A flash swap calls `vibeCall`, not `uniswapV2Call`.
+
+```js
+const arbitrum = {
+  id: 42161,
+  name: "Arbitrum One",
+  nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+  rpcUrls: { default: { http: ["https://arb1.arbitrum.io/rpc"] } }
+};
+
+const ARB_ROUTER = "0x8BE6469287A872B34665F5c0c8fbce73c0Dcbf72";
+const ARB_WETH = "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1";
+const ARB_USDC = "0xaf88d065e77c8cC2239327C5EDb3A432268e5831";
+const ARB_PAIR = "0x4DF5bcAC28b8898988Ba576B8463664b53ddb9F7";
+
+// path = [ARB_WETH, ARB_USDC]
+// read getAmountsOut and write swapExactTokensForTokens on ARB_ROUTER,
+// with the same amountOutMin and deadline rules as the Soneium example.
+```

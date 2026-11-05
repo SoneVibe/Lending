@@ -59,5 +59,42 @@
       { "symbol": "cUSDC", "address": "0x96ae93Df119c131469b38e3d558899F23678dCFb", "underlying": "0xbA9986D2381edf1DA03B0B9c1f8b00dc4AacC369" }
     ]
   },
-  "yields": "variable, not guaranteed"
+  "yields": "variable, not guaranteed",
+  "chains": [
+    {
+      "chainId": 1868,
+      "network": "Soneium Mainnet",
+      "rpcUrl": "https://rpc.soneium.org",
+      "blockExplorer": "https://soneium.blockscout.com/",
+      "router": "0xa393E76bE079cF1ccf684D0f815795Dde248f157",
+      "factory": "0x06C0b58287794a0bdce20ce768b601CA974618DC",
+      "factoryInitCodeHash": "0xa62c15518ad5af48799fb77c27e4842a2e89b712da003c13a836899d76a89a38",
+      "swapFee": {
+        "percent": "0.25%",
+        "numerator": 9975,
+        "denominator": 10000
+      }
+    },
+    {
+      "chainId": 42161,
+      "network": "Arbitrum One",
+      "rpcUrl": "https://arb1.arbitrum.io/rpc",
+      "blockExplorer": "https://arbiscan.io",
+      "router": "0x8BE6469287A872B34665F5c0c8fbce73c0Dcbf72",
+      "factory": "0xA95107ebE4e54480bA755061eF3207c3421150f0",
+      "factoryInitCodeHash": "0x87b780b5d19df9ad0d4c866dcd6b169f14846fb24232a128b678c5bdb395b012",
+      "swapFee": {
+        "percent": "0.25%",
+        "numerator": 9975,
+        "denominator": 10000
+      },
+      "pair": "0x4DF5bcAC28b8898988Ba576B8463664b53ddb9F7",
+      "tokens": [
+        { "symbol": "WETH", "address": "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1", "decimals": 18 },
+        { "symbol": "USDC", "address": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831", "decimals": 6 }
+      ],
+      "sourcify": "exact_match",
+      "notes": "Fund-rescue function removed from the factory: Soneium's rescueFundsFromPair is not on this factory. Sourcify exact match. Router rescueFunds only moves assets already held by the router."
+    }
+  ]
 }
