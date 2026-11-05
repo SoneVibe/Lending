@@ -1,7 +1,7 @@
 /**
  * landing.js v2 — SoneVibe landing multi-chain (propuesta)
  * Soneium es la red principal (DEX + lending + SVUSD + NFTs). Además lee en vivo el DEX
- * de BNB Chain, Astar y Polkadot Hub para mostrar TVL total y el desglose por red.
+ * de BNB Chain, Astar, Polkadot Hub y Arbitrum One para mostrar TVL total y el desglose por red.
  * Reutiliza config.js (loadNetworks), networks.json y token-list.json. No modifica nada existente.
  */
 (() => {
@@ -16,9 +16,10 @@
     '56': { name: 'BNB Chain', color: '#f3ba2f', icon: 'icons/bnb.png', products: ['DEX'], stables: ['usd1'], logs: { rpc: 'https://rpc-bsc.48.club', chunk: 5000, days: 1, concurrency: 12 } },
     '592': { name: 'Astar', color: '#8b5cf6', icon: 'icons/astr.svg', products: ['DEX', 'Lending', 'NFTs'] },
     '420420419': { name: 'Polkadot Hub', color: '#e6007a', icon: 'icons/polkadot.svg', products: ['DEX'] },
+    '42161': { name: 'Arbitrum One', color: '#28A0F0', icon: 'icons/eth.svg', products: ['DEX'] },
   };
   // Orden explícito: las claves numéricas de un objeto JS se ordenan de menor a mayor.
-  const ORDER = ['1868', '56', '592', '420420419'];
+  const ORDER = ['1868', '56', '592', '420420419', '42161'];
   const CFG = {
     SWAP_FEE: 0.0025,
     LP_FEE_SHARE: 5 / 6,

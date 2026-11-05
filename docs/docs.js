@@ -8,8 +8,8 @@
   'use strict';
 
   const FLAGSHIP = '1868';
-  const ORDER = ['1868', '56', '592', '420420419', '1946', '420420417'];
-  const NAMES = { '1868': 'Soneium', '56': 'BNB Chain', '592': 'Astar', '420420419': 'Polkadot Hub', '1946': 'Soneium Minato', '420420417': 'Polkadot Hub Testnet' };
+  const ORDER = ['1868', '56', '592', '420420419', '42161', '1946', '420420417'];
+  const NAMES = { '1868': 'Soneium', '56': 'BNB Chain', '592': 'Astar', '420420419': 'Polkadot Hub', '42161': 'Arbitrum One', '1946': 'Soneium Minato', '420420417': 'Polkadot Hub Testnet' };
   const TESTNETS = new Set(['1946', '420420417']);
   const ZERO = '0x0000000000000000000000000000000000000000';
 
