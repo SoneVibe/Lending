@@ -2,6 +2,8 @@
 
 SoneVibe is a Uniswap V2-style constant-product DEX on Soneium (chain ID 1868). Each swap pays a flat 0.25% fee (9975/10000), taken from the input and left in the pool. Liquidity providers earn 5/6 of that fee. The protocol treasury receives 1/6. Yields and APR are variable, not guaranteed. The factory init code hash is 0xa62c15518ad5af48799fb77c27e4842a2e89b712da003c13a836899d76a89a38. A flash swap calls vibeCall, not uniswapV2Call.
 
+The same DEX is also on Arbitrum One (chain ID 42161). Use the Arbitrum section below for those addresses. The Soneium init code hash above is not the Arbitrum hash.
+
 Public RPC: https://rpc.soneium.org
 Block explorer: https://soneium.blockscout.com/
 
@@ -12,6 +14,23 @@ Contracts on Soneium mainnet, copied from docs/networks.json:
 
 Farm pools, LP tokens, and token addresses are in the machine-readable index:
 https://sonevibe.github.io/Lending/agents.json
+
+Arbitrum One (chain ID 42161):
+Public RPC: https://arb1.arbitrum.io/rpc
+Fallback RPC: https://arbitrum-one.publicnode.com
+Block explorer: https://arbiscan.io
+- Router: 0x8BE6469287A872B34665F5c0c8fbce73c0Dcbf72
+- Factory: 0xA95107ebE4e54480bA755061eF3207c3421150f0
+- WETH: 0x82aF49447D8a07e3bd95BD0d56f35241523fBab1
+- USDC: 0xaf88d065e77c8cC2239327C5EDb3A432268e5831
+- WETH/USDC pair: 0x4DF5bcAC28b8898988Ba576B8463664b53ddb9F7
+  factory.getPair(WETH, USDC) returns this pair. token0 is WETH. token1 is USDC.
+Swap fee: 0.25% (9975/10000). A flash swap calls vibeCall, not uniswapV2Call.
+Factory init code hash: 0x87b780b5d19df9ad0d4c866dcd6b169f14846fb24232a128b678c5bdb395b012
+  This is the value returned by factory.getInitCodeHash().
+Factory and Router are Sourcify exact-match verified. The factory has no function that withdraws pair reserves. The router has owner-only rescueFunds(address), which can transfer only ETH or ERC-20 already held by the router. The verified source says it cannot access pair liquidity.
+Pair creation is closed: factory.isPairCreationOpen() returns false.
+There are no farms on Arbitrum. Do not show an APR or TVL that is not read from the chain.
 
 Minimal ABIs (Router, Pair, Factory, ERC20):
 https://sonevibe.github.io/Lending/abi/router.json
