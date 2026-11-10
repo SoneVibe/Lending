@@ -18,7 +18,7 @@ const soneium = {
   rpcUrls: { default: { http: ["https://rpc.soneium.org"] } }
 };
 
-const ROUTER = "0xa393E76bE079cF1ccf684D0f815795Dde248f157";
+const ROUTER = "0x97C180C2e3097f28D8F14114AD1C0dEF81244344";
 const WETH = "0x4200000000000000000000000000000000000006";
 const USDC_E = "0xbA9986D2381edf1DA03B0B9c1f8b00dc4AacC369";
 
