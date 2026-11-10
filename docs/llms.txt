@@ -2,7 +2,7 @@
 
 SoneVibe is a Uniswap V2-style constant-product DEX on Soneium (chain ID 1868). Each swap pays a flat 0.25% fee (9975/10000), taken from the input and left in the pool. Liquidity providers earn 5/6 of that fee. The protocol treasury receives 1/6. Yields and APR are variable, not guaranteed. The factory init code hash is 0x87b780b5d19df9ad0d4c866dcd6b169f14846fb24232a128b678c5bdb395b012. A flash swap calls vibeCall, not uniswapV2Call.
 
-The same DEX is also on Arbitrum One (chain ID 42161). Use the Arbitrum section below for those addresses. The Soneium init code hash above is not the Arbitrum hash.
+The same DEX is also on Arbitrum One (chain ID 42161). Use the Arbitrum section below for those addresses. The Soneium init code hash above matches the Arbitrum hash.
 
 Public RPC: https://rpc.soneium.org
 Block explorer: https://soneium.blockscout.com/
@@ -27,7 +27,7 @@ Block explorer: https://arbiscan.io
   factory.getPair(WETH, USDC) returns this pair. token0 is WETH. token1 is USDC.
 Swap fee: 0.25% (9975/10000).
 Factory init code hash: 0x87b780b5d19df9ad0d4c866dcd6b169f14846fb24232a128b678c5bdb395b012
-Sourcify exact match. The factory fund-rescue function is removed: Soneium's factory has rescueFundsFromPair, and the Arbitrum factory does not. The router still has owner-only rescueFunds(address), which can move only ETH or ERC-20 already held by the router and cannot access pair liquidity.
+Sourcify exact match. The factory fund-rescue function is removed. The current Soneium factory has no rescueFundsFromPair. The router still has owner-only rescueFunds(address), which can move only ETH or ERC-20 already held by the router and cannot access pair liquidity.
 
 Minimal ABIs (Router, Pair, Factory, ERC20):
 https://sonevibe.github.io/Lending/abi/router.json

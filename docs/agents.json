@@ -94,7 +94,7 @@
         { "symbol": "USDC", "address": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831", "decimals": 6 }
       ],
       "sourcify": "exact_match",
-      "notes": "Fund-rescue function removed from the factory: Soneium's rescueFundsFromPair is not on this factory. Sourcify exact match. Router rescueFunds only moves assets already held by the router."
+      "notes": "Fund-rescue function removed from the factory. The current Soneium factory has no rescueFundsFromPair. Sourcify exact match. Router rescueFunds only moves assets already held by the router."
     }
   ]
 }

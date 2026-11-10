@@ -191,7 +191,7 @@
     const roles = [
       { role: 'Lending admin (Comptroller)', addr: admin, can: 'List markets, set collateral factors, close factor, liquidation incentive, oracle and interest-rate models; pause actions.' },
       { role: 'Pause guardian', addr: guardian, can: 'Pause mint, borrow, transfer or liquidation.', emptyText: 'Not set — only the admin can pause' },
-      { role: 'DEX fee setter (Factory)', addr: feeToSetter, can: 'Choose the treasury address for the 1/6 protocol fee, open or close pair creation, and use the factory\'s emergency rescue functions on pair balances.' },
+      { role: 'DEX fee setter (Factory)', addr: feeToSetter, can: 'Choose the treasury address for the 1/6 protocol fee, and open or close pair creation. The current Soneium factory has no rescueFundsFromPair.' },
       { role: 'SVUSD Stability Module admin', addr: psmAdmin, can: 'Change mint/redeem fees and the USDC reserve cap.' },
       { role: 'LIGHT token owner', addr: lightOwner, can: 'Mint LIGHT up to the 1B max supply. Will be transferred to the MasterChef when farms launch.' },
       { role: 'NFT Marketplace owner', addr: mkOwner, can: 'Set the market fee and treasury, pause the market, upgrade the implementation (UUPS proxy).' },
