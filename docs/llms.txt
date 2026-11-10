@@ -1,6 +1,6 @@
 # SoneVibe
 
-SoneVibe is a Uniswap V2-style constant-product DEX on Soneium (chain ID 1868). Each swap pays a flat 0.25% fee (9975/10000), taken from the input and left in the pool. Liquidity providers earn 5/6 of that fee. The protocol treasury receives 1/6. Yields and APR are variable, not guaranteed. The factory init code hash is 0xa62c15518ad5af48799fb77c27e4842a2e89b712da003c13a836899d76a89a38. A flash swap calls vibeCall, not uniswapV2Call.
+SoneVibe is a Uniswap V2-style constant-product DEX on Soneium (chain ID 1868). Each swap pays a flat 0.25% fee (9975/10000), taken from the input and left in the pool. Liquidity providers earn 5/6 of that fee. The protocol treasury receives 1/6. Yields and APR are variable, not guaranteed. The factory init code hash is 0x87b780b5d19df9ad0d4c866dcd6b169f14846fb24232a128b678c5bdb395b012. A flash swap calls vibeCall, not uniswapV2Call.
 
 The same DEX is also on Arbitrum One (chain ID 42161). Use the Arbitrum section below for those addresses. The Soneium init code hash above is not the Arbitrum hash.
 
@@ -8,8 +8,8 @@ Public RPC: https://rpc.soneium.org
 Block explorer: https://soneium.blockscout.com/
 
 Contracts on Soneium mainnet, copied from docs/networks.json:
-- Router: 0xa393E76bE079cF1ccf684D0f815795Dde248f157
-- Factory: 0x06C0b58287794a0bdce20ce768b601CA974618DC
+- Router: 0x97C180C2e3097f28D8F14114AD1C0dEF81244344
+- Factory: 0x77b141dCFDa726e239efF005E3DE7A47AeBFf948
 - Farm chef (VibeMasterChefV2): 0x8f2F9B17b173C91c7B9195096030a39227B94f62
 
 Farm pools, LP tokens, and token addresses are in the machine-readable index:

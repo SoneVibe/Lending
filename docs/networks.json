@@ -8,8 +8,8 @@
     "nativeCurrency": { "name": "Ether", "symbol": "ETH", "decimals": 18 },
     "master": "0x1126859aB6911Fc3b4f86f2F65E7B6F2eEDe5185",
     "stabilityModule": "0x7F1aF1382899263aF50Bc6d3601bdaB1E17Ba20D",
-    "router": "0xa393E76bE079cF1ccf684D0f815795Dde248f157", 
-    "factory": "0x06C0b58287794a0bdce20ce768b601CA974618DC", 
+    "router": "0x97C180C2e3097f28D8F14114AD1C0dEF81244344", 
+    "factory": "0x77b141dCFDa726e239efF005E3DE7A47AeBFf948", 
 
         "swapTokens": {
         "base": { 
