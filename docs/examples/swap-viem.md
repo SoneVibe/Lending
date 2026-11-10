@@ -86,7 +86,7 @@ Checked on `https://arb1.arbitrum.io/rpc`:
 - WETH/USDC pair: `0x4DF5bcAC28b8898988Ba576B8463664b53ddb9F7` (`factory.getPair` returns this pair; token0 is WETH and token1 is USDC)
 - Swap fee: 0.25% (`amountIn * 9975 / 10000`)
 - Factory init code hash: `0x87b780b5d19df9ad0d4c866dcd6b169f14846fb24232a128b678c5bdb395b012` (`factory.getInitCodeHash()`)
-- Sourcify exact match. The factory fund-rescue function is removed (`rescueFundsFromPair` exists on the Soneium factory and not on this one). Router `rescueFunds(address)` remains owner-only and moves only ETH or ERC-20 already held by the router.
+- Sourcify exact match. The factory fund-rescue function is removed. The current Soneium factory has no `rescueFundsFromPair`. Router `rescueFunds(address)` remains owner-only and moves only ETH or ERC-20 already held by the router.
 - Pair creation is closed (`factory.isPairCreationOpen()` returns false). A flash swap calls `vibeCall`, not `uniswapV2Call`.
 
 ```js
