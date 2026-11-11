@@ -19,7 +19,7 @@
     const more = sidebar.querySelector('details.nav-more');
     if (more && more.querySelector('.nav-link.active')) more.open = true;
 
-    // Skip the shared drawer when a page already provides its own (#mobileMenuBtn).
+    // SonevibeAI.html ships its own drawer (#mobileMenuBtn).
     if (document.getElementById('mobileMenuBtn')) return;
 
     if (!sidebar.id) sidebar.id = 'appSidebar';
