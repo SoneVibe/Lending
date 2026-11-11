@@ -8,7 +8,7 @@
   ];
   const SITE_MORE = [
     ['markets.html', 'Markets Overview'], ['mint-svusd.html', 'Mint SVUSD'], ['swapstabilizer.html', 'Peg Stabilizer'],
-    ['vibe-vault.html', 'Governance Vault'], ['farm.html', 'Yield Farms'], ['souschef.html', 'Sous Chef Pools'], ['SonevibeAI.html', 'VIBE AI'],
+    ['vibe-vault.html', 'Governance Vault'], ['farm.html', 'Yield Farms'], ['souschef.html', 'Sous Chef Pools'],
   ];
   const here = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
 
