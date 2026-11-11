@@ -8,7 +8,7 @@
   ];
   const SITE_MORE = [
     ['markets.html', 'Markets Overview'], ['mint-svusd.html', 'Mint SVUSD'], ['swapstabilizer.html', 'Peg Stabilizer'],
-    ['vibe-vault.html', 'Governance Vault'], ['farm.html', 'Yield Farms'], ['souschef.html', 'Sous Chef Pools'], ['SonevibeAI.html', 'VIBE AI'],
+    ['vibe-vault.html', 'Governance Vault'], ['farm.html', 'Yield Farms'], ['souschef.html', 'Sous Chef Pools'],
   ];
   const here = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
 
@@ -19,7 +19,7 @@
     const more = sidebar.querySelector('details.nav-more');
     if (more && more.querySelector('.nav-link.active')) more.open = true;
 
-    // SonevibeAI.html ships its own drawer (#mobileMenuBtn).
+    // Skip the shared drawer when a page already provides its own (#mobileMenuBtn).
     if (document.getElementById('mobileMenuBtn')) return;
 
     if (!sidebar.id) sidebar.id = 'appSidebar';
