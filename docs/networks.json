@@ -234,8 +234,8 @@
     "nativeCurrency": { "name": "BNB", "symbol": "BNB", "decimals": 18 },
     "master": "",
     "stabilityModule": "",
-    "router": "0x7532b23DFB30ac22b2a74E3B81cC288de19379BA", 
-    "factory": "0xaf905e66038EcE89e03D843B35a11D262053B630", 
+    "router": "0xa393E76bE079cF1ccf684D0f815795Dde248f157", 
+    "factory": "0x26b13e7e923e964b0514B3167A90901B49DAe205", 
 
         "swapTokens": {
         "base": { 
