@@ -29,6 +29,20 @@ Swap fee: 0.25% (9975/10000).
 Factory init code hash: 0x87b780b5d19df9ad0d4c866dcd6b169f14846fb24232a128b678c5bdb395b012
 Sourcify exact match. The factory fund-rescue function is removed. The current Soneium factory has no rescueFundsFromPair. The router still has owner-only rescueFunds(address), which can move only ETH or ERC-20 already held by the router and cannot access pair liquidity.
 
+BNB Smart Chain (chain ID 56):
+Public RPC: https://bsc-dataseed.bnbchain.org
+Block explorer: https://bscscan.com
+- Router: 0xa393E76bE079cF1ccf684D0f815795Dde248f157
+- Factory: 0x26b13e7e923e964b0514B3167A90901B49DAe205
+- WBNB: 0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c
+- USDT: 0x55d398326f99059fF775485246999027B3197955
+- USDT/WBNB pair: 0x6dABcbFdFE097e421269a444eBF22999B1EAE279
+  factory.getPair(USDT, WBNB) returns this pair. token0 is USDT. token1 is WBNB.
+Factory init code hash: 0x87b780b5d19df9ad0d4c866dcd6b169f14846fb24232a128b678c5bdb395b012
+The factory bytecode is identical to the Soneium and Arbitrum factories.
+The BNB router address is the same as an old Soneium router address. Always match address and chain ID.
+Deprecated on BNB (bsc-deprecated, do not use): factory 0xaf905e66038EcE89e03D843B35a11D262053B630, router 0x7532b23DFB30ac22b2a74E3B81cC288de19379BA.
+
 Minimal ABIs (Router, Pair, Factory, ERC20):
 https://sonevibe.github.io/Lending/abi/router.json
 https://sonevibe.github.io/Lending/abi/pair.json
