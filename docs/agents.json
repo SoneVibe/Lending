@@ -95,6 +95,23 @@
       ],
       "sourcify": "exact_match",
       "notes": "Fund-rescue function removed from the factory. The current Soneium factory has no rescueFundsFromPair. Sourcify exact match. Router rescueFunds only moves assets already held by the router."
+    },
+    {
+      "chainId": 56,
+      "network": "BNB Smart Chain",
+      "rpcUrl": "https://bsc-dataseed.bnbchain.org",
+      "blockExplorer": "https://bscscan.com",
+      "router": "0xa393E76bE079cF1ccf684D0f815795Dde248f157",
+      "factory": "0x26b13e7e923e964b0514B3167A90901B49DAe205",
+      "factoryInitCodeHash": "0x87b780b5d19df9ad0d4c866dcd6b169f14846fb24232a128b678c5bdb395b012",
+      "swapFee": { "percent": "0.25%", "numerator": 9975, "denominator": 10000 },
+      "pair": "0x6dABcbFdFE097e421269a444eBF22999B1EAE279",
+      "tokens": [
+        { "symbol": "USDT", "address": "0x55d398326f99059fF775485246999027B3197955", "decimals": 18 },
+        { "symbol": "WBNB", "address": "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c", "decimals": 18 }
+      ],
+      "deprecated": { "status": "bsc-deprecated, do not use", "factory": "0xaf905e66038EcE89e03D843B35a11D262053B630", "router": "0x7532b23DFB30ac22b2a74E3B81cC288de19379BA" },
+      "notes": "Factory bytecode is identical to the Soneium and Arbitrum factories. token0 is USDT, token1 is WBNB. This router address equals an old Soneium router address; always match address and chainId."
     }
   ]
 }
