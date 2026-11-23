@@ -49,6 +49,21 @@
       testRaw: 100000n, // 0.1 * 10^6 (Asset Hub minBalance 0.01)
       minFullRaw: 20000n, // block full-mode below 0.02 USDT
       minFullHuman: '0.02 USDT'
+    },
+    DOT: {
+      symbol: 'DOT',
+      // EIP-55 checksum of 0xFFF…FFF (xcDOT on Astar EVM)
+      address: '0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF',
+      decimals: 10,
+      parachainId: 1000,
+      isRelay: false, // is_relay=true reverts: route via Asset Hub
+      feeIndex: 0,
+      destName: 'Polkadot Asset Hub',
+      ss58Prefix: 0,
+      testHuman: '0.1',
+      testRaw: 1000000000n, // 0.1 * 10^10
+      minFullRaw: 500000000n, // block full-mode below 0.05 DOT
+      minFullHuman: '0.05 DOT'
     }
   };
 
@@ -62,7 +77,14 @@
   let chainId = null;
   let cryptoReady = false;
   let recipient = null; // { pubkeyHex, destSs58, prefix }
-  let balances = { HDX: null, USDT: null, ASTR: null, hdxDecimals: 12, usdtDecimals: 6 };
+  let balances = { HDX: null, USDT: null, DOT: null, ASTR: null, hdxDecimals: 12, usdtDecimals: 6, dotDecimals: 10 };
+
+  function decimalsFor(asset) {
+    if (asset.symbol === 'HDX') return balances.hdxDecimals;
+    if (asset.symbol === 'USDT') return balances.usdtDecimals;
+    if (asset.symbol === 'DOT') return balances.dotDecimals;
+    return asset.decimals;
+  }
   let lastSimOk = false;
   let lastSimKey = '';
 
@@ -171,26 +193,33 @@
     if (!provider || !account || chainId !== ASTAR_CHAIN_ID) {
       el('balHdx').textContent = '—';
       el('balUsdt').textContent = '—';
+      el('balDot').textContent = '—';
       el('balAstr').textContent = '—';
       return;
     }
     try {
       const hdx = new ethers.Contract(ASSETS.HDX.address, ERC20_ABI, provider);
       const usdt = new ethers.Contract(ASSETS.USDT.address, ERC20_ABI, provider);
-      const [hdxBal, usdtBal, astrBal, hdxDec, usdtDec] = await Promise.all([
+      const dot = new ethers.Contract(ASSETS.DOT.address, ERC20_ABI, provider);
+      const [hdxBal, usdtBal, dotBal, astrBal, hdxDec, usdtDec, dotDec] = await Promise.all([
         hdx.balanceOf(account),
         usdt.balanceOf(account),
+        dot.balanceOf(account),
         provider.getBalance(account),
         hdx.decimals().catch(() => 12),
-        usdt.decimals().catch(() => 6)
+        usdt.decimals().catch(() => 6),
+        dot.decimals().catch(() => 10)
       ]);
       balances.HDX = hdxBal;
       balances.USDT = usdtBal;
+      balances.DOT = dotBal;
       balances.ASTR = astrBal;
       balances.hdxDecimals = Number(hdxDec);
       balances.usdtDecimals = Number(usdtDec);
+      balances.dotDecimals = Number(dotDec);
       el('balHdx').textContent = ethers.formatUnits(hdxBal, balances.hdxDecimals) + ' HDX (on-chain)';
       el('balUsdt').textContent = ethers.formatUnits(usdtBal, balances.usdtDecimals) + ' USDT (on-chain)';
+      el('balDot').textContent = ethers.formatUnits(dotBal, balances.dotDecimals) + ' DOT (on-chain)';
       el('balAstr').textContent = ethers.formatEther(astrBal) + ' ASTR (needed for gas)';
       updateAmountUi();
     } catch (err) {
@@ -214,7 +243,7 @@
       return { raw: null, human: 'On-chain balance is zero', mode: 'none' };
     }
     if (bal < asset.minFullRaw) {
-      const dec = asset.symbol === 'HDX' ? balances.hdxDecimals : balances.usdtDecimals;
+      const dec = decimalsFor(asset);
       return {
         raw: null,
         human:
@@ -227,7 +256,7 @@
         mode: 'none'
       };
     }
-    const dec = asset.symbol === 'HDX' ? balances.hdxDecimals : balances.usdtDecimals;
+    const dec = decimalsFor(asset);
     return {
       raw: bal,
       human: ethers.formatUnits(bal, dec) + ' ' + asset.symbol + ' (full on-chain balance)',

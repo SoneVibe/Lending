@@ -128,9 +128,9 @@
 <body>
   <main>
     <h1>Temporary Astar XC20 Exit</h1>
-    <p>Owner-only helper to move leftover <strong>HDX</strong> or <strong>USDT</strong> XC20 balances from an Astar EVM wallet (chain id 592) via the official XCM precompile. No custody, no <code>approve()</code>, no SoneVibe contracts.</p>
+    <p>Owner-only helper to move leftover <strong>HDX</strong>, <strong>USDT</strong>, or <strong>xcDOT</strong> balances from an Astar EVM wallet (chain id 592) via the official XCM precompile. No custody, no <code>approve()</code>, no SoneVibe contracts.</p>
     <div class="banner">
-      Temporary / unlinked page. DOT is out of scope. You call <code>0x…5004</code> directly from your wallet. ASTR is required for gas.
+      Temporary / unlinked page. You call <code>0x…5004</code> directly from your wallet. ASTR is required for gas. DOT must use Asset Hub (<code>is_relay=false</code>, para 1000) — not the relay.
     </div>
 
     <section class="panel">
@@ -145,6 +145,7 @@
         <dt>Chain id</dt><dd id="chainId">—</dd>
         <dt>HDX balance</dt><dd id="balHdx">—</dd>
         <dt>USDT balance</dt><dd id="balUsdt">—</dd>
+        <dt>DOT balance</dt><dd id="balDot">—</dd>
         <dt>ASTR (gas)</dt><dd id="balAstr">—</dd>
       </dl>
       <div id="walletStatus" class="status"></div>
@@ -157,23 +158,24 @@
         <select id="assetSelect">
           <option value="HDX">HDX → Hydration (para 2034)</option>
           <option value="USDT">USDT → Polkadot Asset Hub (para 1000)</option>
+          <option value="DOT">xcDOT → Polkadot Asset Hub (para 1000)</option>
         </select>
       </div>
       <div class="checks">
         <label>
           <input type="checkbox" id="testMode" checked />
-          <span>Test mode (default ON): send exactly <strong>5 HDX</strong> or <strong>0.1 USDT</strong></span>
+          <span>Test mode (default ON): send exactly <strong>5 HDX</strong>, <strong>0.1 USDT</strong>, or <strong>0.1 DOT</strong></span>
         </label>
         <label>
           <input type="checkbox" id="fullBalance" disabled />
-          <span>Full-balance mode (only after unticking test mode; blocked below 2 HDX / 0.02 USDT)</span>
+          <span>Full-balance mode (only after unticking test mode; blocked below 2 HDX / 0.02 USDT / 0.05 DOT)</span>
         </label>
       </div>
       <p class="note" style="margin:8px 0 0;color:var(--muted);font-size:0.85rem">
-        Test amounts are above the destination minimum balance (Hydration: 1 HDX, Asset Hub USDT: 0.01) plus fees. Sending less to an empty account may be lost.
+        Test amounts are above the destination minimum balance (Hydration: 1 HDX, Asset Hub USDT: 0.01, Asset Hub DOT: 0.01) plus fees. Sending less to an empty account may be lost.
       </p>
       <div id="fullWarn" class="warn-box">
-        Warning: only use full-balance mode after you have confirmed the test amount arrived on the destination chain. Full balance sends your entire XC20 balance in one XCM withdraw. Full-mode is blocked if the balance is below 2 HDX or 0.02 USDT.
+        Warning: only use full-balance mode after you have confirmed the test amount arrived on the destination chain. Full balance sends your entire XC20 balance in one XCM withdraw. Full-mode is blocked if the balance is below 2 HDX, 0.02 USDT, or 0.05 DOT.
       </div>
       <dl class="kv" style="margin-top:12px">
         <dt>Amount</dt><dd id="amountHuman">—</dd>
