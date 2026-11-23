@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>Temporary Astar XC20 Exit (owner tool)</title>
+  <style>
+    :root {
+      --bg: #0f1115;
+      --panel: #171a21;
+      --text: #e8eaed;
+      --muted: #9aa0a6;
+      --line: #2a2f3a;
+      --ok: #3dd68c;
+      --warn: #f0b429;
+      --bad: #f07178;
+      --accent: #4da3ff;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      --sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+    }
+    main {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 28px 18px 64px;
+    }
+    h1 { font-size: 1.35rem; margin: 0 0 8px; }
+    h2 { font-size: 1rem; margin: 0 0 10px; }
+    p, li { color: var(--muted); }
+    .banner {
+      border: 1px solid var(--warn);
+      background: rgba(240, 180, 41, 0.08);
+      color: var(--text);
+      padding: 12px 14px;
+      border-radius: 8px;
+      margin: 14px 0 22px;
+      font-size: 0.92rem;
+    }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    label { display: block; font-size: 0.85rem; margin-bottom: 6px; color: var(--muted); }
+    input[type="text"], select {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: #0c0e13;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 0.9rem;
+    }
+    .row { margin-bottom: 12px; }
+    .checks label {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+      color: var(--text);
+      font-size: 0.9rem;
+      margin: 8px 0;
+      cursor: pointer;
+    }
+    .checks input { margin-top: 3px; }
+    button {
+      font: inherit;
+      cursor: pointer;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: #222733;
+      color: var(--text);
+      padding: 10px 14px;
+    }
+    button.primary {
+      background: var(--accent);
+      color: #041018;
+      border-color: transparent;
+      font-weight: 700;
+    }
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+    .kv {
+      display: grid;
+      grid-template-columns: 140px 1fr;
+      gap: 6px 10px;
+      font-size: 0.88rem;
+    }
+    .kv dt { color: var(--muted); }
+    .kv dd {
+      margin: 0;
+      font-family: var(--mono);
+      word-break: break-all;
+      color: var(--text);
+    }
+    .status { font-size: 0.9rem; margin-top: 10px; white-space: pre-wrap; }
+    .status.ok { color: var(--ok); }
+    .status.warn { color: var(--warn); }
+    .status.bad { color: var(--bad); }
+    .mono { font-family: var(--mono); font-size: 0.85rem; word-break: break-all; }
+    .warn-box {
+      display: none;
+      margin-top: 8px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--bad);
+      background: rgba(240, 113, 120, 0.08);
+      color: var(--text);
+      font-size: 0.88rem;
+    }
+    .warn-box.show { display: block; }
+    small.note { display: block; margin-top: 8px; color: var(--muted); font-size: 0.8rem; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Temporary Astar XC20 Exit</h1>
+    <p>Owner-only helper to move leftover <strong>HDX</strong> or <strong>USDT</strong> XC20 balances from an Astar EVM wallet (chain id 592) via the official XCM precompile. No custody, no <code>approve()</code>, no SoneVibe contracts.</p>
+    <div class="banner">
+      Temporary / unlinked page. DOT is out of scope. You call <code>0x…5004</code> directly from your wallet. ASTR is required for gas.
+    </div>
+
+    <section class="panel">
+      <h2>1. Connect MetaMask (Astar EVM)</h2>
+      <div class="actions">
+        <button type="button" id="btnConnect" class="primary">Connect wallet</button>
+        <button type="button" id="btnSwitch">Switch to Astar (592)</button>
+        <button type="button" id="btnRefresh">Refresh balances</button>
+      </div>
+      <dl class="kv" style="margin-top:14px">
+        <dt>Connected</dt><dd id="connectedAddr">—</dd>
+        <dt>Chain id</dt><dd id="chainId">—</dd>
+        <dt>HDX balance</dt><dd id="balHdx">—</dd>
+        <dt>USDT balance</dt><dd id="balUsdt">—</dd>
+        <dt>ASTR (gas)</dt><dd id="balAstr">—</dd>
+      </dl>
+      <div id="walletStatus" class="status"></div>
+    </section>
+
+    <section class="panel">
+      <h2>2. Asset &amp; amount</h2>
+      <div class="row">
+        <label for="assetSelect">Asset</label>
+        <select id="assetSelect">
+          <option value="HDX">HDX → Hydration (para 2034)</option>
+          <option value="USDT">USDT → Polkadot Asset Hub (para 1000)</option>
+        </select>
+      </div>
+      <div class="checks">
+        <label>
+          <input type="checkbox" id="testMode" checked />
+          <span>Test mode (default ON): send exactly <strong>1 HDX</strong> or <strong>0.1 USDT</strong></span>
+        </label>
+        <label>
+          <input type="checkbox" id="fullBalance" disabled />
+          <span>Full-balance mode (only after unticking test mode)</span>
+        </label>
+      </div>
+      <div id="fullWarn" class="warn-box">
+        Warning: only use full-balance mode after you have confirmed the test amount arrived on the destination chain. Full balance sends your entire XC20 balance in one XCM withdraw.
+      </div>
+      <dl class="kv" style="margin-top:12px">
+        <dt>Amount</dt><dd id="amountHuman">—</dd>
+        <dt>Raw amount</dt><dd id="amountRaw">—</dd>
+        <dt>XC20</dt><dd id="assetAddr">—</dd>
+        <dt>Destination</dt><dd id="destInfo">—</dd>
+      </dl>
+    </section>
+
+    <section class="panel">
+      <h2>3. Recipient (your own SS58)</h2>
+      <div class="row">
+        <label for="ss58Input">Paste your SS58 address (never an H160 / 0x EVM address)</label>
+        <input type="text" id="ss58Input" autocomplete="off" spellcheck="false" placeholder="e.g. Hydration or Asset Hub SS58…" />
+      </div>
+      <dl class="kv">
+        <dt>Public key</dt><dd id="pubkeyHex">—</dd>
+        <dt>Dest SS58</dt><dd id="destSs58">—</dd>
+        <dt>Prefix used</dt><dd id="destPrefix">—</dd>
+      </dl>
+      <div class="checks">
+        <label>
+          <input type="checkbox" id="ownAddr" disabled />
+          <span>This is my own address</span>
+        </label>
+      </div>
+      <div id="addrStatus" class="status"></div>
+      <small class="note">Decoded with @polkadot/util-crypto (checksum validated). Re-encoded with the destination chain prefix so you can compare.</small>
+    </section>
+
+    <section class="panel">
+      <h2>4. Calldata preview &amp; static call</h2>
+      <pre id="callSummary" class="mono" style="margin:0;white-space:pre-wrap;color:var(--muted)">Connect wallet, pick asset, and paste a valid SS58 recipient.</pre>
+      <div class="actions" style="margin-top:12px">
+        <button type="button" id="btnSimulate">Run eth_call (simulate)</button>
+        <button type="button" id="btnSend" class="primary" disabled>Send XCM withdraw</button>
+      </div>
+      <div id="simStatus" class="status"></div>
+      <div id="txStatus" class="status"></div>
+      <small class="note">Send stays disabled until: chain is 592, recipient is a valid SS58 (not H160), ownership checkbox is ticked, and the latest eth_call returns true for the exact calldata.</small>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.10.0/dist/ethers.umd.min.js"
+          integrity="sha384-tVisdJ1MRZqej8bqmBNU9m3Gd3FN6xhhCMSWW3eJWnpsaR2XvOQWMBY08U6BIKMw"
+          crossorigin="anonymous"
+          referrerpolicy="no-referrer"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@polkadot/util@14.0.3/bundle-polkadot-util.min.js"
+          integrity="sha384-PyONm1dnZIaWXF/1Nq01ISh/fkO6JZJ9oudaOmWefm3OwGp4nIOMOnhjTQg1/jdE"
+          crossorigin="anonymous"
+          referrerpolicy="no-referrer"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@polkadot/util-crypto@14.0.3/bundle-polkadot-util-crypto.min.js"
+          integrity="sha384-0xjb0LV+vOWADpJqEZCPb1goNfPWkJPH2WVzrByeNu8mdLrTUyjeMf0PUYMZ5wcY"
+          crossorigin="anonymous"
+          referrerpolicy="no-referrer"></script>
+  <script src="astar-exit.js"></script>
+</body>
+</html>
