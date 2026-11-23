@@ -13,9 +13,22 @@
     "numerator": 9975,
     "denominator": 10000
   },
+  "pairs": [
+    {
+      "address": "0x9726ecEB595376765f7391e16e438cfb7b8D71F2",
+      "token0": { "symbol": "WETH", "address": "0x4200000000000000000000000000000000000006", "decimals": 18 },
+      "token1": { "symbol": "USDC.e", "address": "0xbA9986D2381edf1DA03B0B9c1f8b00dc4AacC369", "decimals": 6 }
+    },
+    {
+      "address": "0x18b2e9E07d191A110DAEA6Ad3468495caf4d1CB9",
+      "token0": { "symbol": "ASTR", "address": "0x2CAE934a1e84F693fbb78CA5ED3B0A6893259441", "decimals": 18 },
+      "token1": { "symbol": "USDC.e", "address": "0xbA9986D2381edf1DA03B0B9c1f8b00dc4AacC369", "decimals": 6 }
+    }
+  ],
   "masterChef": {
     "name": "VibeMasterChefV2",
-    "address": "0x8f2F9B17b173C91c7B9195096030a39227B94f62"
+    "address": "0x8f2F9B17b173C91c7B9195096030a39227B94f62",
+    "note": "Pools are legacy LPs from old factory 0x06C0b58287794a0bdce20ce768b601CA974618DC with 0 reserves, not the live pairs."
   },
   "pools": [
     {
@@ -60,6 +73,16 @@
     ]
   },
   "yields": "variable, not guaranteed",
+  "legacy": {
+    "chainId": 1868,
+    "factory": "0x06C0b58287794a0bdce20ce768b601CA974618DC",
+    "router": "0xa393E76bE079cF1ccf684D0f815795Dde248f157",
+    "status": "legacy, do not use on Soneium"
+  },
+  "retiredChains": [
+    { "chainId": 592, "network": "Astar", "retired": "2026-11-23" },
+    { "chainId": 420420419, "network": "Polkadot Hub", "retired": "2026-11-23" }
+  ],
   "chains": [
     {
       "chainId": 1868,
@@ -73,7 +96,19 @@
         "percent": "0.25%",
         "numerator": 9975,
         "denominator": 10000
-      }
+      },
+      "pairs": [
+        {
+          "address": "0x9726ecEB595376765f7391e16e438cfb7b8D71F2",
+          "token0": { "symbol": "WETH", "address": "0x4200000000000000000000000000000000000006", "decimals": 18 },
+          "token1": { "symbol": "USDC.e", "address": "0xbA9986D2381edf1DA03B0B9c1f8b00dc4AacC369", "decimals": 6 }
+        },
+        {
+          "address": "0x18b2e9E07d191A110DAEA6Ad3468495caf4d1CB9",
+          "token0": { "symbol": "ASTR", "address": "0x2CAE934a1e84F693fbb78CA5ED3B0A6893259441", "decimals": 18 },
+          "token1": { "symbol": "USDC.e", "address": "0xbA9986D2381edf1DA03B0B9c1f8b00dc4AacC369", "decimals": 6 }
+        }
+      ]
     },
     {
       "chainId": 42161,

@@ -2,6 +2,8 @@
 
 SoneVibe is a Uniswap V2-style constant-product DEX on Soneium (chain ID 1868). Each swap pays a flat 0.25% fee (9975/10000), taken from the input and left in the pool. Liquidity providers earn 5/6 of that fee. The protocol treasury receives 1/6. Yields and APR are variable, not guaranteed. The factory init code hash is 0x87b780b5d19df9ad0d4c866dcd6b169f14846fb24232a128b678c5bdb395b012. A flash swap calls vibeCall, not uniswapV2Call.
 
+Astar (592) and Polkadot Hub (420420419) were retired on Nov 23, 2026. Supported mainnets are Soneium, Arbitrum One and BNB Smart Chain.
+
 The same DEX is also on Arbitrum One (chain ID 42161). Use the Arbitrum section below for those addresses. The Soneium init code hash above matches the Arbitrum hash.
 
 Public RPC: https://rpc.soneium.org
@@ -10,7 +12,16 @@ Block explorer: https://soneium.blockscout.com/
 Contracts on Soneium mainnet, copied from docs/networks.json:
 - Router: 0x97C180C2e3097f28D8F14114AD1C0dEF81244344
 - Factory: 0x77b141dCFDa726e239efF005E3DE7A47AeBFf948
+- WETH: 0x4200000000000000000000000000000000000006
+- USDC.e: 0xbA9986D2381edf1DA03B0B9c1f8b00dc4AacC369
+- ASTR: 0x2CAE934a1e84F693fbb78CA5ED3B0A6893259441
+- WETH/USDC.e pair: 0x9726ecEB595376765f7391e16e438cfb7b8D71F2
+  factory.getPair(WETH, USDC.e) returns this pair. token0 is WETH. token1 is USDC.e.
+- ASTR/USDC.e pair: 0x18b2e9E07d191A110DAEA6Ad3468495caf4d1CB9
+  factory.getPair(ASTR, USDC.e) returns this pair. token0 is ASTR. token1 is USDC.e.
 - Farm chef (VibeMasterChefV2): 0x8f2F9B17b173C91c7B9195096030a39227B94f62
+- Farm chef pools are legacy LPs from old factory 0x06C0b58287794a0bdce20ce768b601CA974618DC with 0 reserves.
+- Legacy Soneium router: 0xa393E76bE079cF1ccf684D0f815795Dde248f157. Do not use on Soneium.
 
 Farm pools, LP tokens, and token addresses are in the machine-readable index:
 https://sonevibe.github.io/Lending/agents.json
