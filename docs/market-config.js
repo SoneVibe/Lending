@@ -21,39 +21,6 @@ const ICONS = {
  * - indexerType: 'THEGRAPH' (Defecto) o 'SUBQUERY'.
  */
 const MARKET_CONFIG = {
-    // --- SONEIUM MINATO TESTNET (ChainID: 1946) ---
-    "1946": {
-        label: "Minato Testnet",
-        marketplaceAddress: "0x8f77C59d58488C576f444D5481958935a811fcFB",
-        
-        // Usando The Graph
-        indexerType: "THEGRAPH",
-        graphEndpoint: "https://api.studio.thegraph.com/query/1721868/sone-vibe-market/v0.0.16",
-        
-        paymentToken: {
-            address: "0x26e6f7c7047252DdE3dcBF26AA492e6a264Db655", 
-            symbol: "ASTR",
-            decimals: 18,
-            isNative: false 
-        },
-        collections: [
-            {
-                id: "yoki-origins",
-                name: "Yoki Origins (Official)",
-                address: "0x4ea1141673CA8D44ee5c88Ab719f51a210f0E70D", 
-                type: "ERC1155", 
-                imagePlaceholder: ICONS.vibe
-            },
-            {
-                id: "founders-pass",
-                name: "SoneVibe Founders Pass",
-                address: "0x84B5aEC57DB0eBD291Ad88995009dA9787339B56", 
-                type: "ERC721",
-                imagePlaceholder: ICONS.vibe
-            }
-        ]
-    },
-
     // --- SONEIUM MAINNET (ChainID: 1868) ---
     "1868": {
         label: "Soneium Mainnet",
