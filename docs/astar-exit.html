@@ -162,15 +162,18 @@
       <div class="checks">
         <label>
           <input type="checkbox" id="testMode" checked />
-          <span>Test mode (default ON): send exactly <strong>1 HDX</strong> or <strong>0.1 USDT</strong></span>
+          <span>Test mode (default ON): send exactly <strong>5 HDX</strong> or <strong>0.1 USDT</strong></span>
         </label>
         <label>
           <input type="checkbox" id="fullBalance" disabled />
-          <span>Full-balance mode (only after unticking test mode)</span>
+          <span>Full-balance mode (only after unticking test mode; blocked below 2 HDX / 0.02 USDT)</span>
         </label>
       </div>
+      <p class="note" style="margin:8px 0 0;color:var(--muted);font-size:0.85rem">
+        Test amounts are above the destination minimum balance (Hydration: 1 HDX, Asset Hub USDT: 0.01) plus fees. Sending less to an empty account may be lost.
+      </p>
       <div id="fullWarn" class="warn-box">
-        Warning: only use full-balance mode after you have confirmed the test amount arrived on the destination chain. Full balance sends your entire XC20 balance in one XCM withdraw.
+        Warning: only use full-balance mode after you have confirmed the test amount arrived on the destination chain. Full balance sends your entire XC20 balance in one XCM withdraw. Full-mode is blocked if the balance is below 2 HDX or 0.02 USDT.
       </div>
       <dl class="kv" style="margin-top:12px">
         <dt>Amount</dt><dd id="amountHuman">—</dd>

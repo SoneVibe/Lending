@@ -30,8 +30,11 @@
       feeIndex: 0,
       destName: 'Hydration',
       ss58Prefix: 63,
-      testHuman: '1',
-      testRaw: 1000000000000n // 1 * 10^12
+      // 5 HDX: Hydration ED is 1 HDX; 1 HDX minus XCM fee can be lost on an empty account
+      testHuman: '5',
+      testRaw: 5000000000000n, // 5 * 10^12
+      minFullRaw: 2000000000000n, // block full-mode below 2 HDX
+      minFullHuman: '2 HDX'
     },
     USDT: {
       symbol: 'USDT',
@@ -43,7 +46,9 @@
       destName: 'Polkadot Asset Hub',
       ss58Prefix: 0,
       testHuman: '0.1',
-      testRaw: 100000n // 0.1 * 10^6
+      testRaw: 100000n, // 0.1 * 10^6 (Asset Hub minBalance 0.01)
+      minFullRaw: 20000n, // block full-mode below 0.02 USDT
+      minFullHuman: '0.02 USDT'
     }
   };
 
@@ -207,6 +212,20 @@
     }
     if (bal === 0n) {
       return { raw: null, human: 'On-chain balance is zero', mode: 'none' };
+    }
+    if (bal < asset.minFullRaw) {
+      const dec = asset.symbol === 'HDX' ? balances.hdxDecimals : balances.usdtDecimals;
+      return {
+        raw: null,
+        human:
+          'Full-mode blocked: balance ' +
+          ethers.formatUnits(bal, dec) +
+          ' ' +
+          asset.symbol +
+          ' is below minimum ' +
+          asset.minFullHuman,
+        mode: 'none'
+      };
     }
     const dec = asset.symbol === 'HDX' ? balances.hdxDecimals : balances.usdtDecimals;
     return {
