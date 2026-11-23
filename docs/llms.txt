@@ -62,6 +62,8 @@ https://sonevibe.github.io/Lending/abi/erc20.json
 
 A read-only quote and a swap transaction with amountOutMin and a deadline:
 https://sonevibe.github.io/Lending/examples/swap-viem.md
+Add and remove liquidity, with amountAMin, amountBMin, and a deadline:
+https://sonevibe.github.io/Lending/examples/add-liquidity-viem.md
 The user's own wallet signs. Private keys never belong in code.
 
 Live DEX pairs are in the machine-readable pools feed:
