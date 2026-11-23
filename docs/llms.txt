@@ -64,4 +64,5 @@ A read-only quote and a swap transaction with amountOutMin and a deadline:
 https://sonevibe.github.io/Lending/examples/swap-viem.md
 The user's own wallet signs. Private keys never belong in code.
 
-A pools.json data feed is coming. The backend owns that file. It is not published here yet.
+Live DEX pairs are in the machine-readable pools feed:
+https://sonevibe.github.io/Lending/pools.json

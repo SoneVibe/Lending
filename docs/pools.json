@@ -1,0 +1,50 @@
+{
+  "name": "SoneVibe",
+  "updated": "2026-11-23",
+  "swapFee": "0.25%",
+  "feeBps": 25,
+  "note": "Yield is variable, not guaranteed.",
+  "reservesHowTo": "Reserves are read live on chain by calling getReserves() on the pair address. The call returns reserve0, reserve1, and blockTimestampLast, in token0/token1 order. Divide each reserve by that token's decimals.",
+  "pools": [
+    {
+      "chainId": 1868,
+      "chain": "Soneium",
+      "rpc": "https://rpc.soneium.org",
+      "factory": "0x77b141dCFDa726e239efF005E3DE7A47AeBFf948",
+      "router": "0x97C180C2e3097f28D8F14114AD1C0dEF81244344",
+      "pair": "0x9726ecEB595376765f7391e16e438cfb7b8D71F2",
+      "token0": { "symbol": "WETH", "address": "0x4200000000000000000000000000000000000006", "decimals": 18 },
+      "token1": { "symbol": "USDC.e", "address": "0xbA9986D2381edf1DA03B0B9c1f8b00dc4AacC369", "decimals": 6 }
+    },
+    {
+      "chainId": 1868,
+      "chain": "Soneium",
+      "rpc": "https://rpc.soneium.org",
+      "factory": "0x77b141dCFDa726e239efF005E3DE7A47AeBFf948",
+      "router": "0x97C180C2e3097f28D8F14114AD1C0dEF81244344",
+      "pair": "0x18b2e9E07d191A110DAEA6Ad3468495caf4d1CB9",
+      "token0": { "symbol": "ASTR", "address": "0x2CAE934a1e84F693fbb78CA5ED3B0A6893259441", "decimals": 18 },
+      "token1": { "symbol": "USDC.e", "address": "0xbA9986D2381edf1DA03B0B9c1f8b00dc4AacC369", "decimals": 6 }
+    },
+    {
+      "chainId": 56,
+      "chain": "BNB Smart Chain",
+      "rpc": "https://bsc-dataseed.bnbchain.org",
+      "factory": "0x26b13e7e923e964b0514B3167A90901B49DAe205",
+      "router": "0xa393E76bE079cF1ccf684D0f815795Dde248f157",
+      "pair": "0x6dABcbFdFE097e421269a444eBF22999B1EAE279",
+      "token0": { "symbol": "USDT", "address": "0x55d398326f99059fF775485246999027B3197955", "decimals": 18 },
+      "token1": { "symbol": "WBNB", "address": "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c", "decimals": 18 }
+    },
+    {
+      "chainId": 42161,
+      "chain": "Arbitrum One",
+      "rpc": "https://arb1.arbitrum.io/rpc",
+      "factory": "0xA95107ebE4e54480bA755061eF3207c3421150f0",
+      "router": "0x8BE6469287A872B34665F5c0c8fbce73c0Dcbf72",
+      "pair": "0x4DF5bcAC28b8898988Ba576B8463664b53ddb9F7",
+      "token0": { "symbol": "WETH", "address": "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1", "decimals": 18 },
+      "token1": { "symbol": "USDC", "address": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831", "decimals": 6 }
+    }
+  ]
+}

@@ -1,5 +1,6 @@
 {
   "name": "SoneVibe",
+  "poolsFeed": "https://sonevibe.github.io/Lending/pools.json",
   "chainId": 1868,
   "network": "Soneium Mainnet",
   "rpcUrl": "https://rpc.soneium.org",
