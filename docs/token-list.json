@@ -59,22 +59,6 @@
       "decimals": 18,
       "logoURI": "icons/svibe.svg"
     },
-    {
-      "chainId": 420420419,
-      "address": "0xaf905e66038EcE89e03D843B35a11D262053B630",
-      "symbol": "WDOT",
-      "name": "WDOT",
-      "decimals": 18,
-      "logoURI": "icons/polkadot.svg"
-    },
-    {
-      "chainId": 420420419,
-      "address": "0xbeE14ad0949eBB63b90E04b8fD0a78AF2F0f3354",
-      "symbol": "USDT",
-      "name": "USDT",
-      "decimals": 6,
-      "logoURI": "icons/tether.svg"
-    },
            {
       "chainId": 420420417,
       "address": "0x9b9219B3834b3E3307267EAa1E38FABCF165fC2e",
@@ -170,30 +154,6 @@
       "name": "WLFI",
       "decimals": 18,
       "logoURI": "icons/wlfi.svg"
-    },
-     {
-      "chainId": 592,
-      "address": "0xAeaaf0e2c81Af264101B9129C00F4440cCF0F720",
-      "symbol": "WASTR",
-      "name": "WASTR",
-      "decimals": 18,
-      "logoURI": "icons/wastr.png"
-    },
-     {
-      "chainId": 592,
-      "address": "0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF",
-      "symbol": "DOT",
-      "name": "DOT",
-      "decimals": 10,
-      "logoURI": "icons/polkadot.svg"
-    },
-    {
-      "chainId": 592,
-      "address": "0xffFffFfF0000000000000001000000000000000e",
-      "symbol": "HDX",
-      "name": "HDX",
-      "decimals": 12,
-      "logoURI": "icons/hdx.svg"
     },
     {
       "chainId": 1946,

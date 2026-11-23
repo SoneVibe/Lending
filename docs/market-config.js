@@ -95,52 +95,6 @@ const MARKET_CONFIG = {
         ]
     },
 
-    // --- ASTAR EVM MAINNET (ChainID: 592) ---
-    // [CONFIGURACIÓN PARA SUBQUERY PRODUCTION]
-    "592": {
-        label: "Astar Mainnet",
-        // Dirección de tu contrato Proxy V3 desplegado en Astar
-        marketplaceAddress: "0x691459a1D00e6fa2BD39502FF58BfDE8a804940c", 
-        
-        // Configuración SUBQUERY
-        indexerType: "SUBQUERY",
-        
-        // OPCIÓN A: Producción (SubQuery Managed Service)
-        // Reemplaza esto con tu URL HTTPS de producción cuando despliegues (ej: https://api.subquery.network/sq/...)
-        graphEndpoint: "https://index-api.onfinality.io/sq/SoneVibe/sone-vibe-astar", 
-        
-        // OPCIÓN B: Desarrollo Local (Descomentar para probar con Docker)
-        // graphEndpoint: "http://localhost:3000",
-
-        paymentToken: {
-            // Dirección de Wrapped ASTR en Astar Mainnet (Verifica esta dirección en el explorer)
-            address: "0xAeaaf0e2c81Af264101B9129C00F4440cCF0F720", 
-            symbol: "WASTR",
-            decimals: 18,
-            isNative: false
-        },
-        collections: [
-            // [SUGERENCIA]: Para agregar colecciones futuras en Astar:
-            // 1. Despliega tu NFT o obtén la dirección de uno existente.
-            // 2. Copia este bloque, cambia 'address', 'name' y 'type'.
-            // 3. Asegúrate que 'type' sea exactamente "ERC721" o "ERC1155".
-            {
-                id: "Astar Degens",
-                name: "Astar Degens Official",
-                address: "0xd59fC6Bfd9732AB19b03664a45dC29B8421BDA9a", // <--- CAMBIAR POR DIRECCIÓN REAL
-                type: "ERC721",
-                imagePlaceholder: ICONS.vibe
-            },
-            {
-                id: "Test Degen",
-                name: "Test Degen",
-                address: "0x74d9431C9cD7a1872FCEf824348a8475F6E0Ef99",
-                type: "ERC721",
-                imagePlaceholder: ICONS.vibe
-            }
-
-        ]
-    }
 };
 
 // --- HELPERS GLOBALES ---

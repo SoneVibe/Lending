@@ -2,14 +2,14 @@
 
 **Version:** 2.0 (Pro)
 **Date:** December 9, 2025
-**Status:** 🟢 Live on Soneium Mainnet & Astar Network EVM Mainnet
+**Status:** 🟢 Live on Soneium Mainnet
 **Governance Token:** VIBE (Soneium Supply: 1,000,000)
 
 ---
 
 ## 1. Executive Summary
 
-**VIBE Finance** is the sovereign, modular DeFi lending layer designed for the high-throughput era of EVM-compatible networks. Currently deployed on **Soneium** and **Astar Network**, VIBE combines the battle-tested security of Compound V2 architecture with advanced risk management features, hybrid oracle infrastructure, and a native governance vault.
+**VIBE Finance** is the sovereign, modular DeFi lending layer designed for the high-throughput era of EVM-compatible networks. Currently deployed on **Soneium**, VIBE combines the battle-tested security of Compound V2 architecture with advanced risk management features, hybrid oracle infrastructure, and a native governance vault.
 
 Our philosophy, **"Liquidity is Life,"** drives us to create a nervous system for finance where collateral, credit, and governance flow freely between ecosystems with absolute transparency.
 
@@ -89,7 +89,7 @@ We are currently executing **Phase C** of our Master Blueprint.
 ### ✅ Completed (2024 - Q3 2025)
 *   **Phase A (Core):** Deployment of `SoneVibe_cERC20` and `ComptrollerV3`.
 *   **Phase B (Governance):** VIBE Token generation (1M Supply) and Vault deployment.
-*   **Deployment:** Live launch on Soneium Mainnet and Astar EVM.
+*   **Deployment:** Live launch on Soneium Mainnet.
 
 ### 🚧 Current Quarter (Q4 2025)
 *   **Pro Dashboard Release:** Launch of the "Pro" Analytics Dashboard with Simulation Mode and Liquidator Console.
@@ -118,7 +118,6 @@ We are currently executing **Phase C** of our Master Blueprint.
 ## 7. Developer Resources
 
 *   **Soneium Mainnet Master:** `0x2F38ecB638DC4fB636A85167C203d791f2809E60`
-*   **Astar Mainnet Master:** `0x366472468fe831D57b625d2fBbC90bd5a6184042`
 *   **Documentation:** [docs.vibeprotocol.io](https://docs.vibeprotocol.io)
 *   **GitHub:** [github.com/vibefinance](https://github.com/vibefinance)
 
