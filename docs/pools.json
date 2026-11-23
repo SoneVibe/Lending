@@ -4,7 +4,7 @@
   "swapFee": "0.25%",
   "feeBps": 25,
   "note": "Yield is variable, not guaranteed.",
-  "reservesHowTo": "Reserves are read live on chain by calling getReserves() on the pair address. The call returns reserve0, reserve1, and blockTimestampLast, in token0/token1 order. Divide each reserve by that token's decimals.",
+  "reservesHowTo": "Reserves are read live on chain by calling getReserves() on the pair address. The call returns reserve0, reserve1, and blockTimestampLast, in token0/token1 order. Divide each reserve by 10^decimals of that token (e.g. reserve / 10**decimals).",
   "pools": [
     {
       "chainId": 1868,
