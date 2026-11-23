@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>Temporary Astar NFT listing cancel (owner tool)</title>
+  <style>
+    :root {
+      --bg: #0f1115;
+      --panel: #171a21;
+      --text: #e8eaed;
+      --muted: #9aa0a6;
+      --line: #2a2f3a;
+      --ok: #3dd68c;
+      --warn: #f0b429;
+      --bad: #f07178;
+      --accent: #4da3ff;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      --sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+    }
+    main {
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 28px 18px 64px;
+    }
+    h1 { font-size: 1.35rem; margin: 0 0 8px; }
+    h2 { font-size: 1rem; margin: 0 0 10px; }
+    p, li { color: var(--muted); }
+    .banner {
+      border: 1px solid var(--warn);
+      background: rgba(240, 180, 41, 0.08);
+      color: var(--text);
+      padding: 12px 14px;
+      border-radius: 8px;
+      margin: 14px 0 22px;
+      font-size: 0.92rem;
+    }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    label { display: block; font-size: 0.85rem; margin-bottom: 6px; color: var(--muted); }
+    input[type="text"], select {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: #0c0e13;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 0.9rem;
+    }
+    .row { margin-bottom: 12px; }
+    .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    @media (max-width: 640px) { .row2 { grid-template-columns: 1fr; } }
+    button {
+      font: inherit;
+      cursor: pointer;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: #222733;
+      color: var(--text);
+      padding: 10px 14px;
+    }
+    button.primary {
+      background: var(--accent);
+      color: #041018;
+      border-color: transparent;
+      font-weight: 700;
+    }
+    button.danger {
+      background: #a33;
+      border-color: transparent;
+      font-weight: 700;
+    }
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+    .kv {
+      display: grid;
+      grid-template-columns: 150px 1fr;
+      gap: 6px 10px;
+      font-size: 0.88rem;
+    }
+    .kv dt { color: var(--muted); }
+    .kv dd {
+      margin: 0;
+      font-family: var(--mono);
+      word-break: break-all;
+      color: var(--text);
+    }
+    .status { font-size: 0.9rem; margin-top: 10px; white-space: pre-wrap; }
+    .status.ok { color: var(--ok); }
+    .status.warn { color: var(--warn); }
+    .status.bad { color: var(--bad); }
+    .mono { font-family: var(--mono); font-size: 0.85rem; word-break: break-all; }
+    small.note { display: block; margin-top: 8px; color: var(--muted); font-size: 0.8rem; }
+    .progress {
+      height: 10px;
+      background: #0c0e13;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+    .progress > span {
+      display: block;
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #2d6cdf, var(--accent));
+      transition: width .15s linear;
+    }
+    .cards { display: grid; gap: 12px; margin-top: 12px; }
+    .card {
+      display: grid;
+      grid-template-columns: 96px 1fr;
+      gap: 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 12px;
+      background: #12151c;
+    }
+    @media (max-width: 640px) { .card { grid-template-columns: 1fr; } }
+    .card img {
+      width: 96px;
+      height: 96px;
+      object-fit: cover;
+      border-radius: 8px;
+      background: #0c0e13;
+      border: 1px solid var(--line);
+    }
+    .card h3 { margin: 0 0 6px; font-size: 1rem; }
+    .owner-note {
+      display: none;
+      margin-top: 8px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--warn);
+      background: rgba(240, 180, 41, 0.08);
+      color: var(--text);
+      font-size: 0.88rem;
+    }
+    .owner-note.show { display: block; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Temporary Astar NFT listing cancel</h1>
+    <p>Owner/seller helper to cancel listings on the SoneVibe Astar NFT market when the indexer missed the blocks. Reads <code>ItemListed</code> logs over RPC, checks <code>listings(nft, tokenId)</code>, then calls <code>cancelListing</code> only. No <code>approve</code> / <code>setApprovalForAll</code>.</p>
+    <div class="banner">
+      Temporary / unlinked page. Chain id <strong>592</strong> only. Proxy <code id="proxyLabel">0x691459a1D00e6fa2BD39502FF58BfDE8a804940c</code>. After cancel, the NFT always returns to the <strong>listing seller</strong> (not necessarily the connected wallet).
+    </div>
+
+    <section class="panel">
+      <h2>1. Connect MetaMask (Astar EVM)</h2>
+      <div class="actions">
+        <button type="button" id="btnConnect" class="primary">Connect wallet</button>
+        <button type="button" id="btnSwitch">Switch to Astar (592)</button>
+      </div>
+      <dl class="kv" style="margin-top:14px">
+        <dt>Connected</dt><dd id="connectedAddr">—</dd>
+        <dt>Chain id</dt><dd id="chainId">—</dd>
+        <dt>Market owner()</dt><dd id="marketOwner">—</dd>
+        <dt>Role</dt><dd id="roleLabel">—</dd>
+      </dl>
+      <div id="walletStatus" class="status"></div>
+    </section>
+
+    <section class="panel">
+      <h2>2. Scan ItemListed events (RPC)</h2>
+      <p style="margin-top:0">Starts at deploy block <strong>11702077</strong>. Requests logs in chunks (tries 5,000; falls back if the RPC rejects the range). Active status is confirmed via <code>listings[nft][tokenId]</code>.</p>
+      <div class="actions">
+        <button type="button" id="btnScan" class="primary">Scan listings</button>
+        <button type="button" id="btnStopScan">Stop</button>
+      </div>
+      <div class="progress" aria-hidden="true"><span id="scanBar"></span></div>
+      <div id="scanStatus" class="status"></div>
+      <div id="listingCards" class="cards"></div>
+    </section>
+
+    <section class="panel">
+      <h2>3. Manual fallback (collection + tokenId)</h2>
+      <div class="row2">
+        <div class="row">
+          <label for="manualNft">NFT collection address</label>
+          <input type="text" id="manualNft" spellcheck="false" placeholder="0x…" />
+        </div>
+        <div class="row">
+          <label for="manualToken">tokenId</label>
+          <input type="text" id="manualToken" spellcheck="false" placeholder="e.g. 802" />
+        </div>
+      </div>
+      <div class="actions">
+        <button type="button" id="btnManual">Load listing</button>
+      </div>
+      <div id="manualStatus" class="status"></div>
+    </section>
+
+    <section class="panel">
+      <h2>4. Cancel listing</h2>
+      <dl class="kv">
+        <dt>Selected NFT</dt><dd id="selNft">—</dd>
+        <dt>tokenId</dt><dd id="selToken">—</dd>
+        <dt>Seller (return to)</dt><dd id="selSeller">—</dd>
+        <dt>Price</dt><dd id="selPrice">—</dd>
+        <dt>Target</dt><dd id="selTarget">—</dd>
+        <dt>Function</dt><dd id="selFn">cancelListing(address,uint256)</dd>
+      </dl>
+      <div id="ownerCancelNote" class="owner-note">
+        You are connected as the <strong>market owner</strong>, not the listing seller. Cancelling still returns the NFT to the seller:
+        <span class="mono" id="ownerCancelSeller"></span>
+      </div>
+      <div class="actions">
+        <button type="button" id="btnSimulate">Run eth_call (simulate)</button>
+        <button type="button" id="btnCancel" class="danger" disabled>Cancel listing</button>
+      </div>
+      <div id="simStatus" class="status"></div>
+      <div id="txStatus" class="status"></div>
+      <small class="note">Cancel stays disabled until chain is 592, a listing is selected, you are the seller or market owner, and eth_call of the exact calldata succeeds. value = 0. Gas estimate is typically ~180k.</small>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.10.0/dist/ethers.umd.min.js"
+          integrity="sha384-tVisdJ1MRZqej8bqmBNU9m3Gd3FN6xhhCMSWW3eJWnpsaR2XvOQWMBY08U6BIKMw"
+          crossorigin="anonymous"
+          referrerpolicy="no-referrer"></script>
+  <script src="astar-nft-exit.js"></script>
+</body>
+</html>
