@@ -13,6 +13,15 @@ Addresses below were confirmed to have contract code via `eth_getCode` on the li
 | LIGHT | — | `0x84998bf491C80a79B99540666569F360d5Acae6E` | [Blockscout](https://soneium.blockscout.com/address/0x84998bf491C80a79B99540666569F360d5Acae6E) |
 | LightRewards (VibeMasterChefV2) | `LightRewards_VibeMasterChefV2.sol` | `0x8f2F9B17b173C91c7B9195096030a39227B94f62` | [Sourcify exact](https://sourcify.dev/#/lookup/0x8f2F9B17b173C91c7B9195096030a39227B94f62) |
 
+## Soneium — Marketplace (Sourcify exact_match)
+
+Implementation read via EIP-1967 slot `0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc` (`implementation()` / `getImplementation()` revert on this proxy).
+
+| Contract | Role | File | Address | Sourcify |
+| --- | --- | --- | --- | --- |
+| SoneVibeProxy | proxy | `SoneVibeProxy.sol` | `0x7242ACB7a27052abBe49EF096aC473e9cBC02627` | exact_match — [Sourcify](https://sourcify.dev/#/lookup/0x7242ACB7a27052abBe49EF096aC473e9cBC02627) |
+| SoneVibeMarketV3 | implementation | `SoneVibeMarketV3.sol` | `0x8Bf75C5c411Fdd2AF14002Ce20Ba8b3604437AA0` | exact_match — [Sourcify](https://sourcify.dev/#/lookup/0x8Bf75C5c411Fdd2AF14002Ce20Ba8b3604437AA0) |
+
 ## Soneium — Lending (Sourcify exact_match)
 
 Comptroller proxy is `V_Unit`; implementation read on-chain via `getImplementation()` / `masterImplementation()` → `0x95Fd3B75EF4BaFc6c621abc0B08F6b016F672401`. Markets via `allMarkets(uint256)` (live API is `getAllMarketsData()`, not Compound-style `getAllMarkets()`).
