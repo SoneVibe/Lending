@@ -1,50 +1,21 @@
-# Frontend Lending (tipo Aave)
+# SoneVibe
 
-## Script rápido
-1. Configura .env.local con direcciones.
-2. Completa ABIs en `src/abis/`.
-3. Ejecuta: `npm install` y luego `npm run dev`.
+SoneVibe is a DEX with a 0.25% swap fee, plus a lending protocol and the SVUSD stablecoin, on Soneium, BNB Chain and Arbitrum.
 
-## Flujo de usuario
-- Home: tabla de mercados (colateral factor (CF), LT, supply APY, borrow APY, liquidez).
-- Modales: depositar (mint), retirar (redeem), pedir prestado (borrow), repagar (repay), liquidar (liquidate).
-- Panel lateral: posición del usuario, HF, detalle por mercado.
+## Contracts
 
-## Cálculos Clave
+[contracts/README.md](contracts/README.md)
 
-### Utilización
-U = borrows / (cash + borrows - reserves)
+## Official links
 
-### Supply APY (aprox)
-supplyRateAnnual = supplyRatePerBlock * blocksPerYear
+- Website: https://sonevibe.github.io/Lending/
+- Telegram: https://t.me/sonevibeportal
+- Discord: https://discord.gg/DV8GYUPDn2
 
-### Borrow APY (aprox)
-borrowRateAnnual = borrowRatePerBlock * blocksPerYear
+## Stay safe
 
-### Exchange Rate (ya en contrato)
-exchangeRateStored() → (cashNorm + borNorm - resNorm) * 1e18 / totalSupply
+The SoneVibe team never sends the first DM and never asks for private keys or seed phrases.
 
-### Health Factor (HF)
-HF = liquidationUSD / borrowUSD
+## Security
 
-liquidationUSD = Σ (valorColateral_i * LT_i)
-borrowUSD = Σ valorDeuda_j
-
-valorColateral_i = balanceUnderlying_i * price_i * (10^(18 - underlyingDecimals)) / 1e18  (ajustar si decimales > 18)
-valorDeuda_i similar.
-
-HF < 1 ⇒ riesgo de liquidación (según tus reglas).
-
-### Liquidación expected seize
-SeizeUSD = repayUSD * liquidationIncentive
-SeizeTokens calculado por `_computeSeizeCTokens`.
-
-## Extensiones futuras
-- Historial de transacciones (subgraph / event index).
-- Panel de riesgo global (promedio HF, mercados saturados).
-- Filtro / búsqueda.
-
-## Seguridad (frontend)
-- Pre-chequear allowance antes de mint/repay.
-- Mostrar advertencia si HF < 1.05
-- Usar try/catch y parse revert reason.
+[SECURITY.md](SECURITY.md)
