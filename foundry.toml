@@ -1,0 +1,36 @@
+[profile.default]
+src = "contracts"
+test = "test"
+libs = ["lib"]
+solc = "0.8.30"
+auto_detect_solc = true
+optimizer = true
+# Cancun covers the deployed bytecode (including transient storage) and keeps
+# vm.roll from reading the Prague EIP-2935 history contract on the public RPC.
+evm_version = "cancun"
+
+# Verified sources were flattened into contracts/ and still use their original
+# relative imports, plus two incompatible OpenZeppelin import layouts. Those
+# files are skipped so `forge build` can compile the sources that stand alone.
+# Fork tests call the deployed bytecode through interfaces; they do not
+# redeploy these contracts.
+skip = [
+    "contracts/DrainFree_VibeSwapCore.sol",
+    "contracts/IV_MasterEnhanced.sol",
+    "contracts/JumpRateModel.sol",
+    "contracts/LightRewards_VibeMasterChefV2.sol",
+    "contracts/SVUSD_StabilityModule.sol",
+    "contracts/SoneVibeMarketV3.sol",
+    "contracts/SoneVibeProxy.sol",
+    "contracts/V_MasterEnhanced.sol",
+    "contracts/V_MasterEnhancedUnitSupport.sol",
+    "contracts/V_cERC20_ExtendedInterest.sol",
+    "contracts/V_cSVUSD_Mintable.sol",
+    "contracts/VibeMasterChef.sol",
+    "contracts/VibeSwapCore.sol",
+    "contracts/VibeSwapRouter.sol",
+    "contracts/sonevibeoracle.sol",
+]
+
+[rpc_endpoints]
+soneium = "https://rpc.soneium.org"
