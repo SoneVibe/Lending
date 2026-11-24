@@ -1,5 +1,7 @@
 # Live contract sources
 
+Every live contract file in this folder is byte-identical to its verified source on [Sourcify](https://sourcify.dev).
+
 Sources for deployed VIBE contracts. Explorer / Sourcify verification is against deployed bytecode, so moving or grouping these files does not affect on-chain verification.
 
 Addresses below were confirmed to have contract code via `eth_getCode` on the listed RPCs (Soneium `https://rpc.soneium.org`, BNB `https://bsc-dataseed.bnbchain.org`, Arbitrum `https://arb1.arbitrum.io/rpc`). Sourcify links are chain-1868 exact matches unless noted.
@@ -73,8 +75,8 @@ These renamed local copies are **not** the Sourcify-verified deployed source (or
 
 | File | Notes |
 | --- | --- |
-| `sonevibeoracle.sol` | Differs from live `vibeoraclesoneium.sol` (trailing newline only, but not byte-identical). Live oracle → `vibeoraclesoneium.sol`. |
-| `JumpRateModel.sol` | Different contract (`JumpRateModel`) from live `jump.sol` (`JumpRateModelSafe`). Live IRM → `jump.sol`. |
-| `VibeMasterChef.sol` | Not the live chef; live LightRewards → `LightRewards_VibeMasterChefV2.sol`. |
+| [`sonevibeoracle.sol`](../archive/sonevibeoracle.sol) | reference copy, not deployed source. Differs from live `vibeoraclesoneium.sol` (trailing newline only, but not byte-identical). Live oracle → `vibeoraclesoneium.sol`. |
+| [`JumpRateModel.sol`](../archive/JumpRateModel.sol) | reference copy, not deployed source. Different contract (`JumpRateModel`) from live `jump.sol` (`JumpRateModelSafe`). Live IRM → `jump.sol`. |
+| [`VibeMasterChef.sol`](../archive/VibeMasterChef.sol) | reference copy, not deployed source. Not the live chef; live LightRewards → `LightRewards_VibeMasterChefV2.sol`. |
 
 Not in this section (they **are** byte-identical to Sourcify exact_match deployed sources): `V_MasterEnhanced.sol`, `V_cERC20_ExtendedInterest.sol`, `SVUSD_StabilityModule.sol`, `FixedRateModel.sol`.
