@@ -697,4 +697,3 @@ contract VibeMasterChefV2 is Ownable2Step, ReentrancyGuard, Pausable {
         }
     }
 }
-
