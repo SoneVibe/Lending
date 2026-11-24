@@ -9,7 +9,7 @@ SoneVibe is a DEX with a 0.25% swap fee, plus a lending protocol and the SVUSD s
 ## Official links
 
 - Website: https://sonevibe.github.io/Lending/
-- Telegram: https://t.me/sonevibeportal
+- Telegram: https://t.me/SoneVibe
 - Discord: https://discord.gg/DV8GYUPDn2
 
 ## Stay safe
