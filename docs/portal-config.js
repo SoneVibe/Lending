@@ -46,10 +46,6 @@
     ethereum: {
       id: 'ethereum', name: 'Ethereum', short: 'Ethereum', eco: 'Ethereum', kind: 'external', color: '#627EEA', chainId: 1,
       blurb: 'Connected to Polkadot through Snowbridge (trustless light-client bridge).'
-    },
-    soneium: {
-      id: 'soneium', name: 'Soneium', short: 'Soneium', eco: 'Soneium', kind: 'external', color: '#F4F4F5', chainId: 1868,
-      blurb: 'SoneVibe flagship chain. Linked to Ethereum (canonical bridge) and Astar (CCIP).'
     }
   };
 
@@ -151,17 +147,12 @@
     { from: 'ethereum', to: 'assethub', assets: ['ETH', 'WETH', 'USDC.e', 'USDT.e', 'WBTC', 'tBTC', 'wstETH', 'DAI', 'EURC', 'LINK', 'AAVE', 'sUSDe'], name: 'Snowbridge', url: 'https://app.snowbridge.network/', eta: '~30 min', note: 'Arrives on Asset Hub. Come back here to move it into Hub EVM in one click.' },
     { from: 'ethereum', to: 'hubevm', assets: ['ETH', 'WETH', 'USDC.e', 'USDT.e', 'WBTC', 'tBTC', 'wstETH', 'DAI', 'EURC', 'LINK', 'AAVE', 'sUSDe'], name: 'Snowbridge', url: 'https://app.snowbridge.network/', eta: '~30 min + 12 s', note: 'Bridge to your Asset Hub deposit address with Snowbridge, then move it to Hub EVM here (Asset Hub → Hub EVM).', via: 'assethub' },
     { from: 'assethub', to: 'ethereum', assets: ['ETH', 'WETH', 'USDC.e', 'USDT.e', 'WBTC', 'tBTC', 'wstETH', 'DAI', 'EURC', 'LINK', 'AAVE', 'sUSDe', 'DOT'], name: 'Snowbridge', url: 'https://app.snowbridge.network/', eta: '~30–60 min', note: 'Ethereum-side gas is paid in DOT on Asset Hub.' },
-    { from: 'hubevm', to: 'ethereum', assets: ['ETH', 'WETH', 'USDC.e', 'USDT.e', 'WBTC', 'tBTC', 'wstETH', 'DAI', 'EURC', 'LINK', 'AAVE', 'sUSDe', 'DOT'], name: 'Snowbridge', url: 'https://app.snowbridge.network/', eta: '~30–60 min', note: 'First move the asset to Asset Hub here (Hub EVM → Asset Hub), then use Snowbridge.', via: 'assethub' },
-    { from: 'ethereum', to: 'soneium', assets: ['ETH', 'USDC.e'], name: 'Soneium Bridge', url: 'https://superbridge.app/soneium', eta: '~3 min', note: 'Canonical OP-Stack bridge.' },
-    { from: 'soneium', to: 'ethereum', assets: ['ETH', 'USDC.e'], name: 'Soneium Bridge', url: 'https://superbridge.app/soneium', eta: '~7 days (withdrawal)', note: 'Canonical withdrawals wait 7 days. Fast bridges (Relay, Across) settle in minutes.' },
-    { from: 'astar', to: 'soneium', assets: ['ASTR'], name: 'Astar Portal · CCIP', url: 'https://portal.astar.network/', eta: '~20 min', note: 'Chainlink CCIP lane for ASTR between Astar and Soneium.' },
-    { from: 'astarevm', to: 'soneium', assets: ['ASTR'], name: 'Astar Portal · CCIP', url: 'https://portal.astar.network/', eta: '~20 min', note: 'Chainlink CCIP lane for ASTR between Astar and Soneium.' },
-    { from: 'soneium', to: 'astar', assets: ['ASTR'], name: 'Astar Portal · CCIP', url: 'https://portal.astar.network/', eta: '~20 min', note: 'Chainlink CCIP lane for ASTR between Soneium and Astar.' }
+    { from: 'hubevm', to: 'ethereum', assets: ['ETH', 'WETH', 'USDC.e', 'USDT.e', 'WBTC', 'tBTC', 'wstETH', 'DAI', 'EURC', 'LINK', 'AAVE', 'sUSDe', 'DOT'], name: 'Snowbridge', url: 'https://app.snowbridge.network/', eta: '~30–60 min', note: 'First move the asset to Asset Hub here (Hub EVM → Asset Hub), then use Snowbridge.', via: 'assethub' }
   ];
 
   /* Explicitly unsupported pairs, with the reason shown to the user. */
   const blocked = [
-    { asset: 'ASTR', to: ['assethub', 'hubevm'], reason: 'ASTR is not registered as a foreign asset on Polkadot Asset Hub yet, so it cannot land there. Registration has to be proposed by Astar governance over XCM. Use the Astar ⇄ Soneium CCIP lane meanwhile.' }
+    { asset: 'ASTR', to: ['assethub', 'hubevm'], reason: 'ASTR is not registered as a foreign asset on Polkadot Asset Hub yet, so it cannot land there. Registration has to be proposed by Astar governance over XCM.' }
   ];
 
   const xcmPrecompile = '0x00000000000000000000000000000000000a0000';

@@ -2,128 +2,26 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Peg Stabilizer (SVUSD) | SoneVibe</title>
-  <meta name="description" content="Swap USDC to SVUSD 1:1 with minimal fees through the SoneVibe Peg Stabilizer.">
+  <title>Coming soon on BNB Chain | SoneVibe</title>
+  <meta name="description" content="This SoneVibe product is coming soon on BNB Chain, the main chain. Swap and liquidity pools are available now.">
   <link rel="canonical" href="https://sonevibe.github.io/Lending/swapstabilizer.html">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="SoneVibe">
-  <meta property="og:title" content="Peg Stabilizer (SVUSD) | SoneVibe">
-  <meta property="og:description" content="Swap USDC to SVUSD 1:1 with minimal fees through the SoneVibe Peg Stabilizer.">
+  <meta property="og:title" content="Coming soon on BNB Chain | SoneVibe">
+  <meta property="og:description" content="This SoneVibe product is coming soon on BNB Chain, the main chain. Swap and liquidity pools are available now.">
   <meta property="og:url" content="https://sonevibe.github.io/Lending/swapstabilizer.html">
   <meta property="og:image" content="https://sonevibe.github.io/Lending/icons/sonevibe.png">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:site" content="@Sonevibe">
-  <meta name="twitter:creator" content="@Real_Dennis_S_F">
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
   <link rel="icon" type="image/svg+xml" href="icons/vibe.svg">
   <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
   <meta name="theme-color" content="#07080f">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
-  <style>
-    /* Estilos específicos para el Swap */
-    .swap-card {
-      max-width: 480px;
-      margin: 0 auto;
-      padding: 24px;
-    }
-    .swap-tabs {
-      display: flex;
-      background: rgba(0,0,0,0.2);
-      border-radius: 12px;
-      padding: 4px;
-      margin-bottom: 20px;
-    }
-    .swap-tab {
-      flex: 1;
-      text-align: center;
-      padding: 10px;
-      cursor: pointer;
-      border-radius: 8px;
-      font-weight: 600;
-      color: var(--text-muted);
-      transition: all 0.3s;
-    }
-    .swap-tab.active {
-      background: var(--card-bg);
-      color: #fff;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    }
-    .input-wrapper {
-      background: rgba(0,0,0,0.3);
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 12px;
-      border: 1px solid transparent;
-      transition: border-color 0.3s;
-    }
-    .input-wrapper:focus-within {
-      border-color: var(--primary);
-    }
-    .input-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 8px;
-    }
-    .token-badge {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(255,255,255,0.1);
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-weight: 700;
-      font-size: 0.9rem;
-    }
-    .swap-input {
-      background: transparent;
-      border: none;
-      color: #fff;
-      font-size: 1.8rem;
-      font-weight: 600;
-      width: 100%;
-      outline: none;
-    }
-    .swap-input::placeholder { color: rgba(255,255,255,0.2); }
-    .balance-label {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      text-align: right;
-      cursor: pointer;
-    }
-    .balance-label:hover { color: var(--primary); }
-    .info-row {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      margin-bottom: 8px;
-    }
-    .arrow-divider {
-      text-align: center;
-      margin: -10px 0;
-      position: relative;
-      z-index: 1;
-    }
-    .arrow-icon {
-      background: var(--card-bg);
-      border: 1px solid rgba(255,255,255,0.1);
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--primary);
-    }
-  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-
   <div class="app-container">
     <nav class="sidebar glass-panel">
       <div class="logo-area">
@@ -133,152 +31,31 @@
       <a href="index.html" class="nav-link">Home</a>
       <a href="swap.html" class="nav-link">Swap</a>
       <a href="pools.html" class="nav-link">Liquidity Pools</a>
-      <a href="dashboard.html" class="nav-link">Lend / Borrow</a>
       <a href="analytics.html" class="nav-link">Analytics</a>
       <a href="portal.html" class="nav-link">Portal</a>
+      <a href="docs.html" class="nav-link">Docs</a>
       <details class="nav-more">
         <summary>More</summary>
-        <a href="markets.html" class="nav-link">Markets Overview</a>
-        <a href="marketplace.html" class="nav-link">NFT Market</a>
-        <a href="mint-svusd.html" class="nav-link">Mint SVUSD</a>
-        <a href="swapstabilizer.html" class="nav-link active" aria-current="page">Peg Stabilizer</a>
-        <a href="vibe-vault.html" class="nav-link">Governance Vault</a>
-        <a href="farm.html" class="nav-link">Yield Farms</a>
-        <a href="souschef.html" class="nav-link">Sous Chef Pools</a>
-        <a href="souschefv2.html" class="nav-link">Sous Chef V2 (Preview)</a>
-        <a href="docs.html" class="nav-link">Docs</a>
         <a href="https://sonevibe-ai.onrender.com/" class="nav-link" target="_blank" rel="noopener noreferrer">AI Control Center<span class="nav-ext" aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span></a>
-        <a href="liquidator.html" class="nav-link nav-danger">Liquidator Console</a>
       </details>
       <div style="flex-grow:1"></div>
-      <div style="padding: 10px; font-size: 0.8rem; color: var(--text-muted);">
-        Module Status:<br>
-        <span id="statusDot" style="color: var(--danger)">●</span> <span id="connStatus">Disconnected</span>
-      </div>
     </nav>
-
     <div class="main-content">
       <header>
         <div>
-          <h1 style="margin:0; font-size:1.8rem; color:var(--success);">Peg Stabilizer (HSM)</h1>
-          <p style="margin:4px 0 0 0; color:var(--text-muted);">Swap USDC to SVUSD 1:1 with minimal fees.</p>
-        </div>
-        
-        <div class="nav-group">
-          <select id="networkSelect" class="network-select"><option value="" disabled selected>Loading...</option></select>
-          <div class="btn-account-wrapper">
-             <button id="btnConnect" class="btn-primary">Connect Wallet</button>
-             <div id="accountDropdown" class="account-dropdown">
-                 <div style="padding:12px 12px 6px 12px; font-size:0.8rem; color:var(--text-muted); text-transform:uppercase;">Connected Wallet</div>
-                 <div style="padding:0 12px 12px 12px; font-size:1.1rem; font-weight:600; color:#fff;" id="dropdownAddress">0x00...000</div>
-                 <div class="menu-divider"></div>
-                 <div class="menu-item" id="btnCopyAddress"><span>📋</span> Copy Address</div>
-                 <div class="menu-item" id="btnViewExplorer"><span>🔍</span> View on Explorer</div>
-                 <div class="menu-divider"></div>
-                 <div class="menu-item" id="btnDisconnect" style="color:var(--danger);"><span>🚪</span> Disconnect</div>
-             </div>
-          </div>
+          <h1 style="margin:0; font-size:1.8rem; background: linear-gradient(90deg, #fff, #a5b4fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Coming soon on BNB Chain</h1>
+          <p style="margin:4px 0 0 0; color:var(--text-muted);">BNB Chain is the main chain.</p>
         </div>
       </header>
-
-      <!-- Stats Module -->
-      <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); margin-bottom: 20px;">
-        <div class="glass-panel">
-          <div class="stat-label">System Status</div>
-          <div class="stat-value" id="systemStatus">--</div>
+      <section class="glass-panel" style="max-width:720px;">
+        <p style="margin:0 0 18px; color:var(--text-muted); line-height:1.6;">This product is coming soon on BNB Chain. Swap and liquidity pools are available now. Arbitrum One also runs the DEX.</p>
+        <div style="display:flex; gap:12px; flex-wrap:wrap;">
+          <a class="btn-primary" href="swap.html">Swap</a>
+          <a class="btn-primary" href="pools.html">Pools</a>
         </div>
-        <div class="glass-panel">
-          <div class="stat-label">Reserve Capacity</div>
-          <div class="stat-value" id="reserveCapacity">--</div>
-          <div class="stat-sub" id="reserveAvailable">Available: -- USDC</div>
-        </div>
-        <div class="glass-panel">
-          <div class="stat-label">Current Fees</div>
-          <div class="stat-value" id="feeDisplay">--%</div>
-          <div class="stat-sub">Fixed Rate Swap</div>
-        </div>
-      </div>
-
-      <!-- Swap Interface -->
-      <div class="glass-panel swap-card">
-        <div class="swap-tabs">
-          <div class="swap-tab active" id="tabMint" onclick="setMode('mint')">Mint SVUSD</div>
-          <div class="swap-tab" id="tabRedeem" onclick="setMode('redeem')">Redeem USDC</div>
-        </div>
-
-        <!-- Input From -->
-        <div class="input-wrapper">
-          <div class="input-row">
-            <span style="color:var(--text-muted);">You Pay</span>
-            <div class="token-badge" id="tokenInBadge">
-              <span>💲</span> <span id="tokenInName">USDC</span>
-            </div>
-          </div>
-          <input id="inputAmount" type="number" class="swap-input" placeholder="0.00">
-          <div class="balance-label" id="balanceIn">Balance: --</div>
-        </div>
-
-        <div class="arrow-divider">
-          <div class="arrow-icon">⬇</div>
-        </div>
-
-        <!-- Output To -->
-        <div class="input-wrapper" style="background:rgba(0,0,0,0.2);">
-          <div class="input-row">
-            <span style="color:var(--text-muted);">You Receive</span>
-            <div class="token-badge" id="tokenOutBadge">
-              <span>⚡</span> <span id="tokenOutName">SVUSD</span>
-            </div>
-          </div>
-          <input id="outputAmount" type="text" class="swap-input" placeholder="0.00" disabled style="opacity:0.8;">
-          <div class="balance-label" id="balanceOut">Balance: --</div>
-        </div>
-
-        <!-- Details -->
-        <div style="padding: 10px; background: rgba(0,0,0,0.2); border-radius: 8px; margin-bottom: 20px;">
-          <div class="info-row">
-            <span>Exchange Rate</span>
-            <span>1 USDC = 1 SVUSD</span>
-          </div>
-          <div class="info-row">
-            <span>Fee (<span id="feePercent">0.1</span>%)</span>
-            <span id="feeAmount">0.00</span>
-          </div>
-        </div>
-
-        <button id="btnActionSwap" class="btn-scan" style="width:100%; font-size:1.1rem; padding: 16px;">Connect Wallet</button>
-        <div id="txStatus" style="text-align:center; margin-top:10px; font-size:0.9rem; min-height:20px;"></div>
-
-      </div>
-
-    </div> 
-  </div>
-
-  <div id="walletModal" class="modal-overlay">
-    <div class="modal-card">
-      <div class="modal-header"><h2 class="modal-title">Connect Wallet</h2><button class="btn-close" onclick="closeWalletModal()">×</button></div>
-      <div id="walletList" class="wallet-grid"></div>
-      <div style="margin-top:24px; text-align:center; font-size:0.8rem; color:var(--text-muted);">By connecting, you agree to SoneVibe Terms of Service.</div>
+      </section>
     </div>
   </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/ethers@6.10.0/dist/ethers.umd.min.js"></script>
-  <!-- Asegúrate de que abis.js tenga STABILITY_ABI y ERC20_ABI -->
-  <script src="abis.js"></script>
-  <script src="config.js"></script>
-  <script src="wallet-config.js"></script>
-  <script src="swapstabilizer.js"></script>
-
-  <footer class="site-footer">
-    <span class="sf-fine">© 2026 SoneVibe · DeFi carries risk. Nothing on this site is financial advice.</span>
-    <div class="sf-links">
-      <a href="docs.html">Docs</a>
-      <a href="https://x.com/Sonevibe" target="_blank" rel="noopener">X · @Sonevibe</a>
-      <a href="https://x.com/Real_Dennis_S_F" target="_blank" rel="noopener">X · @Real_Dennis_S_F</a>
-      <a href="https://t.me/SoneVibe" target="_blank" rel="noopener">Telegram</a>
-      <a href="https://github.com/SoneVibe/Lending" target="_blank" rel="noopener">GitHub</a>
-    </div>
-  </footer>
   <script src="nav.js"></script>
 </body>
 </html>

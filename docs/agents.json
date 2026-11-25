@@ -1,6 +1,6 @@
 {
   "name": "SoneVibe",
-  "description": "SoneVibe main chain is BNB Chain (chain ID 56). Soneium (chain ID 1868) is legacy and remains open for withdrawals. Arbitrum One (chain ID 42161) also runs the DEX. Yields and APR are variable, not guaranteed.",
+  "description": "SoneVibe main chain is BNB Chain (chain ID 56). Arbitrum One (chain ID 42161) also runs the DEX. Yields and APR are variable, not guaranteed.",
   "poolsFeed": "https://sonevibe.github.io/Lending/pools.json",
   "addLiquidityExample": "https://sonevibe.github.io/Lending/examples/add-liquidity-viem.md",
   "chainId": 56,
@@ -20,31 +20,61 @@
     {
       "address": "0x93016Fa6e3c184c96Df7466579DfaA970C7cb6A5",
       "featured": true,
-      "token0": { "symbol": "ETH", "address": "0x2170Ed0880ac9A755fd29B2688956BD959F933F8", "decimals": 18 },
-      "token1": { "symbol": "USDT", "address": "0x55d398326f99059fF775485246999027B3197955", "decimals": 18 }
+      "token0": {
+        "symbol": "ETH",
+        "address": "0x2170Ed0880ac9A755fd29B2688956BD959F933F8",
+        "decimals": 18
+      },
+      "token1": {
+        "symbol": "USDT",
+        "address": "0x55d398326f99059fF775485246999027B3197955",
+        "decimals": 18
+      }
     },
     {
       "address": "0x6dABcbFdFE097e421269a444eBF22999B1EAE279",
       "featured": false,
-      "token0": { "symbol": "USDT", "address": "0x55d398326f99059fF775485246999027B3197955", "decimals": 18 },
-      "token1": { "symbol": "WBNB", "address": "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c", "decimals": 18 }
+      "token0": {
+        "symbol": "USDT",
+        "address": "0x55d398326f99059fF775485246999027B3197955",
+        "decimals": 18
+      },
+      "token1": {
+        "symbol": "WBNB",
+        "address": "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
+        "decimals": 18
+      }
     }
   ],
   "tokens": [
-    { "symbol": "ETH", "address": "0x2170Ed0880ac9A755fd29B2688956BD959F933F8", "decimals": 18 },
-    { "symbol": "USDT", "address": "0x55d398326f99059fF775485246999027B3197955", "decimals": 18 },
-    { "symbol": "WBNB", "address": "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c", "decimals": 18 }
+    {
+      "symbol": "ETH",
+      "address": "0x2170Ed0880ac9A755fd29B2688956BD959F933F8",
+      "decimals": 18
+    },
+    {
+      "symbol": "USDT",
+      "address": "0x55d398326f99059fF775485246999027B3197955",
+      "decimals": 18
+    },
+    {
+      "symbol": "WBNB",
+      "address": "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
+      "decimals": 18
+    }
   ],
   "yields": "variable, not guaranteed",
-  "legacy": {
-    "chainId": 1868,
-    "factory": "0x06C0b58287794a0bdce20ce768b601CA974618DC",
-    "router": "0xa393E76bE079cF1ccf684D0f815795Dde248f157",
-    "status": "legacy on Soneium, do not use on Soneium. This same router address is the live router on BNB Chain (chain ID 56). Always match address and chain ID."
-  },
   "retiredChains": [
-    { "chainId": 592, "network": "Astar", "retired": "2026-11-23" },
-    { "chainId": 420420419, "network": "Polkadot Hub", "retired": "2026-11-23" }
+    {
+      "chainId": 592,
+      "network": "Astar",
+      "retired": "2026-11-23"
+    },
+    {
+      "chainId": 420420419,
+      "network": "Polkadot Hub",
+      "retired": "2026-11-23"
+    }
   ],
   "chains": [
     {
@@ -56,105 +86,65 @@
       "router": "0xa393E76bE079cF1ccf684D0f815795Dde248f157",
       "factory": "0x26b13e7e923e964b0514B3167A90901B49DAe205",
       "factoryInitCodeHash": "0x87b780b5d19df9ad0d4c866dcd6b169f14846fb24232a128b678c5bdb395b012",
-      "swapFee": { "percent": "0.25%", "numerator": 9975, "denominator": 10000 },
-      "pair": "0x93016Fa6e3c184c96Df7466579DfaA970C7cb6A5",
-      "pairs": [
-        {
-          "address": "0x93016Fa6e3c184c96Df7466579DfaA970C7cb6A5",
-          "featured": true,
-          "token0": { "symbol": "ETH", "address": "0x2170Ed0880ac9A755fd29B2688956BD959F933F8", "decimals": 18 },
-          "token1": { "symbol": "USDT", "address": "0x55d398326f99059fF775485246999027B3197955", "decimals": 18 }
-        },
-        {
-          "address": "0x6dABcbFdFE097e421269a444eBF22999B1EAE279",
-          "featured": false,
-          "token0": { "symbol": "USDT", "address": "0x55d398326f99059fF775485246999027B3197955", "decimals": 18 },
-          "token1": { "symbol": "WBNB", "address": "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c", "decimals": 18 }
-        }
-      ],
-      "tokens": [
-        { "symbol": "ETH", "address": "0x2170Ed0880ac9A755fd29B2688956BD959F933F8", "decimals": 18 },
-        { "symbol": "USDT", "address": "0x55d398326f99059fF775485246999027B3197955", "decimals": 18 },
-        { "symbol": "WBNB", "address": "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c", "decimals": 18 }
-      ],
-      "deprecated": { "status": "bsc-deprecated, do not use", "factory": "0xaf905e66038EcE89e03D843B35a11D262053B630", "router": "0x7532b23DFB30ac22b2a74E3B81cC288de19379BA" },
-      "notes": "Main chain. Factory bytecode is identical to the Soneium and Arbitrum factories. Featured pair is ETH/USDT: token0 is ETH (BSC-peg ETH), token1 is USDT. USDT/WBNB stays listed and is not featured. This router address equals the legacy Soneium router. It is the live router on BNB Chain. Always match address and chain ID."
-    },
-    {
-      "chainId": 1868,
-      "network": "Soneium Mainnet",
-      "role": "legacy",
-      "status": "withdrawals only",
-      "rpcUrl": "https://rpc.soneium.org",
-      "blockExplorer": "https://soneium.blockscout.com/",
-      "router": "0x97C180C2e3097f28D8F14114AD1C0dEF81244344",
-      "factory": "0x77b141dCFDa726e239efF005E3DE7A47AeBFf948",
-      "factoryInitCodeHash": "0x87b780b5d19df9ad0d4c866dcd6b169f14846fb24232a128b678c5bdb395b012",
       "swapFee": {
         "percent": "0.25%",
         "numerator": 9975,
         "denominator": 10000
       },
+      "pair": "0x93016Fa6e3c184c96Df7466579DfaA970C7cb6A5",
       "pairs": [
         {
-          "address": "0x9726ecEB595376765f7391e16e438cfb7b8D71F2",
-          "token0": { "symbol": "WETH", "address": "0x4200000000000000000000000000000000000006", "decimals": 18 },
-          "token1": { "symbol": "USDC.e", "address": "0xbA9986D2381edf1DA03B0B9c1f8b00dc4AacC369", "decimals": 6 }
+          "address": "0x93016Fa6e3c184c96Df7466579DfaA970C7cb6A5",
+          "featured": true,
+          "token0": {
+            "symbol": "ETH",
+            "address": "0x2170Ed0880ac9A755fd29B2688956BD959F933F8",
+            "decimals": 18
+          },
+          "token1": {
+            "symbol": "USDT",
+            "address": "0x55d398326f99059fF775485246999027B3197955",
+            "decimals": 18
+          }
         },
         {
-          "address": "0x18b2e9E07d191A110DAEA6Ad3468495caf4d1CB9",
-          "token0": { "symbol": "ASTR", "address": "0x2CAE934a1e84F693fbb78CA5ED3B0A6893259441", "decimals": 18 },
-          "token1": { "symbol": "USDC.e", "address": "0xbA9986D2381edf1DA03B0B9c1f8b00dc4AacC369", "decimals": 6 }
+          "address": "0x6dABcbFdFE097e421269a444eBF22999B1EAE279",
+          "featured": false,
+          "token0": {
+            "symbol": "USDT",
+            "address": "0x55d398326f99059fF775485246999027B3197955",
+            "decimals": 18
+          },
+          "token1": {
+            "symbol": "WBNB",
+            "address": "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
+            "decimals": 18
+          }
         }
       ],
       "tokens": [
-        { "symbol": "WETH", "address": "0x4200000000000000000000000000000000000006", "decimals": 18 },
-        { "symbol": "LIGHT", "address": "0x84998bf491C80a79B99540666569F360d5Acae6E", "decimals": 18 },
-        { "symbol": "USDC.e", "address": "0xbA9986D2381edf1DA03B0B9c1f8b00dc4AacC369", "decimals": 6 },
-        { "symbol": "ASTR", "address": "0x2CAE934a1e84F693fbb78CA5ED3B0A6893259441", "decimals": 18 },
-        { "symbol": "USDSC", "address": "0x3f99231dD03a9F0E7e3421c92B7b90fbe012985a", "decimals": 6 }
-      ],
-      "masterChef": {
-        "name": "VibeMasterChefV2",
-        "address": "0x8f2F9B17b173C91c7B9195096030a39227B94f62",
-        "note": "Pools are legacy LPs from old factory 0x06C0b58287794a0bdce20ce768b601CA974618DC with 0 reserves, not the live pairs."
-      },
-      "farmPools": [
         {
-          "pid": 0,
-          "allocPoint": 60,
-          "lpToken": "0xc58ce2E71D0D64fC016DbB826714530B475adc0C",
-          "lpSymbol": "WETH-USDC.e LP",
-          "token0": { "symbol": "WETH", "address": "0x4200000000000000000000000000000000000006", "decimals": 18 },
-          "token1": { "symbol": "USDC.e", "address": "0xbA9986D2381edf1DA03B0B9c1f8b00dc4AacC369", "decimals": 6 }
+          "symbol": "ETH",
+          "address": "0x2170Ed0880ac9A755fd29B2688956BD959F933F8",
+          "decimals": 18
         },
         {
-          "pid": 1,
-          "allocPoint": 20,
-          "lpToken": "0x0E629590259feeFD6Da31b0Ff4c7a80F08F0D767",
-          "lpSymbol": "ASTR-USDC.e LP",
-          "token0": { "symbol": "ASTR", "address": "0x2CAE934a1e84F693fbb78CA5ED3B0A6893259441", "decimals": 18 },
-          "token1": { "symbol": "USDC.e", "address": "0xbA9986D2381edf1DA03B0B9c1f8b00dc4AacC369", "decimals": 6 }
+          "symbol": "USDT",
+          "address": "0x55d398326f99059fF775485246999027B3197955",
+          "decimals": 18
         },
         {
-          "pid": 2,
-          "allocPoint": 20,
-          "lpToken": "0x0684621A0cB5b8A8d791258a060f0c87F94e4D70",
-          "lpSymbol": "LIGHT-USDC.e LP",
-          "token0": { "symbol": "LIGHT", "address": "0x84998bf491C80a79B99540666569F360d5Acae6E", "decimals": 18 },
-          "token1": { "symbol": "USDC.e", "address": "0xbA9986D2381edf1DA03B0B9c1f8b00dc4AacC369", "decimals": 6 }
+          "symbol": "WBNB",
+          "address": "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
+          "decimals": 18
         }
       ],
-      "lending": {
-        "master": "0x1126859aB6911Fc3b4f86f2F65E7B6F2eEDe5185",
-        "stabilityModule": "0x7F1aF1382899263aF50Bc6d3601bdaB1E17Ba20D",
-        "cTokens": [
-          { "symbol": "cASTR", "address": "0x7CA06966B0c07C5e35aA180643E98bB3057EBb27", "underlying": "0x2CAE934a1e84F693fbb78CA5ED3B0A6893259441" },
-          { "symbol": "cUSDSC", "address": "0xDB3e66b87c42C7F3599fbdcBFe08DfF0689A6D77", "underlying": "0x3f99231dD03a9F0E7e3421c92B7b90fbe012985a" },
-          { "symbol": "cUSDC", "address": "0x96ae93Df119c131469b38e3d558899F23678dCFb", "underlying": "0xbA9986D2381edf1DA03B0B9c1f8b00dc4AacC369" }
-        ]
+      "deprecated": {
+        "status": "bsc-deprecated, do not use",
+        "factory": "0xaf905e66038EcE89e03D843B35a11D262053B630",
+        "router": "0x7532b23DFB30ac22b2a74E3B81cC288de19379BA"
       },
-      "notes": "Legacy network. Withdrawals only. The active router is 0x97C180C2e3097f28D8F14114AD1C0dEF81244344. Do not use 0xa393E76bE079cF1ccf684D0f815795Dde248f157 on Soneium. That address is the live router on BNB Chain."
+      "notes": "Main chain. Factory bytecode is identical to the Arbitrum factory. Featured pair is ETH/USDT: token0 is ETH (BSC-peg ETH), token1 is USDT. USDT/WBNB stays listed and is not featured. This router address is the live router on BNB Chain. Always match address and chain ID."
     },
     {
       "chainId": 42161,
@@ -171,11 +161,19 @@
       },
       "pair": "0x4DF5bcAC28b8898988Ba576B8463664b53ddb9F7",
       "tokens": [
-        { "symbol": "WETH", "address": "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1", "decimals": 18 },
-        { "symbol": "USDC", "address": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831", "decimals": 6 }
+        {
+          "symbol": "WETH",
+          "address": "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
+          "decimals": 18
+        },
+        {
+          "symbol": "USDC",
+          "address": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+          "decimals": 6
+        }
       ],
       "sourcify": "exact_match",
-      "notes": "Fund-rescue function removed from the factory. The current Soneium factory has no rescueFundsFromPair. Sourcify exact match. Router rescueFunds only moves assets already held by the router."
+      "notes": "Fund-rescue function removed from the factory. Sourcify exact match. Router rescueFunds only moves assets already held by the router."
     }
   ],
   "contracts": {

@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>SoneVibe Docs | DEX, Lending, SVUSD & NFT Market</title>
+  <title>SoneVibe Docs | DEX on BNB Chain</title>
   <link rel="canonical" href="https://sonevibe.github.io/Lending/docs.html">
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="description" content="Official SoneVibe documentation: how the DEX, liquidity pools, lending markets, SVUSD stablecoin, farms and NFT market work on Soneium and BNB Chain. Live parameters and contract addresses.">
+  <meta name="description" content="Official SoneVibe documentation: how the DEX and liquidity pools work. BNB Chain is the main chain. Arbitrum One also runs the DEX. Live parameters and contract addresses.">
   <meta property="og:type" content="article">
   <meta property="og:title" content="SoneVibe Docs">
   <meta property="og:description" content="How SoneVibe works: fees, formulas, risk parameters, admin controls and every contract address — read live from the chain.">
@@ -150,7 +150,7 @@
         SoneVibe <small>Docs</small>
       </a>
       <div class="dc-links">
-        <a href="swap.html">Swap</a><a href="pools.html">Pools</a><a href="dashboard.html">Lend</a><a href="portal.html">Portal</a><a href="analytics.html">Analytics</a><a href="marketplace.html">NFTs</a><a href="docs.html" aria-current="page" style="color:#fff">Docs</a>
+        <a href="swap.html">Swap</a><a href="pools.html">Pools</a><a href="portal.html">Portal</a><a href="analytics.html">Analytics</a><a href="docs.html" aria-current="page" style="color:#fff">Docs</a>
       </div>
       <button class="dc-menu" id="tocToggle" type="button" aria-expanded="false" aria-controls="side">Contents</button>
       <a class="dc-btn" href="swap.html">Launch App</a>
@@ -168,10 +168,7 @@
         <div class="dc-toc-group">Products</div>
         <a href="#swap">Swap</a>
         <a href="#liquidity">Liquidity & APR</a>
-        <a href="#lending">Lending & borrowing</a>
-        <a href="#svusd">SVUSD stablecoin</a>
-        <a href="#farms">Farms & staking</a>
-        <a href="#nft">NFT market</a>
+        <a href="#coming-soon">Coming soon</a>
         <div class="dc-toc-group">Reference</div>
         <a href="#tokens">Tokens</a>
         <a href="#fees">Fees</a>
@@ -187,21 +184,18 @@
       <div class="dc-hero">
         <div class="dc-eyebrow">Documentation</div>
         <h1>How SoneVibe works</h1>
-        <p>Everything you need to trade, provide liquidity, lend, borrow, mint SVUSD and trade NFTs with SoneVibe — the formulas, the fees, the risk parameters and every contract address. Values marked live are read from the blockchain when you open this page.</p>
-        <div class="dc-meta"><span class="live">Live parameters</span><span>Home chain: Soneium</span><span>Also on BNB Chain</span><span id="docUpdated">Reading chain…</span></div>
+        <p>Everything you need to trade and provide liquidity with SoneVibe — the formulas, the fees and every contract address. BNB Chain is the main chain. Values marked live are read from the blockchain when you open this page.</p>
+        <div class="dc-meta"><span class="live">Live parameters</span><span>Home chain: BNB Chain</span><span>Also on Arbitrum One</span><span id="docUpdated">Reading chain…</span></div>
       </div>
 
       <!-- ============ OVERVIEW ============ -->
       <section class="dc-sec" id="overview">
         <h2>Overview <a class="anchor" href="#overview" aria-label="Link to Overview">#</a></h2>
-        <p><b>SoneVibe</b> is a non-custodial DeFi protocol whose home is <b>Soneium</b>. It combines six products in one app:</p>
+        <p><b>SoneVibe</b> is a non-custodial DEX. <b>BNB Chain</b> is the main chain. Arbitrum One also runs the DEX.</p>
         <div class="dc-cards">
           <a class="dc-card" href="#swap"><b>SoneVibe DEX</b><span>Constant-product AMM with a flat 0.25% fee.</span></a>
           <a class="dc-card" href="#liquidity"><b>Liquidity pools</b><span>Earn 5/6 of every swap fee, auto-compounded.</span></a>
-          <a class="dc-card" href="#lending"><b>Lending markets</b><span>Supply to earn interest, borrow against collateral.</span></a>
-          <a class="dc-card" href="#svusd"><b>SVUSD</b><span>Dollar stablecoin with a 1:1 USDC stability module.</span></a>
-          <a class="dc-card" href="#farms"><b>Farms</b><span>Stake LP tokens to earn LIGHT emissions.</span></a>
-          <a class="dc-card" href="#nft"><b>NFT market</b><span>Fixed-price ERC-721 / ERC-1155 listings.</span></a>
+          <a class="dc-card" href="#coming-soon"><b>Coming soon</b><span>Lending is coming soon on BNB Chain.</span></a>
         </div>
         <p>You always interact with the smart contracts directly from your own wallet. SoneVibe never holds your private keys, and there is no off-chain order book or database: balances, prices and statistics in the app come from the chain.</p>
       </section>
@@ -209,7 +203,7 @@
       <!-- ============ NETWORKS ============ -->
       <section class="dc-sec" id="networks">
         <h2>Networks <a class="anchor" href="#networks" aria-label="Link to Networks">#</a></h2>
-        <p>Soneium runs the full suite. The DEX is also deployed on BNB Chain. The NFT market runs on Soneium. Testnets are used to ship new features before mainnet.</p>
+        <p>BNB Chain is the main chain and runs the DEX. Arbitrum One also runs the DEX.</p>
         <div class="dc-table-wrap"><table class="dc-table" id="netTable">
           <thead><tr><th>Network</th><th>Chain ID</th><th>Status</th><th>Products</th><th>Explorer</th></tr></thead>
           <tbody><tr><td colspan="5" class="muted">Loading networks…</td></tr></tbody>
@@ -221,9 +215,9 @@
         <h2>Getting started <a class="anchor" href="#getting-started" aria-label="Link to Getting started">#</a></h2>
         <ol>
           <li><b>Install a wallet.</b> SoneVibe supports <b>MetaMask</b>, <b>Trust Wallet</b> and <b>Nova Wallet</b> (browser extension or the wallet's in-app browser on mobile).</li>
-          <li><b>Get gas.</b> Transactions on Soneium are paid in <b>ETH</b>; on BNB Chain in <b>BNB</b>. Bridge ETH to Soneium through the official bridge listed on <a href="https://soneium.org" target="_blank" rel="noopener">soneium.org</a>.</li>
+          <li><b>Get gas.</b> Transactions on BNB Chain are paid in <b>BNB</b>. On Arbitrum One they are paid in <b>ETH</b>.</li>
           <li><b>Connect.</b> Press <i>Connect Wallet</i> in the app. If your wallet is on another network, the app asks it to switch or add the network for you.</li>
-          <li><b>Approve, then act.</b> The first time you use a token, your wallet asks for an approval so the contract can move that token. After that, swaps, deposits and repayments need a single confirmation.</li>
+          <li><b>Approve, then act.</b> The first time you use a token, your wallet asks for an approval so the contract can move that token. After that, swaps and liquidity changes need a single confirmation.</li>
         </ol>
         <div class="dc-note warn">Always check that you are on <b>sonevibe.github.io/Lending</b> and that contract addresses in your wallet match the ones in <a href="#contracts">Contracts</a>. SoneVibe will never ask for your seed phrase.</div>
       </section>
@@ -247,7 +241,7 @@ amountOut       = amountInWithFee × reserveOut / (reserveIn × 10000 + amountIn
           </tbody>
         </table></div>
         <h3>Routing</h3>
-        <p>The app swaps through the <b>direct pool</b> between the two tokens you pick (for example ASTR → USDC). If a pair has no pool, swap through a common token such as ETH or USDC in two steps. The router contract itself supports multi-hop paths, and automatic routing in the app is on the roadmap.</p>
+        <p>The app swaps through the <b>direct pool</b> between the two tokens you pick (for example ETH → USDT on BNB Chain). If a pair has no pool, swap through a common token such as USDT in two steps. The router contract itself supports multi-hop paths, and automatic routing in the app is on the roadmap.</p>
         <div class="dc-note info">Token approvals from the Swap page are unlimited, so you only approve each token once. You can review or revoke them at any time from your wallet or the block explorer's token-approval tool.</div>
       </section>
 
@@ -277,77 +271,10 @@ APY     = (1 + APR / 365)^365 − 1</pre>
         <p class="muted" style="color:var(--text-muted)">Formula: <code>IL = 2·√r / (1 + r) − 1</code>, where <code>r</code> is the price ratio change. The same numbers apply if the price falls by the same factor.</p>
       </section>
 
-      <!-- ============ LENDING ============ -->
-      <section class="dc-sec" id="lending">
-        <h2>Lending & borrowing <a class="anchor" href="#lending" aria-label="Link to Lending">#</a></h2>
-        <p>SoneVibe lending follows the proven Compound V2 design. When you <b>supply</b> an asset you receive interest-bearing <b>cTokens</b> (e.g. cASTR). Supplied assets can be enabled as <b>collateral</b> to <b>borrow</b> other assets. Interest accrues every block.</p>
-        <h3>Live markets on Soneium</h3>
-        <div class="dc-table-wrap"><table class="dc-table" id="lendTable">
-          <thead><tr><th>Market</th><th>Supplied</th><th>Borrowed</th><th>Utilization</th><th>Supply APR</th><th>Borrow APR</th></tr></thead>
-          <tbody><tr><td colspan="6" class="muted">Reading markets…</td></tr></tbody>
-        </table></div>
-        <h3>Risk parameters</h3>
-        <div class="dc-table-wrap"><table class="dc-table">
-          <thead><tr><th>Parameter</th><th>Value</th><th>Meaning</th></tr></thead>
-          <tbody>
-            <tr><td>Collateral factor</td><td class="num">Per market, shown in the app</td><td>Share of a collateral's value you can borrow against. $100 of collateral with a 60% factor supports $60 of debt.</td></tr>
-            <tr><td>Close factor</td><td class="num"><span class="lv loading" data-live="closeFactor"></span></td><td>Maximum share of a borrow that can be repaid in a single liquidation.</td></tr>
-            <tr><td>Liquidation incentive</td><td class="num"><span class="lv loading" data-live="liqIncentive"></span></td><td>Bonus collateral a liquidator receives on top of the debt repaid.</td></tr>
-            <tr><td>Reserve factor</td><td class="num"><span class="lv loading" data-live="reserveFactor"></span></td><td>Share of borrow interest kept as protocol reserves instead of paid to suppliers.</td></tr>
-          </tbody>
-        </table></div>
-        <h3>Formulas</h3>
-        <pre>Utilization U    = borrows / (cash + borrows − reserves)
-Borrow rate      = base + U × multiplier                      <span class="c">(U ≤ kink)</span>
-                 = base + kink × multiplier + (U − kink) × jump <span class="c">(U &gt; kink)</span>
-Supply rate      = borrow rate × U × (1 − reserve factor)
-Exchange rate    = (cash + borrows − reserves) / cToken supply
-Health factor    = Σ (collateral USD × collateral factor) / total borrows USD</pre>
-        <p>SoneVibe cTokens track <code>internalCash</code> instead of reading the contract's token balance. Tokens sent directly to a market ("donations") therefore cannot move the exchange rate — a known attack on standard Compound forks.</p>
-        <h3>Liquidation</h3>
-        <p>If your <b>health factor falls below 1.0</b>, anyone can repay up to the close factor of your debt and receive your collateral plus the liquidation incentive. Keep a buffer: prices move, and interest keeps growing your debt.</p>
-        <pre><span class="c">// Example with the live parameters</span>
-Debt $1,000 · HF 0.97 → liquidator repays up to $500
-Liquidator receives $500 × 1.10 = $550 of your collateral</pre>
-        <p>Prices come from the SoneVibe oracle contract (<span class="lv loading" data-live="oracle"></span>), shown in <a href="#contracts">Contracts</a>.</p>
-      </section>
-
-      <!-- ============ SVUSD ============ -->
-      <section class="dc-sec" id="svusd">
-        <h2>SVUSD stablecoin <a class="anchor" href="#svusd" aria-label="Link to SVUSD">#</a></h2>
-        <p><b>SVUSD</b> is SoneVibe's dollar stablecoin. It can only be minted by approved <b>facilitators</b>, and each facilitator has a hard <b>bucket cap</b> on how much it can create. Two facilitators exist:</p>
-        <h3>1 · Stability module (PSM)</h3>
-        <p>Swap USDC and SVUSD 1:1 minus a small fee. This is what holds the peg: when SVUSD trades above $1, minting through the module is profitable; below $1, redeeming is.</p>
-        <div class="dc-table-wrap"><table class="dc-table">
-          <thead><tr><th>Action</th><th>Function</th><th>Fee</th></tr></thead>
-          <tbody>
-            <tr><td>USDC → SVUSD (mint)</td><td><code>buySVUSD(amountUSDC)</code></td><td class="num"><span class="lv loading" data-live="psmFeeIn"></span></td></tr>
-            <tr><td>SVUSD → USDC (redeem)</td><td><code>sellSVUSD(amountSVUSD)</code></td><td class="num"><span class="lv loading" data-live="psmFeeOut"></span></td></tr>
-          </tbody>
-        </table></div>
-        <p>The module holds the USDC reserves itself, up to a reserve cap of <span class="lv loading" data-live="psmCap"></span>. SVUSD in circulation on Soneium: <span class="lv loading" data-live="svusdSupply"></span>.</p>
-        <h3>2 · Borrowing (mintable market)</h3>
-        <p>Supply collateral in the lending markets and borrow SVUSD from the <code>cSVUSD</code> market. Borrowing mints new SVUSD to your wallet and repaying burns it. Because no one supplies SVUSD, interest on SVUSD debt goes to the protocol treasury. Positions follow the same health-factor and liquidation rules as any other borrow.</p>
-        <p><a href="mint-svusd.html">Open the SVUSD console →</a></p>
-      </section>
-
-      <!-- ============ FARMS ============ -->
-      <section class="dc-sec" id="farms">
-        <h2>Farms & staking <a class="anchor" href="#farms" aria-label="Link to Farms">#</a></h2>
-        <p><b>Farms (MasterChef).</b> Stake LP tokens to earn <b>LIGHT</b>. A fixed amount of LIGHT is emitted per block and split between farms by their allocation points. There is no bonus multiplier (1×), and <code>emergencyWithdraw</code> always lets you take your LP tokens out, giving up pending rewards.</p>
-        <p><b>Pools (SousChef).</b> Stake a single token and earn another (for example stake LIGHT, earn DOT). Rewards are pre-funded in each pool contract; the owner cannot withdraw the staked token or the reward token from it.</p>
-        <div class="dc-note info">Farms are not in an active reward period on the current networks, and staking pools are not available on them. Mainnet farms will be announced on <a href="https://x.com/Sonevibe" target="_blank" rel="noopener">@Sonevibe</a> with their emission schedule before launch. Rewards are variable, not guaranteed.</div>
-      </section>
-
-      <!-- ============ NFT ============ -->
-      <section class="dc-sec" id="nft">
-        <h2>NFT market <a class="anchor" href="#nft" aria-label="Link to NFT market">#</a></h2>
-        <p>List ERC-721 and ERC-1155 NFTs at a fixed price and buy them in one transaction. Prices are set in an ERC-20 payment token per network, so buyers approve the token once and then call <code>buyItem</code>. Sellers can <code>cancelListing</code> at any time.</p>
-        <div class="dc-table-wrap"><table class="dc-table" id="nftTable">
-          <thead><tr><th>Network</th><th>Payment token</th><th>Market fee</th><th>Collections</th><th>Indexer</th></tr></thead>
-          <tbody><tr><td colspan="5" class="muted">Loading markets…</td></tr></tbody>
-        </table></div>
-        <p>The market fee is deducted from the sale price and sent to the treasury; the seller receives the rest. Listing and cancelling are free apart from gas.</p>
+      <!-- ============ COMING SOON ============ -->
+      <section class="dc-sec" id="coming-soon">
+        <h2>Coming soon <a class="anchor" href="#coming-soon" aria-label="Link to Coming soon">#</a></h2>
+        <p>Lending is coming soon on BNB Chain. Until that release, use <a href="swap.html">Swap</a> and <a href="pools.html">Pools</a>. Fee APR on liquidity is variable, not guaranteed.</p>
       </section>
 
       <!-- ============ TOKENS ============ -->
@@ -356,13 +283,9 @@ Liquidator receives $500 × 1.10 = $550 of your collateral</pre>
         <div class="dc-table-wrap"><table class="dc-table">
           <thead><tr><th>Token</th><th>Role</th><th>Supply</th></tr></thead>
           <tbody>
-            <tr><td><b>LIGHT</b></td><td>Farm reward and ecosystem token. Mintable only by its owner (the MasterChef once farms go live), never above the max supply.</td><td class="num">Max 1,000,000,000<br><span class="muted">Minted: <span class="lv loading" data-live="lightSupply"></span></span></td></tr>
-            <tr><td><b>SVUSD</b></td><td>Dollar stablecoin minted by facilitators (stability module and mintable market).</td><td class="num"><span class="lv loading" data-live="svusdSupply"></span></td></tr>
             <tr><td><b>LP tokens</b></td><td>Your share of a SoneVibe DEX pool, ERC-20, redeemable at any time.</td><td class="num">Per pool</td></tr>
-            <tr><td><b>cTokens</b></td><td>Your deposit in a lending market, growing in value as interest accrues.</td><td class="num">Per market</td></tr>
           </tbody>
         </table></div>
-        <p>At deployment 1,000,000 LIGHT (0.1% of max supply) were minted to the deployer for initial liquidity. Every future mint is visible on-chain.</p>
       </section>
 
       <!-- ============ FEES ============ -->
@@ -374,12 +297,6 @@ Liquidator receives $500 × 1.10 = $550 of your collateral</pre>
             <tr><td>Swap</td><td class="num"><b>0.25%</b></td><td>0.2083% liquidity providers · 0.0417% treasury</td></tr>
             <tr><td>Wrap / unwrap</td><td class="num">0%</td><td>—</td></tr>
             <tr><td>Add / remove liquidity</td><td class="num">0%</td><td>—</td></tr>
-            <tr><td>Supply / withdraw (lending)</td><td class="num">0%</td><td>—</td></tr>
-            <tr><td>Borrow interest</td><td class="num">Variable</td><td>Suppliers, minus the <span class="lv loading" data-live="reserveFactor"></span> reserve factor</td></tr>
-            <tr><td>Liquidation</td><td class="num"><span class="lv loading" data-live="liqIncentive"></span> bonus</td><td>Liquidator (paid from the liquidated collateral)</td></tr>
-            <tr><td>SVUSD mint / redeem (PSM)</td><td class="num"><span class="lv loading" data-live="psmFeeIn"></span> / <span class="lv loading" data-live="psmFeeOut"></span></td><td>Treasury</td></tr>
-            <tr><td>SVUSD borrow interest</td><td class="num">Variable</td><td>Treasury</td></tr>
-            <tr><td>NFT sale</td><td class="num"><span class="lv loading" data-live="nftFee"></span></td><td>Treasury (paid by seller from the sale price)</td></tr>
           </tbody>
         </table></div>
         <p>Gas is paid to the network, not to SoneVibe.</p>
@@ -406,11 +323,8 @@ Liquidator receives $500 × 1.10 = $550 of your collateral</pre>
         </table></div>
         <h3>Design protections</h3>
         <ul>
-          <li><b>Donation-proof lending accounting</b> with <code>internalCash</code>.</li>
-          <li><b>Reentrancy guards</b> on farms, staking pools and the NFT market.</li>
-          <li><b>Bucket caps</b> limit how much SVUSD each facilitator can mint, and the stability module has a USDC reserve cap.</li>
-          <li><b>Hard cap</b> of 1B LIGHT enforced in the token contract.</li>
-          <li><b>Emergency withdraw</b> in farms and staking pools always returns your deposit.</li>
+          <li><b>Fee split</b> is enforced in the pool: 5/6 of the swap fee stays with liquidity providers and 1/6 goes to the treasury.</li>
+          <li><b>You sign every action</b> in your own wallet. SoneVibe never asks for a seed phrase.</li>
         </ul>
         <h3>Audits</h3>
         <p>No third-party audit report has been published yet. Contracts are verified on the block explorers so anyone can read the code. Audit reports will be linked here when available.</p>
@@ -423,11 +337,9 @@ Liquidator receives $500 × 1.10 = $550 of your collateral</pre>
         <ul>
           <li><b>Smart-contract risk.</b> Bugs can lead to loss of funds, even in forks of well-tested code.</li>
           <li><b>Admin risk.</b> The roles listed in <a href="#security">Security</a> can change parameters. Check who controls them.</li>
-          <li><b>Oracle risk.</b> A wrong price can cause unfair liquidations or bad debt.</li>
-          <li><b>Liquidation risk.</b> Borrowers can lose part of their collateral if their health factor drops below 1.0.</li>
           <li><b>Impermanent loss.</b> Liquidity providers can end up with less value than holding.</li>
           <li><b>Low-liquidity pools.</b> Small pools have high price impact and can be moved by a single trade.</li>
-          <li><b>Stablecoin risk.</b> SVUSD and USDC can lose their peg.</li>
+          <li><b>Stablecoin risk.</b> Stablecoins used in pools can lose their peg.</li>
           <li><b>Bridge and network risk.</b> Assets bridged between chains depend on the bridge's security; networks can halt or reorganize.</li>
         </ul>
         <p>Nothing on this site is financial advice. Only deposit what you can afford to lose.</p>
@@ -439,8 +351,7 @@ Liquidator receives $500 × 1.10 = $550 of your collateral</pre>
         <details class="dc-faq"><summary>Why is my swap failing with "slippage"?</summary><p>The price moved more than your slippage tolerance between quoting and mining. Try a smaller amount, or raise tolerance to 1% for volatile or thin pools. Be careful with 5% — it leaves room for front-running.</p></details>
         <details class="dc-faq"><summary>Do I need to claim or compound LP fees?</summary><p>No. Swap fees stay in the pool and increase the value of your LP tokens automatically. You receive them when you remove liquidity.</p></details>
         <details class="dc-faq"><summary>Why does the APR change every day?</summary><p>It is based on the last 7 days of real swap volume divided by the liquidity in the pool. More volume or less liquidity means higher APR, and the reverse.</p></details>
-        <details class="dc-faq"><summary>What happens if my health factor drops below 1?</summary><p>Your position becomes liquidatable. A liquidator repays up to half of your debt and receives the same value of your collateral plus a 10% bonus. Add collateral or repay debt to raise your health factor.</p></details>
-        <details class="dc-faq"><summary>Is SoneVibe on BNB Chain the same protocol?</summary><p>Yes. The same DEX contracts are deployed on BNB Chain, controlled by the same team. Lending, SVUSD and the NFT market are currently on Soneium.</p></details>
+        <details class="dc-faq"><summary>Which network should I use?</summary><p>BNB Chain is the main chain. Arbitrum One also runs the DEX. Lending is coming soon on BNB Chain.</p></details>
         <details class="dc-faq"><summary>How do I revoke token approvals?</summary><p>Use your wallet's permissions page or the token-approval tool on Blockscout / BscScan and revoke the router, market or pool contract you approved.</p></details>
       </section>
 
@@ -453,7 +364,6 @@ Liquidator receives $500 × 1.10 = $550 of your collateral</pre>
 
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.10.0/dist/ethers.umd.min.js"></script>
   <script src="config.js"></script>
-  <script src="market-config.js"></script>
   <script src="docs.js"></script>
   <script src="nav.js"></script>
 </body>

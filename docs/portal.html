@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>SoneVibe Portal | Bridge DOT, USDt & USDC across Polkadot Hub, Astar, Soneium and Ethereum</title>
+  <title>SoneVibe Portal | Bridge DOT, USDt & USDC across Polkadot Hub, Astar and Ethereum</title>
   <link rel="canonical" href="https://sonevibe.github.io/Lending/portal.html">
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="description" content="SoneVibe Portal: move DOT, USDt, USDC and Snowbridge assets between Polkadot Asset Hub, Polkadot Hub EVM and Astar in one click. Routes to Soneium and Ethereum included.">
+  <meta name="description" content="SoneVibe Portal: move DOT, USDt, USDC and Snowbridge assets between Polkadot Asset Hub, Polkadot Hub EVM and Astar in one click. Routes to Ethereum included.">
   <meta property="og:type" content="website">
   <meta property="og:title" content="SoneVibe Portal">
-  <meta property="og:description" content="The hub between Soneium, Ethereum, Polkadot and Astar. Bridge DOT, USDt and USDC with native XCM — no wrapped IOUs.">
+  <meta property="og:description" content="The hub between Ethereum, Polkadot and Astar. Bridge DOT, USDt and USDC with native XCM — no wrapped IOUs.">
   <meta property="og:url" content="https://sonevibe.github.io/Lending/portal.html">
   <meta property="og:image" content="https://sonevibe.github.io/Lending/icons/sonevibe.png">
   <meta name="twitter:card" content="summary">
@@ -334,7 +334,7 @@
         SoneVibe <small>Portal</small>
       </a>
       <div class="pt-links">
-        <a href="swap.html">Swap</a><a href="pools.html">Pools</a><a href="dashboard.html">Lend</a><a class="on" href="portal.html" aria-current="page">Portal</a><a href="analytics.html">Analytics</a><a href="marketplace.html">NFTs</a><a href="docs.html">Docs</a>
+        <a href="swap.html">Swap</a><a href="pools.html">Pools</a><a class="on" href="portal.html" aria-current="page">Portal</a><a href="analytics.html">Analytics</a><a href="docs.html">Docs</a>
       </div>
       <div class="pt-conn">
         <button class="pt-wbtn" id="btnSub" type="button" aria-haspopup="dialog" aria-expanded="false"><span class="lbl">Polkadot wallet</span></button>
@@ -348,8 +348,8 @@
       <section class="pt-hero">
         <div>
           <div class="pt-eyebrow">SoneVibe Portal</div>
-          <h1>Move assets across <span>Polkadot, Astar, Soneium &amp; Ethereum</span></h1>
-          <p>Native XCM transfers between Polkadot Asset Hub, Polkadot Hub EVM and Astar — real DOT, USDt and USDC, never wrapped IOUs. Routes to Soneium and Ethereum go through the official bridges.</p>
+          <h1>Move assets across <span>Polkadot, Astar &amp; Ethereum</span></h1>
+          <p>Native XCM transfers between Polkadot Asset Hub, Polkadot Hub EVM and Astar — real DOT, USDt and USDC, never wrapped IOUs. Routes to Ethereum go through Snowbridge.</p>
         </div>
         <div>
           <div class="pt-orbit" id="orbit"></div>
@@ -440,7 +440,7 @@
         <div class="pt-how">
           <div class="pt-box"><h3>Asset Hub ⇄ Hub EVM</h3><p>Every 0x address has an Asset Hub twin (the address followed by twelve <code>EE</code> bytes). Sending to Hub EVM is a plain transfer to that twin; coming back uses the XCM precompile at <code>0x…0a0000</code>. Tokens appear in MetaMask as ERC20 precompiles, e.g. USDt at <code>0x000007C0…01200000</code>.</p></div>
           <div class="pt-box"><h3>Polkadot ⇄ Astar</h3><p>Asset Hub is the reserve for DOT, USDt and USDC. Going to Astar is an XCM reserve transfer; coming back uses Astar's XCM pallets. Destination fees (≈0.0001 DOT or ≈0.0002 USDt on Astar) are taken from the amount.</p></div>
-          <div class="pt-box"><h3>Soneium &amp; Ethereum</h3><p>Ethereum assets reach Polkadot through Snowbridge and then move into Hub EVM here. ASTR reaches Soneium through Chainlink CCIP on the Astar Portal. The Portal points you to the right bridge and completes the Polkadot side.</p></div>
+          <div class="pt-box"><h3>Ethereum</h3><p>Ethereum assets reach Polkadot through Snowbridge and then move into Hub EVM here. The Portal points you to the right bridge and completes the Polkadot side.</p></div>
         </div>
       </div>
     </section>
@@ -451,7 +451,7 @@
         <details><summary>Which wallet do I need?</summary><p>For Asset Hub and Astar use Talisman, SubWallet, Nova Wallet or Polkadot.js. For Polkadot Hub EVM use MetaMask (Talisman and SubWallet also work as EVM wallets). Asset Hub ⇄ Hub EVM needs the wallet of the side you send from.</p></details>
         <details><summary>What is "Map account" and do I need it?</summary><p>A Polkadot account that wants to use EVM apps directly (sign in MetaMask-style dApps with the same key) calls <code>revive.mapAccount</code> once. It links your native account to its 0x address and takes a small refundable deposit. You do not need it to receive funds on a MetaMask address — the Portal sends to the right account automatically.</p></details>
         <details><summary>Can I deposit DOT from an exchange straight to my MetaMask address?</summary><p>Yes. Exchanges only support Polkadot (SS58) addresses, so use the "Asset Hub deposit address" shown under your EVM wallet. Funds sent there show up in MetaMask on Polkadot Hub.</p></details>
-        <details><summary>Why can't I bridge ASTR to Polkadot Hub?</summary><p>ASTR is not registered as a foreign asset on Polkadot Asset Hub yet, so Asset Hub cannot hold it. Registration has to be proposed by Astar over XCM. As soon as it exists it becomes one line in <code>portal-config.js</code>. Until then, ASTR moves to Soneium via CCIP.</p></details>
+        <details><summary>Why can't I bridge ASTR to Polkadot Hub?</summary><p>ASTR is not registered as a foreign asset on Polkadot Asset Hub yet, so Asset Hub cannot hold it. Registration has to be proposed by Astar over XCM. As soon as it exists it becomes one line in <code>portal-config.js</code>.</p></details>
         <details><summary>Why did I receive slightly less than I sent?</summary><p>Cross-chain transfers pay execution on the destination in the asset itself: about 0.0001 DOT on Astar, about 0.0008 DOT on Asset Hub, a fraction of a cent for USDt/USDC. Same-chain moves between Asset Hub and Hub EVM have no destination fee.</p></details>
         <details><summary>Where do I trade after bridging?</summary><p>On Polkadot Hub EVM the SoneVibe DEX trades WDOT and SoneVibe USDT. After a transfer lands, the Portal offers a one-click wrap so your funds are ready for <a href="swap.html" style="color:var(--cyan)">Swap</a> and <a href="pools.html" style="color:var(--cyan)">Pools</a>.</p></details>
       </div>

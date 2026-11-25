@@ -2,17 +2,17 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>SoneVibe | Swap, Earn & Borrow on BNB Chain</title>
+  <title>SoneVibe | Swap and earn on BNB Chain</title>
   <link rel="canonical" href="https://sonevibe.github.io/Lending/">
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"Organization","name":"SoneVibe","url":"https://sonevibe.github.io/Lending/","logo":"https://sonevibe.github.io/Lending/icons/sonevibe.png",
    "sameAs":["https://x.com/Sonevibe","https://x.com/Real_Dennis_S_F","https://t.me/SoneVibe","https://github.com/SoneVibe/Lending"]}
   </script>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="description" content="SoneVibe is a DeFi app whose main chain is BNB Chain. Swap and provide liquidity there. Soneium is legacy and remains open for withdrawals. Every number is read live from the blockchain.">
+  <meta name="description" content="SoneVibe is a DeFi app whose main chain is BNB Chain. Swap and provide liquidity there. Arbitrum One also runs the DEX. Every number is read live from the blockchain.">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="SoneVibe — Swap, Earn & Borrow. Home on BNB Chain.">
-  <meta property="og:description" content="DEX on BNB Chain, with Soneium open for withdrawals. Live on-chain stats, open contracts.">
+  <meta property="og:title" content="SoneVibe — Swap and earn. Home on BNB Chain.">
+  <meta property="og:description" content="DEX on BNB Chain. Arbitrum One also runs the DEX. Live on-chain stats, open contracts.">
   <meta property="og:url" content="https://sonevibe.github.io/Lending/">
   <meta property="og:image" content="https://sonevibe.github.io/Lending/icons/sonevibe.png">
   <meta name="twitter:card" content="summary_large_image">
@@ -59,7 +59,7 @@
     .lp-cta { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
 
     /* stats */
-    .lp-stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1px; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.07); border-radius: 20px; overflow: hidden; margin-top: 60px; }
+    .lp-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.07); border-radius: 20px; overflow: hidden; margin-top: 60px; }
     .lp-stat { background: #0c0e19; padding: 24px 22px; text-align: left; }
     .lp-stat .k { font-size: .74rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); }
     .lp-stat .v { font-size: 1.7rem; font-weight: 800; margin: 8px 0 4px; color: #fff; font-variant-numeric: tabular-nums; min-height: 2.1rem; }
@@ -195,7 +195,7 @@
       .lp-chains { grid-template-columns: 1fr 1fr; }
       .lp-chain.flagship .lp-chain-stats { grid-template-columns: repeat(3, 1fr); row-gap: 18px; }
       .lp-chain-products { order: 5; width: 100%; margin-left: 0; }
-      .lp-stats { grid-template-columns: repeat(2, 1fr); } .lp-stats .lp-stat:last-child { grid-column: 1 / -1; }
+      .lp-stats { grid-template-columns: repeat(2, 1fr); }
       .lp-products { grid-template-columns: 1fr 1fr; } .lp-split { grid-template-columns: 1fr; }
       .lp-footer .lp-wrap { grid-template-columns: 1fr 1fr; }
     }
@@ -224,10 +224,8 @@
       <div class="lp-links">
         <a href="swap.html">Swap</a>
         <a href="pools.html">Pools</a>
-        <a href="dashboard.html">Lend</a>
         <a href="portal.html">Portal</a>
         <a href="analytics.html">Analytics</a>
-        <a href="marketplace.html">NFTs</a>
         <a href="docs.html">Docs</a>
       </div>
       <a href="swap.html" class="lp-btn primary">Launch App</a>
@@ -238,10 +236,9 @@
     <section class="lp-hero">
       <div class="lp-pills">
         <div class="lp-live"><i></i> Live on BNB Chain <span id="liveBlock"></span></div>
-        <a class="lp-also" href="#networks"><img src="icons/soneium.svg" alt="">Soneium withdrawals only</a>
       </div>
-      <h1>Swap, earn and borrow.<br><em>Built on BNB Chain.</em></h1>
-      <p>SoneVibe is the DEX and liquidity app for BNB Chain. Soneium is legacy and stays open so existing users can withdraw. Every number below is read live from the blockchain.</p>
+      <h1>Swap and earn.<br><em>Built on BNB Chain.</em></h1>
+      <p>SoneVibe is the DEX and liquidity app for BNB Chain. Arbitrum One also runs the DEX. Every number below is read live from the blockchain.</p>
       <div class="lp-cta">
         <a href="swap.html" class="lp-btn primary">Start trading →</a>
         <a href="analytics.html" class="lp-btn ghost">Explore live analytics</a>
@@ -252,7 +249,6 @@
         <div class="lp-stat loading" id="stVol"><div class="k">Volume 24h</div><div class="v">—</div><div class="s"></div></div>
         <div class="lp-stat loading" id="stSwaps"><div class="k">BNB Chain swaps · 24 hours</div><div class="v">—</div><div class="s"></div></div>
         <div class="lp-stat loading" id="stPairs"><div class="k">Trading pairs</div><div class="v">—</div><div class="s"></div></div>
-        <div class="lp-stat loading" id="stLend"><div class="k">Lending supplied</div><div class="v">—</div><div class="s"></div></div>
       </div>
       <div class="lp-verified">
         <span>✓ Verified on-chain from each network's contracts · <span id="liveUpdated">Loading…</span></span>
@@ -263,39 +259,23 @@
     <section class="lp-section" id="products">
       <div class="lp-eyebrow">Products</div>
       <h2>One app for your whole DeFi flow</h2>
-      <p class="lead">Trade, put idle assets to work and borrow against them without leaving SoneVibe.</p>
+      <p class="lead">Trade and put assets to work in liquidity pools without leaving SoneVibe.</p>
       <div class="lp-products">
         <a class="lp-card" href="swap.html">
           <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 7h13l-4-4M17 17H4l4 4"/></svg></div>
-          <h3>Swap</h3><p>Trade on BNB Chain at a flat 0.25% fee, with live price-impact warnings, slippage protection and one-click native wrapping. Soneium stays open for withdrawals.</p><span class="go">Trade now →</span>
+          <h3>Swap</h3><p>Trade on BNB Chain at a flat 0.25% fee, with live price-impact warnings, slippage protection and one-click native wrapping.</p><span class="go">Trade now →</span>
         </a>
         <a class="lp-card" href="pools.html">
           <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12c3-4 6-4 9 0s6 4 9 0M3 18c3-4 6-4 9 0s6 4 9 0M3 6c3-4 6-4 9 0s6 4 9 0"/></svg></div>
           <h3>Liquidity pools</h3><p>Provide liquidity and earn 5/6 of every swap fee, automatically reinvested in your position.</p><span class="go">Add liquidity →</span>
-        </a>
-        <a class="lp-card" href="dashboard.html">
-          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v20M17 6H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
-          <h3>Lend & borrow</h3><p>Supply ASTR, USDC and more to earn interest, or borrow against your collateral with a live health factor.</p><span class="go">Open markets →</span>
-        </a>
-        <a class="lp-card" href="mint-svusd.html">
-          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9 12h6M12 9v6"/></svg></div>
-          <h3>SVUSD stablecoin</h3><p>Mint an over-collateralized dollar and keep it on peg through the stability module.</p><span class="go">Mint SVUSD →</span>
-        </a>
-        <a class="lp-card" href="marketplace.html">
-          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="m3 16 5-5 4 4 3-3 6 6"/></svg></div>
-          <h3>NFT market</h3><p>List, buy and trade ERC-721 and ERC-1155 NFTs on Soneium, the legacy network, from the same wallet you use for DeFi.</p><span class="go">Browse NFTs →</span>
-        </a>
-        <a class="lp-card" href="vibe-vault.html">
-          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 10h18M5 10v8M9 10v8M15 10v8M19 10v8M2 21h20M12 3l9 5H3z"/></svg></div>
-          <h3>Governance vault</h3><p>Stake to take part in protocol decisions and help steer future markets and parameters.</p><span class="go">Open vault →</span>
         </a>
       </div>
     </section>
 
     <section class="lp-section" id="networks">
       <div class="lp-eyebrow">Multi-chain</div>
-      <h2>Home on BNB Chain. Soneium stays open for withdrawals.</h2>
-      <p class="lead">BNB Chain is the main network. Soneium is legacy and remains available so existing users can withdraw. Here is how liquidity is split, live. Fee APR is variable, not guaranteed.</p>
+      <h2>Home on BNB Chain.</h2>
+      <p class="lead">BNB Chain is the main network. Arbitrum One also runs the DEX. Here is how liquidity is split, live. Fee APR is variable, not guaranteed.</p>
       <div class="lp-tvlbar" id="tvlBar" aria-label="DEX liquidity share by network"><span class="lp-bar-empty"></span></div>
       <div class="lp-legend" id="tvlLegend"></div>
       <div class="lp-chains" id="chainGrid"></div>
@@ -304,7 +284,7 @@
     <section class="lp-section" id="pools">
       <div class="lp-eyebrow">Top pools</div>
       <h2>Where liquidity is working right now</h2>
-      <p class="lead">Fee APR is variable, not guaranteed. It comes from real swap fees paid to liquidity providers: last 24 hours on BNB Chain, last 7 days on Soneium.</p>
+      <p class="lead">Fee APR is variable, not guaranteed. It comes from real swap fees paid to liquidity providers over the last 24 hours on BNB Chain.</p>
       <div class="lp-pools" id="topPools"><div class="lp-skel"></div><div class="lp-skel"></div><div class="lp-skel"></div></div>
     </section>
 
@@ -318,7 +298,7 @@
           <p class="sub">The rules every user should know before depositing.</p>
           <ul class="lp-facts">
             <li><span><b>0.25% swap fee.</b> 5/6 goes to liquidity providers, 1/6 to the protocol treasury.</span></li>
-            <li><span><b>Oracle-priced lending.</b> Collateral is valued by the SoneVibe oracle; positions below a health factor of 1.0 can be liquidated with a 10% bonus, up to 50% of the debt at a time.</span></li>
+            <li><span><b>Lending.</b> Lending is coming soon on BNB Chain.</span></li>
             <li><span><b>Self-custody.</b> Your assets stay in smart contracts you interact with directly from your wallet.</span></li>
             <li><span><b>Live data.</b> Stats on this page and in Analytics are read from the chain, not from a private database.</span></li>
           </ul>
@@ -357,7 +337,7 @@
 
     <section class="lp-final">
       <h2>Ready to put your assets to work?</h2>
-      <p>Connect MetaMask, Trust Wallet or Nova and make your first swap on BNB Chain in under a minute. Soneium remains open for withdrawals.</p>
+      <p>Connect MetaMask, Trust Wallet or Nova and make your first swap on BNB Chain in under a minute.</p>
       <div class="lp-cta">
         <a href="swap.html" class="lp-btn primary">Launch App</a>
         <a href="https://x.com/Sonevibe" target="_blank" rel="noopener" class="lp-btn ghost">Follow @Sonevibe</a>
@@ -372,15 +352,15 @@
           <img class="brand-logo" src="icons/vibe.svg" alt="" width="28" height="28">
           SoneVibe
         </a>
-        <p style="margin:0; max-width:280px; line-height:1.6">The DeFi app for BNB Chain: swap and provide liquidity. Soneium remains open for withdrawals.</p>
+        <p style="margin:0; max-width:280px; line-height:1.6">The DeFi app for BNB Chain: swap and provide liquidity. Arbitrum One also runs the DEX.</p>
       </div>
       <div>
         <h4>Products</h4>
-        <a href="swap.html">Swap</a><a href="pools.html">Pools</a><a href="dashboard.html">Lend & Borrow</a><a href="mint-svusd.html">SVUSD</a><a href="marketplace.html">NFT Market</a>
+        <a href="swap.html">Swap</a><a href="pools.html">Pools</a>
       </div>
       <div>
         <h4>Resources</h4>
-        <a href="analytics.html">Analytics</a><a href="markets.html">Markets</a><a href="docs.html">Docs</a><a href="docs.html#contracts">Contracts</a><a href="https://github.com/SoneVibe/Lending" target="_blank" rel="noopener">GitHub</a>
+        <a href="analytics.html">Analytics</a><a href="docs.html">Docs</a><a href="docs.html#contracts">Contracts</a><a href="https://github.com/SoneVibe/Lending" target="_blank" rel="noopener">GitHub</a>
       </div>
       <div>
         <h4>Community</h4>

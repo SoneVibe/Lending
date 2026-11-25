@@ -2,33 +2,27 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Lend &amp; Borrow | SoneVibe</title>
-  <meta name="description" content="Supply collateral, borrow assets and track your health factor in the SoneVibe lending markets on Soneium.">
-  <link rel="canonical" href="https://sonevibe.github.io/Lending/dashboard.html">
+  <title>Coming soon on BNB Chain | SoneVibe</title>
+  <meta name="description" content="This SoneVibe product is coming soon on BNB Chain, the main chain. Swap and liquidity pools are available now.">
+  <link rel="canonical" href="https://sonevibe.github.io/Lending/dashboard2.html">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="SoneVibe">
-  <meta property="og:title" content="Lend &amp; Borrow | SoneVibe">
-  <meta property="og:description" content="Supply collateral, borrow assets and track your health factor in the SoneVibe lending markets on Soneium.">
-  <meta property="og:url" content="https://sonevibe.github.io/Lending/dashboard.html">
+  <meta property="og:title" content="Coming soon on BNB Chain | SoneVibe">
+  <meta property="og:description" content="This SoneVibe product is coming soon on BNB Chain, the main chain. Swap and liquidity pools are available now.">
+  <meta property="og:url" content="https://sonevibe.github.io/Lending/dashboard2.html">
   <meta property="og:image" content="https://sonevibe.github.io/Lending/icons/sonevibe.png">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:site" content="@Sonevibe">
-  <meta name="twitter:creator" content="@Real_Dennis_S_F">
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
   <link rel="icon" type="image/svg+xml" href="icons/vibe.svg">
   <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
   <meta name="theme-color" content="#07080f">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-  <!-- CSS MASTER IMPORTADO -->
   <link rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-
   <div class="app-container">
-    <!-- Sidebar -->
     <nav class="sidebar glass-panel">
       <div class="logo-area">
         <a class="brand-mark" href="index.html" aria-label="SoneVibe home"><img src="icons/vibe.svg" alt="" width="32" height="32"><span>SoneVibe</span></a>
@@ -37,234 +31,31 @@
       <a href="index.html" class="nav-link">Home</a>
       <a href="swap.html" class="nav-link">Swap</a>
       <a href="pools.html" class="nav-link">Liquidity Pools</a>
-      <a href="dashboard.html" class="nav-link">Lend / Borrow</a>
       <a href="analytics.html" class="nav-link">Analytics</a>
       <a href="portal.html" class="nav-link">Portal</a>
+      <a href="docs.html" class="nav-link">Docs</a>
       <details class="nav-more">
         <summary>More</summary>
-        <a href="markets.html" class="nav-link">Markets Overview</a>
-        <a href="marketplace.html" class="nav-link">NFT Market</a>
-        <a href="mint-svusd.html" class="nav-link">Mint SVUSD</a>
-        <a href="swapstabilizer.html" class="nav-link">Peg Stabilizer</a>
-        <a href="vibe-vault.html" class="nav-link">Governance Vault</a>
-        <a href="farm.html" class="nav-link">Yield Farms</a>
-        <a href="souschef.html" class="nav-link">Sous Chef Pools</a>
-        <a href="souschefv2.html" class="nav-link">Sous Chef V2 (Preview)</a>
-        <a href="docs.html" class="nav-link">Docs</a>
         <a href="https://sonevibe-ai.onrender.com/" class="nav-link" target="_blank" rel="noopener noreferrer">AI Control Center<span class="nav-ext" aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span></a>
-        <a href="liquidator.html" class="nav-link nav-danger">Liquidator Console</a>
       </details>
       <div style="flex-grow:1"></div>
-      <div style="padding: 10px; font-size: 0.8rem; color: var(--text-muted);">
-        Connection Status:<br>
-        <span id="statusDot" style="color: var(--danger)">●</span> <span id="connStatus">Disconnected</span>
-      </div>
     </nav>
-
-    <!-- Main Content -->
     <div class="main-content">
-      
       <header>
         <div>
-          <h1 style="margin:0; font-size:1.8rem;">Overview</h1>
-          <p style="margin:4px 0 0 0; color:var(--text-muted);">Manage your positions and health factor</p>
-        </div>
-        
-        <div class="nav-group">
-          <select id="networkSelect" class="network-select">
-             <option value="" disabled selected>Loading Networks...</option>
-          </select>
-          
-          <div class="btn-account-wrapper">
-             <button id="btnConnect" class="btn-primary">Connect Wallet</button>
-             <div id="accountDropdown" class="account-dropdown">
-                 <div style="padding:12px 12px 6px 12px; font-size:0.8rem; color:var(--text-muted); text-transform:uppercase;">Connected Wallet</div>
-                 <div style="padding:0 12px 12px 12px; font-size:1.1rem; font-weight:600; color:#fff;" id="dropdownAddress">0x00...000</div>
-                 <div class="menu-divider"></div>
-                 <div class="menu-item" id="btnCopyAddress"><span>📋</span> Copy Address</div>
-                 <div class="menu-item" id="btnViewExplorer"><span>🔍</span> View on Explorer</div>
-                 <div class="menu-divider"></div>
-                 <div class="menu-item" id="btnDisconnect" style="color:var(--danger);"><span>🚪</span> Disconnect</div>
-             </div>
-          </div>
+          <h1 style="margin:0; font-size:1.8rem; background: linear-gradient(90deg, #fff, #a5b4fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Coming soon on BNB Chain</h1>
+          <p style="margin:4px 0 0 0; color:var(--text-muted);">BNB Chain is the main chain.</p>
         </div>
       </header>
-
-      <!-- Stats -->
-      <div class="stats-grid">
-        <div class="glass-panel stat-card" style="border-top: 4px solid var(--success);">
-          <h3>Net Worth</h3>
-          <div class="stat-value" id="netWorthDisplay">$0.00</div>
-          <div style="font-size:0.8rem; color:var(--text-muted); margin-top:4px;">Supply - Borrow</div>
+      <section class="glass-panel" style="max-width:720px;">
+        <p style="margin:0 0 18px; color:var(--text-muted); line-height:1.6;">This product is coming soon on BNB Chain. Swap and liquidity pools are available now. Arbitrum One also runs the DEX.</p>
+        <div style="display:flex; gap:12px; flex-wrap:wrap;">
+          <a class="btn-primary" href="swap.html">Swap</a>
+          <a class="btn-primary" href="pools.html">Pools</a>
         </div>
-
-        <div class="glass-panel stat-card">
-          <h3>Net APY</h3>
-          <div class="stat-value" id="netApyDisplay">--%</div>
-          <div style="font-size:0.8rem; color:var(--success); margin-top:4px;">Optimization Active</div>
-        </div>
-        <div class="glass-panel stat-card">
-          <h3>Health Factor</h3>
-          <div class="stat-value" id="healthFactor" style="color:var(--success)">—</div>
-          <div style="font-size:0.8rem; color:var(--text-muted); margin-top:4px;">Liquidation at < 1.0</div>
-        </div>
-        <div class="glass-panel stat-card vibe-card">
-          <h3>Unclaimed Rewards</h3>
-          <div class="stat-value" id="vibeRewards" style="color:var(--warning)">—</div>
-          <button id="claimVibe" class="btn-ghost" style="width:100%; margin-top:8px; font-size:0.85rem; padding:8px;">Claim VIBE</button>
-        </div>
-      </div>
-
-      <!-- Simulation -->
-      <div class="glass-panel sim-panel">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <h2 style="margin:0; font-size:1.2rem;">Liquidity & Simulation</h2>
-          <span class="apy-badge borrow" style="font-size:0.7rem;">PRO FEATURE</span>
-        </div>
-        
-        <div class="health-wrap">
-          <div class="bar-label">
-            <span>Current Collateral Usage</span>
-            <span id="collateralBarText" style="font-weight:bold; color:#fff;">0%</span>
-          </div>
-          <div class="bar-container">
-            <div class="bar-fill" id="collateralBar" style="width:0%; z-index:2; position:relative;"></div>
-            <div class="bar-fill simulated" id="hypotheticalCollateralBar" style="width:0%;"></div>
-          </div>
-          <div class="bar-label" style="justify-content: flex-end;">
-            <span id="hypotheticalCollateralBarText" style="color:var(--warning); opacity:0;">0% (Simulated)</span>
-          </div>
-        </div>
-
-        <form id="hypotheticalForm" class="sim-controls" autocomplete="off">
-          <div class="input-group">
-            <label>Asset</label>
-            <select id="hypAssetSelect"></select>
-          </div>
-          <div class="input-group">
-            <label>Action</label>
-            <select id="hypActionType">
-              <option value="borrow">Borrow (+Debt)</option>
-              <option value="redeem">Redeem (-Collateral)</option>
-            </select>
-          </div>
-          <div class="input-group">
-            <label>Amount</label>
-            <input id="hypAmount" type="number" placeholder="0.00" step="0.000001" />
-          </div>
-          <button type="submit" class="btn-simulate">
-            Simulate Impact
-          </button>
-        </form>
-      </div>
-
-      <!-- Markets Table (Market Positions) -->
-      <div class="glass-panel">
-        <h2 style="margin:0 0 20px 0; font-size:1.2rem;">Market Positions</h2>
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Asset</th>
-                <th>Price</th>
-                <th>Collateral</th>
-                <th>Supply Balance</th>
-                <th>Supply APY</th>
-                <th>Borrow Balance</th>
-                <th>Borrow APY</th>
-                <th>Governance APY</th>
-              </tr>
-            </thead>
-            <tbody id="marketsBody">
-              <tr><td colspan="8" style="text-align:center; padding:30px; color:var(--text-muted);">Connect wallet to view markets</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- ======================================================= -->
-      <!-- [MOVED] ACTION PANEL: AHORA ENTRE MARKETS Y VAULT       -->
-      <!-- ======================================================= -->
-      <div class="action-panel mobile-friendly">
-        <h4><span style="color:var(--accent)">⚡</span> Trade</h4>
-        
-        <!-- Contenedor Grid para layout flexible -->
-        <div class="trade-grid">
-           <!-- Columna 1: Asset -->
-           <div class="input-group">
-               <label style="font-size:0.75rem; color:var(--text-muted)">Asset</label>
-               <select id="quickAsset" class="action-input"></select>
-           </div>
-           
-           <!-- Columna 2: Action -->
-           <div class="input-group">
-               <label style="font-size:0.75rem; color:var(--text-muted)">Action</label>
-               <select id="quickAction" class="action-input">
-                 <option value="mint">Supply (Mint)</option>
-                 <option value="redeem">Withdraw (Redeem)</option>
-                 <option value="borrow">Borrow</option>
-                 <option value="repay">Repay</option>
-               </select>
-           </div>
-           
-           <!-- Columna 3: Amount -->
-           <div class="input-group">
-               <label style="font-size:0.75rem; color:var(--text-muted)">Amount</label>
-               <input id="quickAmount" type="number" placeholder="0.00" class="action-input" step="0.000001">
-           </div>
-           
-           <!-- Columna 4: Button -->
-           <div class="input-group">
-               <button id="btnQuickExecute" class="action-btn" style="width:100%">Execute</button>
-           </div>
-        </div>
-        
-        <div id="quickStatus" class="action-status">Ready</div>
-      </div>
-      <!-- ======================================================= -->
-
-      <!-- Vault Mini (Vault Rewards APY) -->
-      <div class="glass-panel" style="border-top: 4px solid var(--warning);">
-        <h3 class="vibe-title">
-          <img alt="" src="icons/vibe.svg" width="20" /> Vault Rewards APY
-        </h3>
-        <div style="display:flex; gap:20px; flex-wrap:wrap; margin-top:15px;" id="vaultApyContainer">
-          <span class="text-muted">Loading incentives...</span>
-        </div>
-      </div>
-
-    </div> 
-  </div>
-
-  <div id="walletModal" class="modal-overlay">
-    <div class="modal-card">
-      <div class="modal-header">
-        <h2 class="modal-title">Connect Wallet</h2>
-        <button class="btn-close" onclick="closeWalletModal()">×</button>
-      </div>
-      <div id="walletList" class="wallet-grid"></div>
-      <div style="margin-top:24px; text-align:center; font-size:0.8rem; color:var(--text-muted);">
-        By connecting, you agree to SoneVibe Terms of Service.
-      </div>
+      </section>
     </div>
   </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/ethers@6.10.0/dist/ethers.umd.min.js"></script>
-  <script src="abis.js"></script>
-  <script src="config.js"></script>
-  <script src="wallet-config.js"></script>
-  <script src="dashboard-main.js"></script>
-
-  <footer class="site-footer">
-    <span class="sf-fine">© 2026 SoneVibe · DeFi carries risk. Nothing on this site is financial advice.</span>
-    <div class="sf-links">
-      <a href="docs.html">Docs</a>
-      <a href="https://x.com/Sonevibe" target="_blank" rel="noopener">X · @Sonevibe</a>
-      <a href="https://x.com/Real_Dennis_S_F" target="_blank" rel="noopener">X · @Real_Dennis_S_F</a>
-      <a href="https://t.me/SoneVibe" target="_blank" rel="noopener">Telegram</a>
-      <a href="https://github.com/SoneVibe/Lending" target="_blank" rel="noopener">GitHub</a>
-    </div>
-  </footer>
   <script src="nav.js"></script>
 </body>
 </html>

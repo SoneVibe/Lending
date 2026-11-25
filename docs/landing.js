@@ -1,6 +1,6 @@
 /**
  * landing.js v2 — SoneVibe landing, multi-chain.
- * BNB Chain is the main network. Soneium is legacy and stays open for withdrawals.
+ * BNB Chain is the main network.
  * Also reads the Arbitrum One DEX for total liquidity and the per-network split.
  * Reuses config.js (loadNetworks), networks.json and token-list.json.
  */
@@ -12,12 +12,11 @@
   // bsc-dataseed no permite getLogs y publicnode solo sirve los últimos ~10 000 bloques sin token;
   // 48.club acepta rangos de 5 000 bloques en histórico (24 h de BNB ≈ 38 consultas, ~45 s).
   const CHAINS = {
-    '1868': { name: 'Soneium', color: '#00e0ff', icon: 'icons/soneium.svg', products: ['Withdrawals only'], logs: { rpc: 'https://soneium-mainnet.rpc.sentio.xyz', chunk: 1000, days: 7, concurrency: 4 } },
     '56': { name: 'BNB Chain', color: '#f3ba2f', icon: 'icons/bnb.png', products: ['DEX'], stables: ['usd1'], logs: { rpc: 'https://rpc-bsc.48.club', chunk: 5000, days: 1, concurrency: 12 } },
     '42161': { name: 'Arbitrum One', color: '#28A0F0', icon: 'icons/arbitrum.png', products: ['DEX'] },
   };
-  // Orden explícito: las claves numéricas de un objeto JS se ordenan de menor a mayor.
-  const ORDER = ['56', '1868', '42161'];
+  // Explicit order: numeric object keys would otherwise sort from low to high.
+  const ORDER = ['56', '42161'];
   const CFG = {
     SWAP_FEE: 0.0025,
     LP_FEE_SHARE: 5 / 6,
@@ -210,25 +209,10 @@
       });
     }
 
-    if (net.chainId === '1868') await scanLending(net, rpc, oraclePrice, isStable);
     result.ts = Date.now();
     render();
     saveCache();
     return result;
-  }
-
-  // Lending: misma convención que markets.js (cToken × exchangeRate normalizado a 18 decimales)
-  async function scanLending(net, rpc, oraclePrice, isStable) {
-    const markets = await pool(net.cTokens || [], 4, async (m) => {
-      try {
-        const c = new ethers.Contract(m.address, ABI.cToken, rpc);
-        const [ts, tb, er] = await Promise.all([c.totalSupply(), c.totalBorrows(), c.exchangeRateStored()]);
-        const price = (await oraclePrice(m.address)) || (isStable(m.underlyingSymbol) ? 1 : 0);
-        return { supplied: parseFloat(ethers.formatUnits(ts * er, 36)) * price, borrowed: parseFloat(ethers.formatUnits(tb, Number(m.underlyingDecimals ?? 18))) * price };
-      } catch (e) { return null; }
-    });
-    const ok = markets.filter(Boolean);
-    state.lending = { supplied: ok.reduce((a, m) => a + m.supplied, 0), borrowed: ok.reduce((a, m) => a + m.borrowed, 0), markets: ok.length };
   }
 
   // ---------- render ----------
@@ -265,8 +249,6 @@
     } else if (flag && allDone) {
       setStat('stSwaps', '—', 'RPC busy, see Analytics');
     }
-
-    if (state.lending) setStat('stLend', fmtUsd(state.lending.supplied), `${state.lending.markets} Soneium markets · withdrawals only · ${fmtUsd(state.lending.borrowed)} borrowed`);
 
     renderNetworkCards(ids);
     renderTopPools(res);

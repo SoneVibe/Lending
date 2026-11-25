@@ -526,7 +526,7 @@ async function readPoolsFeed() {
 }
 
 // A pair link from Home or Analytics must open on the chain that holds that pair,
-// including a Soneium pair, so remove-liquidity stays reachable before a wallet connects.
+// before a wallet connects. The factory() check confirms the pair belongs to that network.
 async function networkForPair(pair, enabled) {
   const feed = await readPoolsFeed();
   const hit = feed && (feed.pools || []).find((p) => String(p.pair || "").toLowerCase() === pair.toLowerCase());

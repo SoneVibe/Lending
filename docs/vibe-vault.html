@@ -1,32 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Governance Vault | SoneVibe</title>
-  <meta name="description" content="Stake in the SoneVibe Governance Vault and earn VIBE rewards.">
+  <meta charset="UTF-8">
+  <title>Coming soon on BNB Chain | SoneVibe</title>
+  <meta name="description" content="This SoneVibe product is coming soon on BNB Chain, the main chain. Swap and liquidity pools are available now.">
   <link rel="canonical" href="https://sonevibe.github.io/Lending/vibe-vault.html">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="SoneVibe">
-  <meta property="og:title" content="Governance Vault | SoneVibe">
-  <meta property="og:description" content="Stake in the SoneVibe Governance Vault and earn VIBE rewards.">
+  <meta property="og:title" content="Coming soon on BNB Chain | SoneVibe">
+  <meta property="og:description" content="This SoneVibe product is coming soon on BNB Chain, the main chain. Swap and liquidity pools are available now.">
   <meta property="og:url" content="https://sonevibe.github.io/Lending/vibe-vault.html">
   <meta property="og:image" content="https://sonevibe.github.io/Lending/icons/sonevibe.png">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:site" content="@Sonevibe">
-  <meta name="twitter:creator" content="@Real_Dennis_S_F">
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
   <link rel="icon" type="image/svg+xml" href="icons/vibe.svg">
   <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
   <meta name="theme-color" content="#07080f">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/vault.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-
   <div class="app-container">
     <nav class="sidebar glass-panel">
       <div class="logo-area">
@@ -36,183 +31,31 @@
       <a href="index.html" class="nav-link">Home</a>
       <a href="swap.html" class="nav-link">Swap</a>
       <a href="pools.html" class="nav-link">Liquidity Pools</a>
-      <a href="dashboard.html" class="nav-link">Lend / Borrow</a>
       <a href="analytics.html" class="nav-link">Analytics</a>
       <a href="portal.html" class="nav-link">Portal</a>
+      <a href="docs.html" class="nav-link">Docs</a>
       <details class="nav-more">
         <summary>More</summary>
-        <a href="markets.html" class="nav-link">Markets Overview</a>
-        <a href="marketplace.html" class="nav-link">NFT Market</a>
-        <a href="mint-svusd.html" class="nav-link">Mint SVUSD</a>
-        <a href="swapstabilizer.html" class="nav-link">Peg Stabilizer</a>
-        <a href="vibe-vault.html" class="nav-link active" aria-current="page">Governance Vault</a>
-        <a href="farm.html" class="nav-link">Yield Farms</a>
-        <a href="souschef.html" class="nav-link">Sous Chef Pools</a>
-        <a href="souschefv2.html" class="nav-link">Sous Chef V2 (Preview)</a>
-        <a href="docs.html" class="nav-link">Docs</a>
         <a href="https://sonevibe-ai.onrender.com/" class="nav-link" target="_blank" rel="noopener noreferrer">AI Control Center<span class="nav-ext" aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span></a>
-        <a href="liquidator.html" class="nav-link nav-danger">Liquidator Console</a>
       </details>
       <div style="flex-grow:1"></div>
-      <div style="padding: 10px; font-size: 0.8rem; color: var(--text-muted);">
-        Connection Status:<br>
-        <span id="statusDot" style="color: var(--danger)">●</span> <span id="connStatus">Disconnected</span>
-      </div>
     </nav>
-
     <div class="main-content">
       <header>
         <div>
-          <h1 style="margin:0; font-size:1.8rem;">Governance Vault</h1>
-          <p style="margin:4px 0 0 0; color:var(--text-muted);">Earn VIBE for supplying &amp; borrowing</p>
-        </div>
-        
-        <div class="nav-group">
-          <select id="networkSelect" class="network-select"><option value="" disabled selected>Loading...</option></select>
-          <div class="btn-account-wrapper">
-             <button id="btnConnect" class="btn-primary">Connect Wallet</button>
-             <div id="accountDropdown" class="account-dropdown">
-                 <div style="padding:12px 12px 6px 12px; font-size:0.8rem; color:var(--text-muted); text-transform:uppercase;">Connected Wallet</div>
-                 <div style="padding:0 12px 12px 12px; font-size:1.1rem; font-weight:600; color:#fff;" id="dropdownAddress">0x00...000</div>
-                 <div class="menu-divider"></div>
-                 <div class="menu-item" id="btnCopyAddress"><span>📋</span> Copy Address</div>
-                 <div class="menu-item" id="btnViewExplorer"><span>🔍</span> View on Explorer</div>
-                 <div class="menu-divider"></div>
-                 <div class="menu-item" id="btnDisconnect" style="color:var(--danger);"><span>🚪</span> Disconnect</div>
-             </div>
-          </div>
+          <h1 style="margin:0; font-size:1.8rem; background: linear-gradient(90deg, #fff, #a5b4fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Coming soon on BNB Chain</h1>
+          <p style="margin:4px 0 0 0; color:var(--text-muted);">BNB Chain is the main chain.</p>
         </div>
       </header>
-
-      <!-- HERO / PROTOCOL OVERVIEW -->
-      <section class="vv-hero" aria-labelledby="vvHeroTitle">
-        <div class="vv-hero-top">
-          <div class="vv-hero-id">
-            <div class="vv-token-logo"><img src="icons/vibe.svg" alt="" width="44" height="44"></div>
-            <div>
-              <div class="vv-eyebrow">VIBE Incentives · <span id="vvNetName">—</span></div>
-              <h2 id="vvHeroTitle" class="vv-hero-title"><span id="vvTokenName">Vibe Governance Token</span> <span class="vv-chip" id="vvTokenSymbol">VIBE</span></h2>
-            </div>
-          </div>
-          <div class="vv-token-actions">
-            <button type="button" class="vv-pill" id="vvCopyToken" title="Copy token address"><span class="vv-mono" id="vvTokenAddrShort">0x…</span> <span aria-hidden="true">⧉</span></button>
-            <a class="vv-pill" id="vvTokenExplorer" href="#" target="_blank" rel="noopener">Explorer <span aria-hidden="true">↗</span></a>
-            <button type="button" class="vv-pill vv-pill-accent" id="vvAddToken">+ Add to wallet</button>
-          </div>
-        </div>
-
-        <div class="vv-kpis">
-          <div class="vv-kpi"><span class="vv-kpi-label">Daily Emissions</span><span class="vv-kpi-value" id="kpiDaily"><i class="vv-sk"></i></span><span class="vv-kpi-sub">VIBE / day, all markets</span></div>
-          <div class="vv-kpi"><span class="vv-kpi-label">Incentivized TVL</span><span class="vv-kpi-value" id="kpiTvl"><i class="vv-sk"></i></span><span class="vv-kpi-sub">Supply in rewarded markets</span></div>
-          <div class="vv-kpi"><span class="vv-kpi-label">Rewarded Markets</span><span class="vv-kpi-value" id="kpiMarkets"><i class="vv-sk"></i></span><span class="vv-kpi-sub" id="kpiMarketsSub">of — listed</span></div>
-          <div class="vv-kpi"><span class="vv-kpi-label">VIBE Total Supply</span><span class="vv-kpi-value" id="kpiSupply"><i class="vv-sk"></i></span><span class="vv-kpi-sub">Minted via emissions</span></div>
+      <section class="glass-panel" style="max-width:720px;">
+        <p style="margin:0 0 18px; color:var(--text-muted); line-height:1.6;">This product is coming soon on BNB Chain. Swap and liquidity pools are available now. Arbitrum One also runs the DEX.</p>
+        <div style="display:flex; gap:12px; flex-wrap:wrap;">
+          <a class="btn-primary" href="swap.html">Swap</a>
+          <a class="btn-primary" href="pools.html">Pools</a>
         </div>
       </section>
-
-      <!-- USER REWARDS -->
-      <section class="vv-grid">
-        <div class="vv-card vv-rewards" aria-live="polite">
-          <div class="vv-card-head">
-            <h3>Your Rewards</h3>
-            <span class="vv-badge" id="vvUserBadge">Not connected</span>
-          </div>
-
-          <div class="vv-claim-label">Claimable now</div>
-          <div class="vv-claim-value"><span id="vaultVibeRewards">0.00</span><span class="vv-unit" data-vv-symbol>VIBE</span></div>
-
-          <div class="vv-rows">
-            <div class="vv-row"><span>Accruing <button type="button" class="vv-info" aria-label="What is Accruing?" data-tip="Rewards earned since your last interaction. They settle into “Claimable” automatically the next time you supply, withdraw, borrow or repay in that market.">?</button></span><strong><span id="vvAccruing">—</span> <span data-vv-symbol>VIBE</span></strong></div>
-            <div class="vv-row"><span>Your earning rate</span><strong><span id="vvUserDaily">—</span> <span data-vv-symbol>VIBE</span>/day</strong></div>
-            <div class="vv-row"><span>Wallet balance</span><strong><span id="vaultVibeWallet">—</span> <span data-vv-symbol>VIBE</span></strong></div>
-          </div>
-
-          <button id="btnVaultClaimVibe" class="btn-claim vv-btn-claim" disabled>Connect wallet to claim</button>
-          <div id="vaultVibeStatus" class="vv-status" role="status"></div>
-        </div>
-
-        <div class="vv-card">
-          <div class="vv-card-head">
-            <h3>Your Earning Positions</h3>
-            <a href="dashboard.html" class="vv-link">Manage in Lend / Borrow →</a>
-          </div>
-          <div id="vvPositions" class="vv-positions">
-            <div class="vv-empty">Connect your wallet to see the positions earning VIBE.</div>
-          </div>
-        </div>
-      </section>
-
-      <!-- MARKETS TABLE -->
-      <section class="vv-card">
-        <div class="vv-card-head">
-          <div>
-            <h3>Incentivized Markets</h3>
-            <p class="vv-sub">VIBE is streamed every block to suppliers and borrowers, on top of the base lending APY.</p>
-          </div>
-          <div class="vv-meta"><span class="vv-live-dot" id="vvLiveDot"></span><span id="vvUpdated">Loading…</span></div>
-        </div>
-        <div class="vv-table-wrap">
-          <table class="vv-table">
-            <thead>
-              <tr>
-                <th scope="col">Asset</th>
-                <th scope="col" class="r">Total Supplied</th>
-                <th scope="col" class="r">Supply VIBE APR <button type="button" class="vv-info" aria-label="How is VIBE APR calculated?" data-tip="Token-denominated: yearly VIBE emitted ÷ underlying supplied (same formula as Lend / Borrow). Not converted to USD.">?</button></th>
-                <th scope="col" class="r">Total Borrowed</th>
-                <th scope="col" class="r">Borrow VIBE APR</th>
-                <th scope="col" class="r">VIBE / day</th>
-                <th scope="col" class="r"><span class="sr-only">Actions</span></th>
-              </tr>
-            </thead>
-            <tbody id="vvMarketsBody">
-              <tr class="vv-sk-row"><td colspan="7"><i class="vv-sk vv-sk-wide"></i></td></tr>
-              <tr class="vv-sk-row"><td colspan="7"><i class="vv-sk vv-sk-wide"></i></td></tr>
-              <tr class="vv-sk-row"><td colspan="7"><i class="vv-sk vv-sk-wide"></i></td></tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <!-- HOW IT WORKS -->
-      <section class="vv-card">
-        <div class="vv-card-head"><h3>How it works</h3></div>
-        <div class="vv-steps">
-          <div class="vv-step"><span class="vv-step-n">1</span><h4>Supply or borrow</h4><p>Use any incentivized market in <a href="dashboard.html">Lend / Borrow</a>. Your share of each market determines your share of its emissions.</p></div>
-          <div class="vv-step"><span class="vv-step-n">2</span><h4>Accrue every block</h4><p>VIBE accrues per block. It settles into your claimable balance whenever you interact with a market.</p></div>
-          <div class="vv-step"><span class="vv-step-n">3</span><h4>Claim &amp; govern</h4><p>Claiming mints VIBE straight to your wallet. Use it to vote on proposals or stake for more yield.</p></div>
-        </div>
-        <div class="vv-contracts">
-          <div><span>Rewards distributor</span><a id="vvMasterLink" class="vv-mono" href="#" target="_blank" rel="noopener">—</a></div>
-          <div><span>VIBE token</span><a id="vvTokenLink" class="vv-mono" href="#" target="_blank" rel="noopener">—</a></div>
-          <div><span>Block</span><span id="vvBlock" class="vv-mono">—</span></div>
-        </div>
-      </section>
-    </div> 
-  </div>
-
-  <div id="walletModal" class="modal-overlay">
-    <div class="modal-card">
-      <div class="modal-header"><h2 class="modal-title">Connect Wallet</h2><button class="btn-close" onclick="closeWalletModal()">×</button></div>
-      <div id="walletList" class="wallet-grid"></div>
-      <div style="margin-top:24px; text-align:center; font-size:0.8rem; color:var(--text-muted);">By connecting, you agree to SoneVibe Terms of Service.</div>
     </div>
   </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/ethers@6.10.0/dist/ethers.umd.min.js"></script>
-  <script src="abis.js"></script>
-  <script src="config.js"></script>
-  <script src="wallet-config.js"></script>
-  <script src="main-vault.js"></script>
-
-  <footer class="site-footer">
-    <span class="sf-fine">© 2026 SoneVibe · DeFi carries risk. Nothing on this site is financial advice.</span>
-    <div class="sf-links">
-      <a href="docs.html">Docs</a>
-      <a href="https://x.com/Sonevibe" target="_blank" rel="noopener">X · @Sonevibe</a>
-      <a href="https://x.com/Real_Dennis_S_F" target="_blank" rel="noopener">X · @Real_Dennis_S_F</a>
-      <a href="https://t.me/SoneVibe" target="_blank" rel="noopener">Telegram</a>
-      <a href="https://github.com/SoneVibe/Lending" target="_blank" rel="noopener">GitHub</a>
-    </div>
-  </footer>
   <script src="nav.js"></script>
 </body>
 </html>

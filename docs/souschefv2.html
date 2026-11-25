@@ -2,19 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Sous Chef V2 (Preview) | SoneVibe</title>
-  <meta name="description" content="Preview of SoneVibe Sous Chef vaults: automated strategy vaults and auto-compounders.">
+  <title>Coming soon on BNB Chain | SoneVibe</title>
+  <meta name="description" content="This SoneVibe product is coming soon on BNB Chain, the main chain. Swap and liquidity pools are available now.">
   <link rel="canonical" href="https://sonevibe.github.io/Lending/souschefv2.html">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="SoneVibe">
-  <meta property="og:title" content="Sous Chef V2 (Preview) | SoneVibe">
-  <meta property="og:description" content="Preview of SoneVibe Sous Chef vaults: automated strategy vaults and auto-compounders.">
+  <meta property="og:title" content="Coming soon on BNB Chain | SoneVibe">
+  <meta property="og:description" content="This SoneVibe product is coming soon on BNB Chain, the main chain. Swap and liquidity pools are available now.">
   <meta property="og:url" content="https://sonevibe.github.io/Lending/souschefv2.html">
   <meta property="og:image" content="https://sonevibe.github.io/Lending/icons/sonevibe.png">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:site" content="@Sonevibe">
-  <meta name="twitter:creator" content="@Real_Dennis_S_F">
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
   <link rel="icon" type="image/svg+xml" href="icons/vibe.svg">
   <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
@@ -23,9 +22,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-
   <div class="app-container">
-    <!-- Sidebar -->
     <nav class="sidebar glass-panel">
       <div class="logo-area">
         <a class="brand-mark" href="index.html" aria-label="SoneVibe home"><img src="icons/vibe.svg" alt="" width="32" height="32"><span>SoneVibe</span></a>
@@ -34,176 +31,31 @@
       <a href="index.html" class="nav-link">Home</a>
       <a href="swap.html" class="nav-link">Swap</a>
       <a href="pools.html" class="nav-link">Liquidity Pools</a>
-      <a href="dashboard.html" class="nav-link">Lend / Borrow</a>
       <a href="analytics.html" class="nav-link">Analytics</a>
       <a href="portal.html" class="nav-link">Portal</a>
+      <a href="docs.html" class="nav-link">Docs</a>
       <details class="nav-more">
         <summary>More</summary>
-        <a href="markets.html" class="nav-link">Markets Overview</a>
-        <a href="marketplace.html" class="nav-link">NFT Market</a>
-        <a href="mint-svusd.html" class="nav-link">Mint SVUSD</a>
-        <a href="swapstabilizer.html" class="nav-link">Peg Stabilizer</a>
-        <a href="vibe-vault.html" class="nav-link">Governance Vault</a>
-        <a href="farm.html" class="nav-link">Yield Farms</a>
-        <a href="souschef.html" class="nav-link">Sous Chef Pools</a>
-        <a href="souschefv2.html" class="nav-link active" aria-current="page">Sous Chef V2 (Preview)</a>
-        <a href="docs.html" class="nav-link">Docs</a>
         <a href="https://sonevibe-ai.onrender.com/" class="nav-link" target="_blank" rel="noopener noreferrer">AI Control Center<span class="nav-ext" aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span></a>
-        <a href="liquidator.html" class="nav-link nav-danger">Liquidator Console</a>
       </details>
       <div style="flex-grow:1"></div>
-      <div style="padding: 10px; font-size: 0.8rem; color: var(--text-muted);">
-        Network Status:<br>
-        <span id="statusDot" style="color: var(--danger)">●</span> <span id="connStatus">Disconnected</span>
-      </div>
     </nav>
-
-    <!-- Main Content -->
     <div class="main-content">
-      
       <header>
         <div>
-          <h1 style="margin:0; font-size:1.8rem; color:var(--warning);">SoneVibe Sous Chef 👨‍🍳</h1>
-          <p style="margin:4px 0 0 0; color:var(--text-muted);">Automated Strategy Vaults & Auto-Compounders</p>
-        </div>
-        
-        <div class="nav-group">
-          <select id="networkSelect" class="network-select"><option>Loading...</option></select>
-          <div class="btn-account-wrapper">
-             <button id="btnConnect" class="btn-primary">Connect Wallet</button>
-             <div id="accountDropdown" class="account-dropdown">
-                 <div style="padding:12px 12px 6px 12px; font-size:0.8rem; color:var(--text-muted);">CONNECTED</div>
-                 <div style="padding:0 12px 12px 12px; font-size:1.1rem; font-weight:600; color:#fff;" id="dropdownAddress">...</div>
-                 <div class="menu-divider"></div>
-                 <div class="menu-item" id="btnDisconnect" style="color:var(--danger);">Disconnect</div>
-             </div>
-          </div>
+          <h1 style="margin:0; font-size:1.8rem; background: linear-gradient(90deg, #fff, #a5b4fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Coming soon on BNB Chain</h1>
+          <p style="margin:4px 0 0 0; color:var(--text-muted);">BNB Chain is the main chain.</p>
         </div>
       </header>
-
-      <!-- Explanation -->
-      <div class="glass-panel" style="margin-bottom:30px; border-left:4px solid var(--warning);">
-        <h3 style="margin-top:0;">What is the Sous Chef?</h3>
-        <p style="color:var(--text-muted); line-height:1.5;">
-            The Sous Chef automatically compounds your rewards back into your position to maximize APY. 
-            Simply deposit single assets or LP tokens, and let the protocol handle the harvesting and reinvesting for you.
-        </p>
-      </div>
-
-      <!-- Vault Grid -->
-      <div class="farm-grid">
-        
-        <!-- Vault 1: Auto VIBE -->
-        <div class="farm-card chef-card">
-            <div class="farm-header">
-                <div style="display:flex; align-items:center; gap:10px;">
-                    <img alt="" src="icons/vibe.svg" width="40" style="border-radius:50%;">
-                    <div>
-                        <div style="font-weight:700; font-size:1.1rem;">Auto LIGHT</div>
-                        <div style="font-size:0.8rem; color:var(--text-muted);">Single Stake</div>
-                    </div>
-                </div>
-                <div class="farm-badge hot">Auto-Compound</div>
-            </div>
-            
-            <div class="farm-stats">
-                <div class="stat-row">
-                    <span class="stat-label-sm">APY</span>
-                    <span class="stat-val-lg" style="color:var(--warning)">2,400%</span>
-                </div>
-                <div class="stat-row">
-                    <span class="stat-label-sm">Total Staked</span>
-                    <span class="stat-val-lg">450K LIGHT</span>
-                </div>
-            </div>
-
-            <div class="token-input-box-pro" style="margin-bottom:15px;">
-                <div class="token-flex">
-                    <label>Deposit LIGHT</label>
-                    <span class="balance-label">Bal: 0.00</span>
-                </div>
-                <input type="number" class="swap-input-pro" placeholder="0.0">
-            </div>
-
-            <button class="btn-primary" style="width:100%; background:var(--warning); color:#000; box-shadow:none;">Deposit</button>
-            <div style="text-align:center; font-size:0.75rem; margin-top:10px; color:var(--text-muted);">0.1% Performance Fee</div>
+      <section class="glass-panel" style="max-width:720px;">
+        <p style="margin:0 0 18px; color:var(--text-muted); line-height:1.6;">This product is coming soon on BNB Chain. Swap and liquidity pools are available now. Arbitrum One also runs the DEX.</p>
+        <div style="display:flex; gap:12px; flex-wrap:wrap;">
+          <a class="btn-primary" href="swap.html">Swap</a>
+          <a class="btn-primary" href="pools.html">Pools</a>
         </div>
-
-        <!-- Vault 2: Stable Strategy -->
-        <div class="farm-card">
-            <div class="farm-header">
-                <div class="icon-stack">
-                    <img alt="" src="icons/usdc.svg">
-                    <img alt="" src="icons/usdsc.svg">
-                </div>
-                <div style="text-align:right;">
-                    <div style="font-weight:700; font-size:1.1rem;">Stable Maximizer</div>
-                    <div style="font-size:0.8rem; color:var(--text-muted);">USDC-USDSC</div>
-                </div>
-            </div>
-            
-            <div class="farm-stats">
-                <div class="stat-row">
-                    <span class="stat-label-sm">APY</span>
-                    <span class="stat-val-lg">24.5%</span>
-                </div>
-                <div class="stat-row">
-                    <span class="stat-label-sm">Strategy</span>
-                    <span class="stat-val-lg">Curve-Convex</span>
-                </div>
-            </div>
-
-            <div class="token-input-box-pro" style="margin-bottom:15px;">
-                <div class="token-flex">
-                    <label>Deposit LP</label>
-                    <span class="balance-label">Bal: 0.00</span>
-                </div>
-                <input type="number" class="swap-input-pro" placeholder="0.0">
-            </div>
-
-            <button class="btn-primary" style="width:100%; background:rgba(255,255,255,0.1);">Connect Wallet</button>
-           
-        </div>
-        
-
-      </div> <!-- End Grid -->
-
-    </div> 
-  </div>
- 
-
-  <!-- Wallet Modal -->
-  <div id="walletModal" class="modal-overlay">
-    <div class="modal-card">
-      <div class="modal-header">
-        <h2 class="modal-title">Connect Wallet</h2>
-        <button class="btn-close" onclick="closeWalletModal()">×</button>
-      </div>
-      <div id="walletList" class="wallet-grid"></div>
-      <div style="margin-top:24px; text-align:center; font-size:0.8rem; color:var(--text-muted);">
-        By connecting, you agree to SoneVibe Terms of Service.
-      </div>
+      </section>
     </div>
   </div>
-
-  <!-- SCRIPTS REQUERIDOS -->
-  <script src="https://cdn.jsdelivr.net/npm/ethers@6.10.0/dist/ethers.umd.min.js"></script>
-  <script src="abis.js"></script>
-  <script src="config.js"></script>
-  <script src="wallet-config.js"></script>
-  <script src="swap.js"></script> <!-- Reutilizamos la lógica de conexión de swap.js -->
-
-
-  <footer class="site-footer">
-    <span class="sf-fine">© 2026 SoneVibe · DeFi carries risk. Nothing on this site is financial advice.</span>
-    <div class="sf-links">
-      <a href="docs.html">Docs</a>
-      <a href="https://x.com/Sonevibe" target="_blank" rel="noopener">X · @Sonevibe</a>
-      <a href="https://x.com/Real_Dennis_S_F" target="_blank" rel="noopener">X · @Real_Dennis_S_F</a>
-      <a href="https://t.me/SoneVibe" target="_blank" rel="noopener">Telegram</a>
-      <a href="https://github.com/SoneVibe/Lending" target="_blank" rel="noopener">GitHub</a>
-    </div>
-  </footer>
   <script src="nav.js"></script>
 </body>
 </html>

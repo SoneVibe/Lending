@@ -184,7 +184,5 @@ window.CSVUSD_MINTABLE_ABI = [
   { "inputs": [{ "internalType": "uint256", "name": "amount", "type": "uint256" }], "name": "repay", "outputs": [], "stateMutability": "nonpayable", "type": "function" }
 ];
 
-// VIBE Governance Token (ERC20) on Soneium. NOT the rewards distributor:
 // VIBE rewards (vibeAccrued / claimVIBE / speeds) live in each network's Master
 // (comptroller). Resolve it with window.getRewardsAddress(ACTIVE) from config.js.
-window.VIBE_TOKEN_ADDRESS = "0x68Bcb0b5F8840EfA6e4406f6A11947B0de292613";
