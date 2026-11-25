@@ -1,36 +1,4 @@
 {
-  "BNB Mainnet": {
-    "slug": "BNB",
-    "label": "BNB Mainnet",
-    "chainId": "56",
-    "rpcUrls": ["https://bsc-dataseed.binance.org/"],
-    "blockExplorerUrls": ["https://bscscan.com"],
-    "nativeCurrency": { "name": "BNB", "symbol": "BNB", "decimals": 18 },
-    "master": "",
-    "stabilityModule": "",
-    "router": "0xa393E76bE079cF1ccf684D0f815795Dde248f157", 
-    "factory": "0x26b13e7e923e964b0514B3167A90901B49DAe205", 
-
-        "swapTokens": {
-        "base": { 
-            "symbol": "BNB", 
-            "underlyingAddress": "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c", 
-            "decimals": 18, 
-            "icon": "icons/bnb.png",
-            "isNative": true
-        },
-        "quote": { 
-            "symbol": "USDT", 
-            "address": "0x55d398326f99059fF775485246999027B3197955", 
-            "decimals": 18, 
-            "icon": "icons/tether.svg",
-            "isNative": false
-        }
-    },
-    "cTokens": [],
-    "blocksPerYear": 69000000,
-    "enabled": true
-  },
   "Soneium Mainnet": {
     "slug": "soneium",
     "label": "Soneium Mainnet",
@@ -93,6 +61,39 @@
     "blocksPerYear": 15768000,
     "enabled": true
   },
+      "BNB Mainnet": {
+    "slug": "BNB",
+    "label": "BNB Mainnet",
+    "chainId": "56",
+    "rpcUrls": ["https://bsc-dataseed.binance.org/"],
+    "blockExplorerUrls": ["https://bscscan.com"],
+    "nativeCurrency": { "name": "BNB", "symbol": "BNB", "decimals": 18 },
+    "master": "",
+    "stabilityModule": "",
+    "router": "0xa393E76bE079cF1ccf684D0f815795Dde248f157", 
+    "factory": "0x26b13e7e923e964b0514B3167A90901B49DAe205", 
+
+        "swapTokens": {
+        "base": { 
+            "symbol": "BNB", 
+            "underlyingAddress": "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c", 
+            "decimals": 18, 
+            "icon": "icons/bnb.png",
+            "isNative": true
+        },
+        "quote": { 
+            "symbol": "USDT", 
+            "address": "0x55d398326f99059fF775485246999027B3197955", 
+            "decimals": 18, 
+            "icon": "icons/tether.svg",
+            "isNative": false
+        }
+    },
+    "cTokens": [],
+    "blocksPerYear": 69000000,
+    "enabled": true
+  },
+  
   "Arbitrum One": {
     "slug": "arbitrum",
     "label": "Arbitrum One",

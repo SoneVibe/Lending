@@ -534,10 +534,9 @@ async function networkForPair(pair, enabled) {
     const net = enabled.find((n) => String(n.chainId) === String(hit.chainId));
     if (net) return net;
   }
-  const data = "0x0dfe1681";
-  const checks = enabled.map(async (net) => {
-    const url = net.rpcUrls && net.rpcUrls[0];
-    if (!url) return null;
+  const token0Data = "0x0dfe1681";
+  const factoryData = "0xc45a0155";
+  const callWord = async (url, data) => {
     const body = JSON.stringify({ jsonrpc: "2.0", id: 1, method: "eth_call", params: [{ to: pair, data }, "latest"] });
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), 4000);
@@ -545,10 +544,18 @@ async function networkForPair(pair, enabled) {
       const res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body, signal: ctrl.signal });
       const out = await res.json();
       const word = out && out.result;
-      if (typeof word === "string" && /^0x[0-9a-fA-F]{64}$/.test(word) && !/^0x0{64}$/i.test(word)) return net;
+      if (typeof word === "string" && /^0x[0-9a-fA-F]{64}$/.test(word) && !/^0x0{64}$/i.test(word)) return "0x" + word.slice(-40);
     } catch (e) { /* this network does not host the pair */ }
     finally { clearTimeout(timer); }
     return null;
+  };
+  const checks = enabled.map(async (net) => {
+    const url = net.rpcUrls && net.rpcUrls[0];
+    if (!url || !net.factory) return null;
+    const [token0, pairFactory] = await Promise.all([callWord(url, token0Data), callWord(url, factoryData)]);
+    if (!token0 || !pairFactory) return null;
+    if (pairFactory.toLowerCase() !== String(net.factory).toLowerCase()) return null;
+    return net;
   });
   return (await Promise.all(checks)).find(Boolean) || null;
 }
