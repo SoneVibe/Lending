@@ -28,8 +28,8 @@ async function initSwapApp() {
         NETWORKS_DATA = await window.loadNetworks();
         initNetworkSelector();
         
-        // Auto-select Soneium by default
-        ACTIVE = Object.values(NETWORKS_DATA).find(n => n.chainId == "1868" && n.enabled);
+        // Auto-select BNB Chain by default
+        ACTIVE = Object.values(NETWORKS_DATA).find(n => n.chainId == "56" && n.enabled);
         
         if(window.checkAutoConnect) {
             await window.checkAutoConnect(connectWallet);

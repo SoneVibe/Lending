@@ -1,23 +1,23 @@
 /**
- * landing.js v2 — SoneVibe landing multi-chain (propuesta)
- * Soneium es la red principal (DEX + lending + SVUSD + NFTs). Además lee en vivo el DEX
- * de BNB Chain y Arbitrum One para mostrar TVL total y el desglose por red.
- * Reutiliza config.js (loadNetworks), networks.json y token-list.json. No modifica nada existente.
+ * landing.js v2 — SoneVibe landing, multi-chain.
+ * BNB Chain is the main network. Soneium is legacy and stays open for withdrawals.
+ * Also reads the Arbitrum One DEX for total liquidity and the per-network split.
+ * Reuses config.js (loadNetworks), networks.json and token-list.json.
  */
 (() => {
   'use strict';
 
-  const FLAGSHIP = '1868';
+  const FLAGSHIP = '56';
   // Solo mainnets. `logs` = cómo contar volumen: RPC con eth_getLogs, bloques por consulta, días y paralelismo.
   // bsc-dataseed no permite getLogs y publicnode solo sirve los últimos ~10 000 bloques sin token;
   // 48.club acepta rangos de 5 000 bloques en histórico (24 h de BNB ≈ 38 consultas, ~45 s).
   const CHAINS = {
-    '1868': { name: 'Soneium', color: '#00e0ff', icon: 'icons/soneium.svg', products: ['DEX', 'Lending', 'SVUSD', 'NFTs'], logs: { rpc: 'https://soneium-mainnet.rpc.sentio.xyz', chunk: 1000, days: 7, concurrency: 4 } },
+    '1868': { name: 'Soneium', color: '#00e0ff', icon: 'icons/soneium.svg', products: ['Withdrawals only'], logs: { rpc: 'https://soneium-mainnet.rpc.sentio.xyz', chunk: 1000, days: 7, concurrency: 4 } },
     '56': { name: 'BNB Chain', color: '#f3ba2f', icon: 'icons/bnb.png', products: ['DEX'], stables: ['usd1'], logs: { rpc: 'https://rpc-bsc.48.club', chunk: 5000, days: 1, concurrency: 12 } },
     '42161': { name: 'Arbitrum One', color: '#28A0F0', icon: 'icons/arbitrum.png', products: ['DEX'] },
   };
   // Orden explícito: las claves numéricas de un objeto JS se ordenan de menor a mayor.
-  const ORDER = ['1868', '56', '42161'];
+  const ORDER = ['56', '1868', '42161'];
   const CFG = {
     SWAP_FEE: 0.0025,
     LP_FEE_SHARE: 5 / 6,
@@ -210,7 +210,7 @@
       });
     }
 
-    if (net.chainId === FLAGSHIP) await scanLending(net, rpc, oraclePrice, isStable);
+    if (net.chainId === '1868') await scanLending(net, rpc, oraclePrice, isStable);
     result.ts = Date.now();
     render();
     saveCache();
@@ -233,9 +233,7 @@
 
   // ---------- render ----------
   function orderedChains() {
-    return ORDER
-      .filter((id) => state.nets[id] || state.results[id])
-      .sort((a, b) => (a === FLAGSHIP ? -1 : b === FLAGSHIP ? 1 : (state.results[b]?.tvl || 0) - (state.results[a]?.tvl || 0)));
+    return ORDER.filter((id) => state.nets[id] || state.results[id]);
   }
 
   function render() {
@@ -262,13 +260,13 @@
       setStat('stVol', '—', 'RPC busy, see Analytics');
     }
 
-    if (flag && flag.logDays >= 7) {
-      setStat('stSwaps', fmtInt(flag.txs), `Across ${flag.activePools || 0} active Soneium pools`);
+    if (flag && flag.logsOk) {
+      setStat('stSwaps', fmtInt(flag.txs), `Across ${flag.activePools || 0} active BNB Chain pools`);
     } else if (flag && allDone) {
       setStat('stSwaps', '—', 'RPC busy, see Analytics');
     }
 
-    if (state.lending) setStat('stLend', fmtUsd(state.lending.supplied), `${state.lending.markets} Soneium markets · ${fmtUsd(state.lending.borrowed)} borrowed`);
+    if (state.lending) setStat('stLend', fmtUsd(state.lending.supplied), `${state.lending.markets} Soneium markets · withdrawals only · ${fmtUsd(state.lending.borrowed)} borrowed`);
 
     renderNetworkCards(ids);
     renderTopPools(res);
@@ -309,17 +307,20 @@
       ];
       if (id === FLAGSHIP) {
         const best = r ? Math.max(0, ...r.pairs.filter((p) => p.tvl >= 1).map((p) => p.apr || 0)) : 0;
+        const ready = r && r.logsOk;
+        const swapLabel = r && r.logDays >= 7 ? 'Swaps · 7d' : 'Swaps · 24h';
+        const liquid = r ? r.pairs.filter((p) => p.tvl > 0).length : 0;
         stats.push(
-          cell('Swaps · 7d', r && r.logDays >= 7 ? fmtInt(r.txs) : r ? '…' : dash),
-          cell('Lending supplied', state.lending ? fmtUsd(state.lending.supplied) : r ? '…' : dash),
-          cell('Best fee APR', r && r.logDays >= 7 ? fmtPct(best) : r ? '…' : dash),
+          cell(swapLabel, ready ? fmtInt(r.txs) : (r && r.logsPending ? '…' : dash)),
+          cell('Pools with liquidity', r ? fmtInt(liquid) : dash),
+          cell('Best fee APR', ready ? fmtPct(best) : (r && r.logsPending ? '…' : dash)),
         );
       }
       return `
         <article class="lp-chain${id === FLAGSHIP ? ' flagship' : ''}" style="--c:${c.color}">
           <div class="lp-chain-head">
             <span class="lp-chain-ic"><img src="${esc(c.icon)}" alt="" onerror="this.remove()"></span>
-            <div><h3>${esc(c.name)}</h3><span class="lp-chain-tag">${id === FLAGSHIP ? 'Flagship · full SoneVibe suite' : esc(c.products.join(' · '))}</span></div>
+            <div><h3>${esc(c.name)}</h3><span class="lp-chain-tag">${id === FLAGSHIP ? 'Main chain' : esc(c.products.join(' · '))}</span></div>
             ${id === FLAGSHIP ? `<div class="lp-chain-products">${c.products.map((p) => `<span>${esc(p)}</span>`).join('')}</div><span class="lp-home">Home chain</span>` : ''}
           </div>
           <div class="lp-chain-stats">${stats.join('')}</div>
@@ -332,7 +333,7 @@
     const el = $('topPools');
     if (!el || !res.length) return;
     const all = res.flatMap((r) => r.pairs).filter((p) => p.tvl > 0);
-    // Soneium primero: 3 pools de Soneium + los 2 mayores del resto de redes.
+    // Main chain first: 3 pools from the flagship chain, then the 2 largest from the other networks.
     const flagTop = all.filter((p) => p.chainId === FLAGSHIP).sort((a, b) => b.tvl - a.tvl).slice(0, 3);
     const otherTop = all.filter((p) => p.chainId !== FLAGSHIP).sort((a, b) => b.tvl - a.tvl).slice(0, 2);
     const top = [...flagTop, ...otherTop];
@@ -344,7 +345,7 @@
       const days = r && (r.logsOk || r.logsPending) ? c.logs?.days || 0 : 0;
       const wait = r && r.logsPending && !r.logsOk;
       return `
-      <a class="lp-pool" href="pools.html?pair=${esc(p.address)}">
+      <a class="lp-pool" href="pools.html?chain=${esc(p.chainId)}&pair=${esc(p.address)}">
         <div class="lp-pool-pair"><span class="lp-icons">${img(p.t0)}${img(p.t1)}</span><div><b>${esc(p.t0.symbol)} / ${esc(p.t1.symbol)}</b><span class="lp-net" style="--c:${c.color}">${esc(c.name)}</span></div></div>
         <div><span class="lp-k">TVL</span>${fmtUsd(p.tvl)}</div>
         <div><span class="lp-k">Volume ${days >= 7 ? '7d' : '24h'}</span>${wait ? '…' : days ? fmtUsd(days >= 7 ? p.vol7d : p.vol24h) : '—'}</div>

@@ -514,15 +514,75 @@ window.setSlippage = (val, fromCustom = false) => {
 // -------------------- INIT APP --------------------
 document.addEventListener("DOMContentLoaded", initApp);
 
+async function readPoolsFeed() {
+  if (readPoolsFeed.cache !== undefined) return readPoolsFeed.cache;
+  try {
+    const res = await fetch("./pools.json");
+    readPoolsFeed.cache = res.ok ? await res.json() : null;
+  } catch (e) {
+    readPoolsFeed.cache = null;
+  }
+  return readPoolsFeed.cache;
+}
+
+// A pair link from Home or Analytics must open on the chain that holds that pair,
+// including a Soneium pair, so remove-liquidity stays reachable before a wallet connects.
+async function networkForPair(pair, enabled) {
+  const feed = await readPoolsFeed();
+  const hit = feed && (feed.pools || []).find((p) => String(p.pair || "").toLowerCase() === pair.toLowerCase());
+  if (hit) {
+    const net = enabled.find((n) => String(n.chainId) === String(hit.chainId));
+    if (net) return net;
+  }
+  const token0Data = "0x0dfe1681";
+  const factoryData = "0xc45a0155";
+  const callWord = async (url, data) => {
+    const body = JSON.stringify({ jsonrpc: "2.0", id: 1, method: "eth_call", params: [{ to: pair, data }, "latest"] });
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 4000);
+    try {
+      const res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body, signal: ctrl.signal });
+      const out = await res.json();
+      const word = out && out.result;
+      if (typeof word === "string" && /^0x[0-9a-fA-F]{64}$/.test(word) && !/^0x0{64}$/i.test(word)) return "0x" + word.slice(-40);
+    } catch (e) { /* this network does not host the pair */ }
+    finally { clearTimeout(timer); }
+    return null;
+  };
+  const checks = enabled.map(async (net) => {
+    const url = net.rpcUrls && net.rpcUrls[0];
+    if (!url || !net.factory) return null;
+    const [token0, pairFactory] = await Promise.all([callWord(url, token0Data), callWord(url, factoryData)]);
+    if (!token0 || !pairFactory) return null;
+    if (pairFactory.toLowerCase() !== String(net.factory).toLowerCase()) return null;
+    return net;
+  });
+  return (await Promise.all(checks)).find(Boolean) || null;
+}
+
+async function chooseInitialNetwork() {
+  const enabled = Object.values(NETWORKS_DATA).filter((n) => n.enabled);
+  const params = new URLSearchParams(window.location.search);
+  const requested = params.get("chain");
+  if (requested) {
+    const hit = enabled.find((n) => String(n.chainId) === String(requested));
+    if (hit) return hit;
+  }
+  const pair = params.get("pair");
+  if (pair && ethers.isAddress(pair)) {
+    const owner = await networkForPair(pair, enabled);
+    if (owner) return owner;
+  }
+  return enabled.find((n) => n.chainId == "56") || enabled[0];
+}
+
 async function initApp() {
   try {
     // Use swap config if available (injects swapTokenList)
     NETWORKS_DATA = window.loadSwapConfig ? await window.loadSwapConfig() : await window.loadNetworks();
 
+    ACTIVE = await chooseInitialNetwork();
     initNetworkSelector();
-
-    // Default pick
-    ACTIVE = Object.values(NETWORKS_DATA).find(n => n.chainId == "1868" && n.enabled);
 
     // Wire import UI early (modal does connect checks)
     wireImportUI();
@@ -819,8 +879,9 @@ async function initPoolsInterface() {
   });
 
   const fromUrl = await pairFromUrl();
-  fillSelector('tokenA', fromUrl ? fromUrl[0] : 0);
-  fillSelector('tokenB', fromUrl ? fromUrl[1] : (tokenList.length > 1 ? 1 : 0));
+  const featured = fromUrl || await featuredPairIndices();
+  fillSelector('tokenA', featured[0]);
+  fillSelector('tokenB', featured[1]);
 
   const selA = getEl('tokenA');
   const selB = getEl('tokenB');
@@ -872,6 +933,19 @@ async function initPoolsInterface() {
   }
 
   await updateBalances();
+}
+
+async function featuredPairIndices() {
+  const fallback = [0, tokenList.length > 1 ? 1 : 0];
+  if (String(ACTIVE && ACTIVE.chainId) !== "56") return fallback;
+  const feed = await readPoolsFeed();
+  const hit = feed && (feed.pools || []).find((p) => String(p.chainId) === "56" && p.featured && p.token0 && p.token1);
+  const addresses = hit
+    ? [hit.token0.address, hit.token1.address]
+    : ["0x2170Ed0880ac9A755fd29B2688956BD959F933F8", "0x55d398326f99059fF775485246999027B3197955"];
+  const idx = addresses.map((a) => tokenList.findIndex((t) => (t.address || "").toLowerCase() === String(a).toLowerCase()));
+  if (idx[0] >= 0 && idx[1] >= 0 && idx[0] !== idx[1]) return idx;
+  return fallback;
 }
 
 function fillSelector(id, defaultIdx) {

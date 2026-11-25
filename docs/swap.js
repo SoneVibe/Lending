@@ -112,7 +112,7 @@ async function detectInitialNetwork() {
         try { walletChainId = parseInt(await window.ethereum.request({ method: 'eth_chainId' }), 16); } catch (e) {}
     }
     return enabled.find(n => parseInt(n.chainId) === walletChainId)
-        || enabled.find(n => n.chainId == "1868")
+        || enabled.find(n => n.chainId == "56")
         || enabled[0];
 }
 
