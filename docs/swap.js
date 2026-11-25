@@ -768,13 +768,13 @@ if (amountOut) {
     amountOut.addEventListener('input', () => onAmountTyped('out'));
 }
 
-async function setFractionOfBalance(numerator, divisor) {
+async function setFractionOfBalance(numerator, denominator) {
     if (!signer) { openWalletModal(); return; }
     if (rawBal.in === null) await updateBalances();
     const t = tokenIn();
     if (!t || rawBal.in === null) return;
-    let amount = (rawBal.in * BigInt(numerator)) / BigInt(divisor);
-    if (isNativeTok(t) && numerator === divisor) {
+    let amount = (rawBal.in * BigInt(numerator)) / BigInt(denominator);
+    if (isNativeTok(t) && numerator === denominator) {
         try {
             const fee = await getReadProvider().getFeeData();
             const gasPrice = fee.maxFeePerGas ?? fee.gasPrice ?? 0n;

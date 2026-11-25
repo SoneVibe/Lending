@@ -14,7 +14,7 @@
   "swapFee": {
     "percent": "0.25%",
     "numerator": 9975,
-    "divisor": 10000
+    "denominator": 10000
   },
   "pairs": [
     {
@@ -89,7 +89,7 @@
       "swapFee": {
         "percent": "0.25%",
         "numerator": 9975,
-        "divisor": 10000
+        "denominator": 10000
       },
       "pair": "0x93016Fa6e3c184c96Df7466579DfaA970C7cb6A5",
       "pairs": [
@@ -157,7 +157,7 @@
       "swapFee": {
         "percent": "0.25%",
         "numerator": 9975,
-        "divisor": 10000
+        "denominator": 10000
       },
       "pair": "0x4DF5bcAC28b8898988Ba576B8463664b53ddb9F7",
       "tokens": [
