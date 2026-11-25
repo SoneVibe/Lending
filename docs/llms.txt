@@ -1,16 +1,33 @@
 # SoneVibe
 
-SoneVibe is a Uniswap V2-style constant-product DEX on Soneium (chain ID 1868). Each swap pays a flat 0.25% fee (9975/10000), taken from the input and left in the pool. Liquidity providers earn 5/6 of that fee. The protocol treasury receives 1/6. Yields and APR are variable, not guaranteed. The factory init code hash is 0x87b780b5d19df9ad0d4c866dcd6b169f14846fb24232a128b678c5bdb395b012. A flash swap calls vibeCall, not uniswapV2Call.
+SoneVibe is a Uniswap V2-style constant-product DEX. The main chain is BNB Chain (chain ID 56). Each swap pays a flat 0.25% fee (9975/10000), taken from the input and left in the pool. Liquidity providers earn 5/6 of that fee. The protocol treasury receives 1/6. Yields and APR are variable, not guaranteed. The factory init code hash is 0x87b780b5d19df9ad0d4c866dcd6b169f14846fb24232a128b678c5bdb395b012. A flash swap calls vibeCall, not uniswapV2Call.
 
-Astar (592) and Polkadot Hub (420420419) were retired on Nov 23, 2026. Supported mainnets are Soneium, Arbitrum One and BNB Smart Chain.
+Soneium (chain ID 1868) is legacy and remains open for withdrawals. Arbitrum One (chain ID 42161) also runs the DEX. Astar (592) and Polkadot Hub (420420419) were retired on Nov 23, 2026.
 
-The same DEX is also on Arbitrum One (chain ID 42161). Use the Arbitrum section below for those addresses. The Soneium init code hash above matches the Arbitrum hash.
+The Soneium init code hash matches the BNB Chain hash and the Arbitrum hash.
 
+BNB Chain (chain ID 56), the main chain:
+Public RPC: https://bsc-dataseed.binance.org
+Block explorer: https://bscscan.com
+- Router: 0xa393E76bE079cF1ccf684D0f815795Dde248f157
+- Factory: 0x26b13e7e923e964b0514B3167A90901B49DAe205
+- WBNB: 0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c
+- ETH (BSC-peg ETH): 0x2170Ed0880ac9A755fd29B2688956BD959F933F8
+- USDT: 0x55d398326f99059fF775485246999027B3197955
+- ETH/USDT pair (featured): 0x93016Fa6e3c184c96Df7466579DfaA970C7cb6A5
+  factory.getPair(ETH, USDT) returns this pair. token0 is ETH. token1 is USDT.
+- USDT/WBNB pair (listed, not featured): 0x6dABcbFdFE097e421269a444eBF22999B1EAE279
+  factory.getPair(USDT, WBNB) returns this pair. token0 is USDT. token1 is WBNB.
+Factory init code hash: 0x87b780b5d19df9ad0d4c866dcd6b169f14846fb24232a128b678c5bdb395b012
+The factory bytecode is identical to the Soneium and Arbitrum factories.
+This router address is also the legacy Soneium router. On BNB Chain it is the live router. On Soneium, do not use it. Always match address and chain ID.
+Deprecated on BNB (bsc-deprecated, do not use): factory 0xaf905e66038EcE89e03D843B35a11D262053B630, router 0x7532b23DFB30ac22b2a74E3B81cC288de19379BA.
+
+Soneium (chain ID 1868), legacy, withdrawals only:
 Public RPC: https://rpc.soneium.org
 Block explorer: https://soneium.blockscout.com/
-
 Contracts on Soneium mainnet, copied from docs/networks.json:
-- Router: 0x97C180C2e3097f28D8F14114AD1C0dEF81244344
+- Router (active): 0x97C180C2e3097f28D8F14114AD1C0dEF81244344
 - Factory: 0x77b141dCFDa726e239efF005E3DE7A47AeBFf948
 - WETH: 0x4200000000000000000000000000000000000006
 - USDC.e: 0xbA9986D2381edf1DA03B0B9c1f8b00dc4AacC369
@@ -21,7 +38,7 @@ Contracts on Soneium mainnet, copied from docs/networks.json:
   factory.getPair(ASTR, USDC.e) returns this pair. token0 is ASTR. token1 is USDC.e.
 - Farm chef (VibeMasterChefV2): 0x8f2F9B17b173C91c7B9195096030a39227B94f62
 - Farm chef pools are legacy LPs from old factory 0x06C0b58287794a0bdce20ce768b601CA974618DC with 0 reserves.
-- Legacy Soneium router: 0xa393E76bE079cF1ccf684D0f815795Dde248f157. Do not use on Soneium.
+- Legacy Soneium router: 0xa393E76bE079cF1ccf684D0f815795Dde248f157. Do not use on Soneium. That address is the live router on BNB Chain.
 
 Farm pools, LP tokens, and token addresses are in the machine-readable index:
 https://sonevibe.github.io/Lending/agents.json
@@ -39,20 +56,6 @@ Block explorer: https://arbiscan.io
 Swap fee: 0.25% (9975/10000).
 Factory init code hash: 0x87b780b5d19df9ad0d4c866dcd6b169f14846fb24232a128b678c5bdb395b012
 Sourcify exact match. The factory fund-rescue function is removed. The current Soneium factory has no rescueFundsFromPair. The router still has owner-only rescueFunds(address), which can move only ETH or ERC-20 already held by the router and cannot access pair liquidity.
-
-BNB Smart Chain (chain ID 56):
-Public RPC: https://bsc-dataseed.bnbchain.org
-Block explorer: https://bscscan.com
-- Router: 0xa393E76bE079cF1ccf684D0f815795Dde248f157
-- Factory: 0x26b13e7e923e964b0514B3167A90901B49DAe205
-- WBNB: 0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c
-- USDT: 0x55d398326f99059fF775485246999027B3197955
-- USDT/WBNB pair: 0x6dABcbFdFE097e421269a444eBF22999B1EAE279
-  factory.getPair(USDT, WBNB) returns this pair. token0 is USDT. token1 is WBNB.
-Factory init code hash: 0x87b780b5d19df9ad0d4c866dcd6b169f14846fb24232a128b678c5bdb395b012
-The factory bytecode is identical to the Soneium and Arbitrum factories.
-The BNB router address is the same as an old Soneium router address. Always match address and chain ID.
-Deprecated on BNB (bsc-deprecated, do not use): factory 0xaf905e66038EcE89e03D843B35a11D262053B630, router 0x7532b23DFB30ac22b2a74E3B81cC288de19379BA.
 
 Minimal ABIs (Router, Pair, Factory, ERC20):
 https://sonevibe.github.io/Lending/abi/router.json
