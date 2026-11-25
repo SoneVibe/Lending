@@ -40,12 +40,6 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sonevibe.github.io/Lending/portal.html</loc>
-    <lastmod>2026-09-30</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://sonevibe.github.io/Lending/analytics.html</loc>
     <lastmod>2026-09-30</lastmod>
     <changefreq>daily</changefreq>

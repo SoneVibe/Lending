@@ -1,10 +1,10 @@
 // Shared SoneVibe navigation:
 //  1. App pages: mobile drawer for nav.sidebar (≤900px) and "More" group state.
-//  2. Landing / Docs / Portal: mobile menu for the top bar when its links are hidden.
+//  2. Landing / Docs: mobile menu for the top bar when its links are hidden.
 (function () {
   const SITE_LINKS = [
     ['index.html', 'Home'], ['swap.html', 'Swap'], ['pools.html', 'Pools'],
-    ['analytics.html', 'Analytics'], ['portal.html', 'Portal'], ['docs.html', 'Docs'],
+    ['analytics.html', 'Analytics'], ['docs.html', 'Docs'],
   ];
   const SITE_MORE = [];
   const here = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
