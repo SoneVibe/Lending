@@ -3,13 +3,10 @@
 //  2. Landing / Docs / Portal: mobile menu for the top bar when its links are hidden.
 (function () {
   const SITE_LINKS = [
-    ['index.html', 'Home'], ['swap.html', 'Swap'], ['pools.html', 'Liquidity Pools'], ['dashboard.html', 'Lend / Borrow'],
-    ['portal.html', 'Portal'], ['analytics.html', 'Analytics'], ['marketplace.html', 'NFT Market'], ['docs.html', 'Docs'],
+    ['index.html', 'Home'], ['swap.html', 'Swap'], ['pools.html', 'Pools'],
+    ['analytics.html', 'Analytics'], ['portal.html', 'Portal'], ['docs.html', 'Docs'],
   ];
-  const SITE_MORE = [
-    ['markets.html', 'Markets Overview'], ['mint-svusd.html', 'Mint SVUSD'], ['swapstabilizer.html', 'Peg Stabilizer'],
-    ['vibe-vault.html', 'Governance Vault'], ['farm.html', 'Yield Farms'], ['souschef.html', 'Sous Chef Pools'],
-  ];
+  const SITE_MORE = [];
   const here = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
 
   function initSidebar() {
@@ -88,8 +85,9 @@
     panel.hidden = true;
     panel.innerHTML =
       '<div class="site-menu-grid">' + SITE_LINKS.map(item).join('') + '</div>' +
-      '<div class="site-menu-label">More</div>' +
-      '<div class="site-menu-grid">' + SITE_MORE.map(item).join('') + '</div>' +
+      (SITE_MORE.length
+        ? '<div class="site-menu-label">More</div><div class="site-menu-grid">' + SITE_MORE.map(item).join('') + '</div>'
+        : '') +
       '<a class="site-menu-cta" href="swap.html">Launch App</a>';
     nav.appendChild(panel);
 

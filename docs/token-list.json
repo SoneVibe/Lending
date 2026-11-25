@@ -4,62 +4,6 @@
   "logoURI": "icons/vibe.svg",
   "tokens": [
     {
-      "chainId": 1868,
-      "address": "0x84998bf491C80a79B99540666569F360d5Acae6E",
-      "symbol": "LIGHT",
-      "name": "Vibe Light Token",
-      "decimals": 18,
-      "logoURI": "icons/sonevibe.png"
-    },
-    {
-      "chainId": 1868,
-      "address": "0x4200000000000000000000000000000000000006",
-      "symbol": "WETH",
-      "name": "Wrapped Ether",
-      "decimals": 18,
-      "logoURI": "icons/weth.svg"
-    },
-    {
-      "chainId": 1868,
-      "address": "0x0555E30da8f98308EdB960aa94C0Db47230d2B9c",
-      "symbol": "WBTC",
-      "name": "Wrapped Bitcoin",
-      "decimals": 8,
-      "logoURI": "icons/wbtc.svg"
-    },
-    {
-      "chainId": 1868,
-      "address": "0xbA9986D2381edf1DA03B0B9c1f8b00dc4AacC369",
-      "symbol": "USDC",
-      "name": "USD Coin",
-      "decimals": 6,
-      "logoURI": "icons/usdc.svg"
-    },
-    {
-      "chainId": 1868,
-      "address": "0x2CAE934a1e84F693fbb78CA5ED3B0A6893259441",
-      "symbol": "ASTR",
-      "name": "Astar",
-      "decimals": 18,
-      "logoURI": "icons/astr.svg"
-    },
-    {
-      "chainId": 1868,
-      "address": "0x3f99231dD03a9F0E7e3421c92B7b90fbe012985a",
-      "symbol": "USDSC",
-      "name": "USDSC",
-      "decimals": 6,
-      "logoURI": "icons/usdsc.svg"
-    },
-    {
-      "chainId": 1868,
-      "address": "0x0BAde9E6156131A8bcFD04840103F54c4F2BA518",
-      "symbol": "SVIBE",
-      "name": "SVIBE",
-      "decimals": 18,
-      "logoURI": "icons/svibe.svg"
-    },
-    {
       "chainId": 56,
       "address": "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
       "symbol": "WBNB",

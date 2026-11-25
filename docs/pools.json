@@ -3,7 +3,7 @@
   "updated": "2026-11-25",
   "swapFee": "0.25%",
   "feeBps": 25,
-  "note": "Yield is variable, not guaranteed. BNB Chain is the main chain. Soneium is legacy and remains open for withdrawals.",
+  "note": "Yield is variable, not guaranteed. BNB Chain is the main chain. Arbitrum One also runs the DEX.",
   "reservesHowTo": "Reserves are read live on chain by calling getReserves() on the pair address. The call returns reserve0, reserve1, and blockTimestampLast, in token0/token1 order. Divide each reserve by 10^decimals of that token (e.g. reserve / 10**decimals).",
   "pools": [
     {
@@ -29,30 +29,6 @@
       "pair": "0x6dABcbFdFE097e421269a444eBF22999B1EAE279",
       "token0": { "symbol": "USDT", "address": "0x55d398326f99059fF775485246999027B3197955", "decimals": 18 },
       "token1": { "symbol": "WBNB", "address": "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c", "decimals": 18 }
-    },
-    {
-      "chainId": 1868,
-      "chain": "Soneium",
-      "role": "legacy",
-      "status": "withdrawals only",
-      "rpc": "https://rpc.soneium.org",
-      "factory": "0x77b141dCFDa726e239efF005E3DE7A47AeBFf948",
-      "router": "0x97C180C2e3097f28D8F14114AD1C0dEF81244344",
-      "pair": "0x9726ecEB595376765f7391e16e438cfb7b8D71F2",
-      "token0": { "symbol": "WETH", "address": "0x4200000000000000000000000000000000000006", "decimals": 18 },
-      "token1": { "symbol": "USDC.e", "address": "0xbA9986D2381edf1DA03B0B9c1f8b00dc4AacC369", "decimals": 6 }
-    },
-    {
-      "chainId": 1868,
-      "chain": "Soneium",
-      "role": "legacy",
-      "status": "withdrawals only",
-      "rpc": "https://rpc.soneium.org",
-      "factory": "0x77b141dCFDa726e239efF005E3DE7A47AeBFf948",
-      "router": "0x97C180C2e3097f28D8F14114AD1C0dEF81244344",
-      "pair": "0x18b2e9E07d191A110DAEA6Ad3468495caf4d1CB9",
-      "token0": { "symbol": "ASTR", "address": "0x2CAE934a1e84F693fbb78CA5ED3B0A6893259441", "decimals": 18 },
-      "token1": { "symbol": "USDC.e", "address": "0xbA9986D2381edf1DA03B0B9c1f8b00dc4AacC369", "decimals": 6 }
     },
     {
       "chainId": 42161,

@@ -61,7 +61,7 @@
 
   /* ---------------- icons ---------------- */
   const IC = window.SV_ICONS || { tokens: {}, chains: {}, wallets: {} };
-  const CHAIN_SVG = { assethub: 'polkadot', hubevm: 'polkadot', soneium: 'soneium' };
+  const CHAIN_SVG = { assethub: 'polkadot', hubevm: 'polkadot' };
   const CHAIN_IMG = { astar: 'icons/astr.svg', astarevm: 'icons/astr.svg', ethereum: 'icons/eth.svg' };
   function chainIcon(id, sm) {
     const c = cfg.chains[id];
@@ -774,8 +774,7 @@
   }
 
   function suggest() {
-    if (S.asset === 'ASTR' && (S.to === 'assethub' || S.to === 'hubevm')) return ' <button class="pt-link" data-load="astar,soneium,ASTR">Bridge ASTR to Soneium instead →</button>';
-    if (cfg.chains[S.from].kind === 'external' || cfg.chains[S.to].kind === 'external') return ' Soneium and Polkadot connect through Ethereum: Soneium ⇄ Ethereum (canonical bridge), then Ethereum ⇄ Asset Hub (Snowbridge).';
+    if (cfg.chains[S.from].kind === 'external' || cfg.chains[S.to].kind === 'external') return ' Ethereum and Polkadot connect through Snowbridge: Ethereum ⇄ Asset Hub.';
     return '';
   }
 
@@ -1131,7 +1130,7 @@
       return `<tr><td><span style="display:inline-flex;align-items:center;gap:8px">${chainIcon(f, true)}<b>${esc(cfg.chains[f].short)}</b></span></td>${cells}</tr>`;
     }).join('');
     $('matrix').innerHTML = `<thead>${head}</thead><tbody>${rows}</tbody>`;
-    $('orbit').innerHTML = ['Polkadot', 'Astar', 'Soneium', 'Ethereum'].map((eco) => {
+    $('orbit').innerHTML = ['Polkadot', 'Astar', 'Ethereum'].map((eco) => {
       const c = Object.values(cfg.chains).find((x) => x.eco === eco);
       return `<span class="pt-pill">${chainIcon(c.id, true)}${eco}</span>`;
     }).join('');
