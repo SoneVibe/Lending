@@ -28,8 +28,9 @@ let rawBalA = null;
 let rawBalB = null;
 let busy = false;
 let balSeq = 0;
-let readProvider = null;
-let readProviderChain = null;
+const readProviders = new Map();
+let pairLoadError = false;
+let chainReloadHold = 0;
 let poolRefreshTimer = null;
 
 const PAIR_ABI = [
@@ -42,15 +43,110 @@ const PAIR_ABI = [
 
 const getEl = (id) => document.getElementById(id);
 
-// Wallet provider when connected, otherwise a read-only RPC so the pool is visible before connecting.
+// Always a read-only RPC for the selected network. The wallet provider is a
+// different chain whenever the user has not switched yet, and pair reads must
+// not follow it.
 function getReader() {
-  if (provider && signer) return provider;
   if (!ACTIVE || !ACTIVE.rpcUrls || !ACTIVE.rpcUrls.length) return null;
-  if (!readProvider || readProviderChain !== ACTIVE.chainId) {
-    readProvider = new ethers.JsonRpcProvider(ACTIVE.rpcUrls[0], undefined, { staticNetwork: true });
-    readProviderChain = ACTIVE.chainId;
+  const key = String(ACTIVE.chainId);
+  let reader = readProviders.get(key);
+  if (!reader) {
+    reader = new ethers.JsonRpcProvider(ACTIVE.rpcUrls[0], undefined, { staticNetwork: true });
+    readProviders.set(key, reader);
   }
-  return readProvider;
+  return reader;
+}
+
+function holdChainReload() { chainReloadHold += 1; }
+function releaseChainReload() {
+  setTimeout(() => { chainReloadHold = Math.max(0, chainReloadHold - 1); }, 1000);
+}
+
+function userError(message) {
+  const err = new Error(message);
+  err.userFacing = true;
+  return err;
+}
+
+function walletErrorCode(e) {
+  if (!e) return null;
+  const raw = e.code ?? (e.error && e.error.code) ?? (e.info && e.info.error && e.info.error.code) ?? (e.data && e.data.code);
+  if (raw === 'ACTION_REJECTED') return 4001;
+  const n = Number(raw);
+  return Number.isFinite(n) ? n : null;
+}
+
+function isUserRejection(e) {
+  const msg = String((e && (e.shortMessage || e.message)) || '');
+  return walletErrorCode(e) === 4001 || /user (rejected|denied|cancelled|canceled)/i.test(msg);
+}
+
+function activeNetworkLabel() {
+  return (ACTIVE && (ACTIVE.label || ACTIVE.slug)) || 'the selected network';
+}
+
+// Wallet chain must match the selected network before any signed transaction.
+// 4902 means the chain is missing, so add it from networks.json and try again.
+async function ensureActiveChain() {
+  if (!ACTIVE || ACTIVE.chainId == null) throw userError('Network not ready');
+  const eth = selectedProvider || window.ethereum;
+  if (!eth) throw userError('Connect a wallet first');
+
+  const wanted = Number(ACTIVE.chainId);
+  const hexId = '0x' + wanted.toString(16);
+  const label = activeNetworkLabel();
+  const readChain = async () => parseInt(await eth.request({ method: 'eth_chainId' }), 16);
+
+  if (await readChain() !== wanted) {
+    const addChain = async () => {
+      await eth.request({
+        method: 'wallet_addEthereumChain',
+        params: [{
+          chainId: hexId,
+          chainName: ACTIVE.label || label,
+          rpcUrls: ACTIVE.rpcUrls,
+          blockExplorerUrls: ACTIVE.blockExplorerUrls,
+          nativeCurrency: ACTIVE.nativeCurrency
+        }]
+      });
+    };
+    try {
+      await eth.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: hexId }] });
+    } catch (switchError) {
+      if (isUserRejection(switchError)) {
+        throw userError(`Network switch was rejected. Switch your wallet to ${label} to continue.`);
+      }
+      if (walletErrorCode(switchError) !== 4902) {
+        throw userError(`Could not switch the wallet to ${label}.`);
+      }
+      try {
+        await addChain();
+      } catch (addError) {
+        if (isUserRejection(addError)) {
+          throw userError(`Network switch was rejected. Switch your wallet to ${label} to continue.`);
+        }
+        throw userError(`Could not add ${label} to the wallet.`);
+      }
+    }
+
+    if (await readChain() !== wanted) {
+      try {
+        await eth.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: hexId }] });
+      } catch (switchError) {
+        if (isUserRejection(switchError)) {
+          throw userError(`Network switch was rejected. Switch your wallet to ${label} to continue.`);
+        }
+        throw userError(`Wallet is still on a different network. Switch to ${label} and try again.`);
+      }
+    }
+    if (await readChain() !== wanted) {
+      throw userError(`Wallet is still on a different network. Switch to ${label} and try again.`);
+    }
+  }
+
+  provider = new ethers.BrowserProvider(eth);
+  signer = await provider.getSigner();
+  userAddress = await signer.getAddress();
 }
 
 const trimZeros = (s) => (s.includes('.') ? s.replace(/\.?0+$/, '') : s);
@@ -148,6 +244,7 @@ function refreshMainButton() {
   const set = (text, disabled = false) => { btn.textContent = text; btn.disabled = disabled; };
   btn.classList.toggle('is-danger', !isAddMode && !!signer);
   if (!signer) return set('Connect Wallet');
+  if (pairLoadError) return set('Could not load pool data', true);
   const [tA, tB] = pairTokens();
   if (!tA || !tB) return set('Select tokens', true);
   if (sameToken(tA, tB)) return set('Select two different tokens', true);
@@ -182,6 +279,7 @@ function showStatus(text, tone = 'warning', href = null) {
 }
 
 function friendlyError(e) {
+  if (e && e.userFacing && e.message) return e.message;
   const msg = String((e && (e.reason || e.shortMessage || (e.info && e.info.error && e.info.error.message) || e.message)) || '');
   if ((e && (e.code === 'ACTION_REJECTED' || e.code === 4001)) || /user (rejected|denied)/i.test(msg)) return 'Transaction rejected in wallet';
   if (/INSUFFICIENT_[AB]_AMOUNT/.test(msg)) return 'The pool price moved beyond your slippage tolerance. Try again or raise slippage.';
@@ -322,13 +420,14 @@ function setPreviewLoading(loading) {
 }
 
 async function buildImportDraft(address) {
-  if (!provider) throw new Error("Provider not ready");
+  const rd = getReader();
+  if (!rd) throw new Error("Network not ready");
   if (!ethers.isAddress(address)) throw new Error("Invalid address");
 
   // Default warning ON; we disable it if metadata loads fine
   setImportWarning(true);
 
-  const c = new ethers.Contract(address, ERC20_META_ABI, provider);
+  const c = new ethers.Contract(address, ERC20_META_ABI, rd);
 
   // Some non-ERC20 addresses will revert here. That's fine (you asked ANY address; preview blocks if not readable)
   const [name, symbol, decimals] = await Promise.all([
@@ -610,12 +709,11 @@ function initNetworkSelector() {
 
   if (ACTIVE) sel.value = ACTIVE.chainId;
 
+  // Choosing a network only changes what we read. The wallet is asked to
+  // switch when the user approves or adds or removes liquidity.
   sel.onchange = async (e) => {
     const targetChainId = e.target.value;
-    if (userAddress) await switchNetwork(targetChainId);
-    else ACTIVE = Object.values(NETWORKS_DATA).find(n => n.chainId == targetChainId);
-
-    // Refresh token list because import storage is per chain
+    ACTIVE = Object.values(NETWORKS_DATA).find(n => n.chainId == targetChainId);
     await initPoolsInterface();
   };
 }
@@ -708,66 +806,28 @@ async function connectWallet() {
 
     if (window.SessionManager) window.SessionManager.save();
 
-    const chainIdHex = await provider.send("eth_chainId", []);
-    const chainIdDecimal = parseInt(chainIdHex, 16);
-    ACTIVE = Object.values(NETWORKS_DATA).find(n => (parseInt(n.chainId) === chainIdDecimal) && n.enabled);
-
-    const sel = getEl("networkSelect");
+    // Keep the network the user selected. A wallet on another chain must not
+    // retarget reads; signing switches the wallet to ACTIVE.
     if (!ACTIVE) {
-      let targetId = sel ? sel.value : null;
-      if (!targetId) {
-        const def = Object.values(NETWORKS_DATA).find(n => n.enabled);
-        if (def) targetId = def.chainId;
-      }
-      if (targetId) {
-        await switchNetwork(targetId);
-        return;
-      } else {
-        alert("Unsupported Network.");
-        updateStatus(false);
-        return;
-      }
+      const chainIdHex = await provider.send("eth_chainId", []);
+      const chainIdDecimal = parseInt(chainIdHex, 16);
+      ACTIVE = Object.values(NETWORKS_DATA).find(n => (parseInt(n.chainId) === chainIdDecimal) && n.enabled)
+        || Object.values(NETWORKS_DATA).find(n => n.enabled);
     }
 
+    const sel = getEl("networkSelect");
     if (sel && ACTIVE) sel.value = ACTIVE.chainId;
     updateStatus(true);
 
     await initPoolsInterface();
 
     if (ethProvider.on) {
-      ethProvider.on('chainChanged', () => window.location.reload());
+      ethProvider.on('chainChanged', () => { if (chainReloadHold === 0) window.location.reload(); });
       ethProvider.on('accountsChanged', () => window.location.reload());
     }
   } catch (e) {
     console.error(e);
     updateStatus(false);
-  }
-}
-
-async function switchNetwork(targetChainId) {
-  const targetNetwork = Object.values(NETWORKS_DATA).find(n => n.chainId == targetChainId);
-  if (!targetNetwork) return;
-
-  try {
-    await window.ethereum.request({
-      method: 'wallet_switchEthereumChain',
-      params: [{ chainId: "0x" + Number(targetNetwork.chainId).toString(16) }],
-    });
-  } catch (switchError) {
-    if (switchError.code === 4902) {
-      try {
-        await window.ethereum.request({
-          method: 'wallet_addEthereumChain',
-          params: [{
-            chainId: "0x" + Number(targetNetwork.chainId).toString(16),
-            chainName: targetNetwork.label,
-            rpcUrls: targetNetwork.rpcUrls,
-            blockExplorerUrls: targetNetwork.blockExplorerUrls,
-            nativeCurrency: targetNetwork.nativeCurrency
-          }],
-        });
-      } catch (addError) { console.error("Add chain failed", addError); }
-    } else { console.error("Switch failed", switchError); }
   }
 }
 
@@ -998,8 +1058,8 @@ async function updateBalances() {
 
   const getBal = async (t) => {
     try {
-      if (t.isNative) return await provider.getBalance(userAddress);
-      const c = new ethers.Contract(t.address, window.MIN_ERC20_ABI, provider);
+      if (t.isNative) return await rd.getBalance(userAddress);
+      const c = new ethers.Contract(t.address, window.MIN_ERC20_ABI, rd);
       return await c.balanceOf(userAddress);
     } catch { return null; }
   };
@@ -1015,9 +1075,10 @@ async function updateBalances() {
   const maxB = getEl('plMaxB'); if (maxB) maxB.hidden = !(bB && bB > 0n);
 
   // Pair detection will only work if router is configured
-  if (!ACTIVE.router) { refreshMainButton(); return; }
+  if (!ACTIVE.router) { pairLoadError = false; refreshMainButton(); return; }
 
   let pairAddress = null, reserves = { rA: 0n, rB: 0n }, ts = 0n, lp = 0n, weth = null;
+  let pairLoadFailed = false;
 
   try {
     const router = new ethers.Contract(ACTIVE.router, window.POOL_ROUTER_ABI, rd);
@@ -1050,8 +1111,25 @@ async function updateBalances() {
     }
   } catch (e) {
     console.error("Pair detect error:", e);
+    pairLoadFailed = true;
   }
   if (seq !== balSeq) return;
+
+  if (pairLoadFailed) {
+    pairLoadError = true;
+    const note = getEl('plPairNote');
+    if (note) {
+      note.classList.remove('is-new');
+      note.textContent = 'Could not load pool data. Please retry.';
+    }
+    const elRateA = getEl('rateA');
+    const elRateB = getEl('rateB');
+    if (elRateA) elRateA.textContent = '--';
+    if (elRateB) elRateB.textContent = '--';
+    refreshMainButton();
+    return;
+  }
+  pairLoadError = false;
 
   currentWETH = weth;
   currentPairAddress = pairAddress;
@@ -1141,14 +1219,17 @@ async function handleMainAction() {
 // -------------------- ADD LIQUIDITY --------------------
 async function handleAddLiquidity() {
   const btn = getEl('btnMainAction');
-  if (!ACTIVE.router) { showStatus("Router not configured for this network", 'danger'); return; }
+  if (!ACTIVE || !ACTIVE.router) { showStatus("Router not configured for this network", 'danger'); return; }
 
   busy = true;
   btn.disabled = true;
   btn.textContent = 'Preparing…';
-  showStatus('Reading the latest pool price…');
+  showStatus('Checking wallet network…');
+  holdChainReload();
 
   try {
+    await ensureActiveChain();
+    showStatus('Reading the latest pool price…');
     await refreshReserves();
     syncDependent();
     const d = desiredAmounts();
@@ -1220,6 +1301,7 @@ async function handleAddLiquidity() {
     console.error(e);
     showStatus(friendlyError(e), 'danger');
   } finally {
+    releaseChainReload();
     busy = false;
     btn.disabled = false;
     await updateBalances();
@@ -1232,14 +1314,17 @@ async function handleRemoveLiquidity() {
   const percent = Number(getEl('removeRange').value);
 
   if (!currentPairAddress || percent === 0) { showStatus("No liquidity to remove", 'danger'); return; }
-  if (!ACTIVE.router) { showStatus("Router not configured for this network", 'danger'); return; }
+  if (!ACTIVE || !ACTIVE.router) { showStatus("Router not configured for this network", 'danger'); return; }
 
   busy = true;
   btn.disabled = true;
   btn.textContent = 'Preparing…';
-  showStatus('Calculating exit amounts…');
+  showStatus('Checking wallet network…');
+  holdChainReload();
 
   try {
+    await ensureActiveChain();
+    showStatus('Calculating exit amounts…');
     const routerAddr = ACTIVE.router;
     const router = new ethers.Contract(routerAddr, window.POOL_ROUTER_ABI, signer);
     const deadline = Math.floor(Date.now() / 1000) + 1200;
@@ -1260,11 +1345,12 @@ async function handleRemoveLiquidity() {
     const amountBMin = (expectedB * (BPS_MAX - slippageBps)) / BPS_MAX;
 
     showStatus("Checking LP approval…");
-    const pair = new ethers.Contract(currentPairAddress, window.MIN_ERC20_ABI, signer);
-    const allow = await pair.allowance(userAddress, routerAddr);
+    const pairRead = new ethers.Contract(currentPairAddress, window.MIN_ERC20_ABI, getReader());
+    const allow = await pairRead.allowance(userAddress, routerAddr);
 
     if (allow < liquidityAmount) {
       showStatus("Approve the LP token in your wallet…");
+      const pair = new ethers.Contract(currentPairAddress, window.MIN_ERC20_ABI, signer);
       const txApp = await pair.approve(routerAddr, ethers.MaxUint256);
       await txApp.wait();
     }
@@ -1306,6 +1392,7 @@ async function handleRemoveLiquidity() {
     console.error(e);
     showStatus(friendlyError(e), 'danger');
   } finally {
+    releaseChainReload();
     busy = false;
     btn.disabled = false;
     await updateBalances();
@@ -1315,12 +1402,14 @@ async function handleRemoveLiquidity() {
 
 // -------------------- APPROVE --------------------
 async function checkAndApprove(tokenObj, spender, amount, statusEl) {
-  const tokenContract = new ethers.Contract(tokenObj.address, window.MIN_ERC20_ABI, signer);
+  await ensureActiveChain();
+  const tokenRead = new ethers.Contract(tokenObj.address, window.MIN_ERC20_ABI, getReader());
+  const tokenWrite = new ethers.Contract(tokenObj.address, window.MIN_ERC20_ABI, signer);
   const amountWei = typeof amount === 'bigint' ? amount : ethers.parseUnits(amount, tokenObj.decimals);
-  const allowance = await tokenContract.allowance(userAddress, spender);
+  const allowance = await tokenRead.allowance(userAddress, spender);
   if (allowance < amountWei) {
     statusEl.textContent = `Approve ${tokenObj.symbol} in your wallet…`;
-    const tx = await tokenContract.approve(spender, ethers.MaxUint256);
+    const tx = await tokenWrite.approve(spender, ethers.MaxUint256);
     await tx.wait();
   }
 }
