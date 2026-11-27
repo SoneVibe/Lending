@@ -29,10 +29,10 @@
     MINIMUM_LIQUIDITY: 100000n,
     STABLES: ['usdc', 'usdt', 'usdsc', 'svusd', 'dai', 'usds', 'busd'],
     // Swap history only: networks whose default RPC refuses eth_getLogs.
-    // bsc-dataseed answers "limit exceeded". The keyless publicnode endpoint serves
-    // 10,000-block windows, so chunks stay at 9,000. If it fails, the default RPC path runs as before.
+    // BNB dataseed answers "limit exceeded"; NodeReal's public endpoint (listed on chainlist.org)
+    // serves 50,000-block windows, so 7 days is ~27 calls. If it fails, the default RPC path runs as before.
     LOG_RPC: {
-      56: { url: 'https://bsc-rpc.publicnode.com', chunk: 9000, minChunk: 2000 },
+      56: { url: 'https://bsc-mainnet.nodereal.io/v1/64a9df0874fb4a93b9d0a3849de012d3', chunk: 50000, minChunk: 12500 },
     },
   };
 

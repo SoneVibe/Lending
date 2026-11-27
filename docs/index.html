@@ -343,7 +343,7 @@
         <div id="heroPool" aria-live="polite">
           <div class="lp-pc-skel" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
         </div>
-        <p class="lp-pc-foot">Fee APR is the average daily swap fee over the last 7 days, annualized. It is variable, not guaranteed.</p>
+        <p class="lp-pc-foot">Fee APR is the last 24 hours of swap fees, annualized. Variable, not guaranteed.</p>
       </aside>
     </section>
 
@@ -412,12 +412,12 @@
         <div>
           <div class="lp-eyebrow">Pools</div>
           <h2>Live pools</h2>
-          <p class="lead">Price, liquidity, 24-hour volume and a 7-day average fee APR for each pool, read from the pair contracts.</p>
+          <p class="lead">Price, liquidity and the last 24 hours of trading for each pool, read from the pair contracts.</p>
         </div>
         <a class="lp-more" href="pools.html">All pools →</a>
       </div>
       <div class="lp-pools" id="topPools"><div class="lp-skel"></div><div class="lp-skel"></div><div class="lp-skel"></div></div>
-      <p class="lp-note">Fee APR 7d avg is the average daily swap fee paid to liquidity providers over the last 7 days (or the pool's age, at least 1 day), annualized and divided by the pool's liquidity. It is historical and variable, not guaranteed, and it does not include impermanent loss.</p>
+      <p class="lp-note">Fee APR 24h is the swap fees paid to liquidity providers in the last 24 hours, annualized and divided by the pool's liquidity. It is historical and variable, not guaranteed, and it does not include impermanent loss.</p>
     </section>
 
     <section class="lp-section" id="networks">
@@ -513,7 +513,7 @@
     </div>
   </footer>
 
-  <script src="https://cdn.jsdelivr.net/npm/ethers@6.10.0/dist/ethers.umd.min.js" integrity="sha384-tVisdJ1MRZqej8bqmBNU9m3Gd3FN6xhhCMSWW3eJWnpsaR2XvOQWMBY08U6BIKMw" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.10.0/dist/ethers.umd.min.js"></script>
   <script src="config.js"></script>
   <script src="landing.js"></script>
   <script src="nav.js"></script>
