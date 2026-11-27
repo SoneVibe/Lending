@@ -10,15 +10,22 @@
   const FLAGSHIP = '56';
   const ORDER = ['56', '42161'];
 
-  // `rpcs` are tried after the ones in networks.json. `logs` lists the endpoints that serve
-  // eth_getLogs, in order: the first one that answers is used, the next ones are fallbacks.
-  // bsc-dataseed refuses eth_getLogs, so swap history needs its own endpoints on BNB Chain.
+  // `rpcs` are keyless public endpoints, tried after the ones in networks.json.
+  // `logs` lists endpoints that serve eth_getLogs, in order. bsc-dataseed and
+  // bsc-dataseed1.defibit.io answer ordinary reads but reject every eth_getLogs
+  // ("limit exceeded"), so swap history cannot use them.
+  // publicnode accepts at most 10,000 blocks per eth_getLogs; pocket accepts 5,000.
+  // Chunks stay under those caps. On Arbitrum, arb1 accepts ranges of at least
+  // 1,000,000 blocks, so 400,000 is inside that limit (7 days is about 2.1 million blocks).
   const CHAINS = {
     '56': {
       name: 'BNB Chain', color: '#f3ba2f', icon: 'icons/bnb.png', stables: ['usd1'],
-      rpcs: ['https://bsc-dataseed.bnbchain.org', 'https://bsc-rpc.publicnode.com'],
+      rpcs: [
+        'https://bsc-dataseed.bnbchain.org',
+        'https://bsc-dataseed1.defibit.io',
+        'https://bsc-rpc.publicnode.com',
+      ],
       logs: [
-        { url: 'https://bsc-mainnet.nodereal.io/v1/64a9df0874fb4a93b9d0a3849de012d3', chunk: 49000 },
         { url: 'https://bsc-rpc.publicnode.com', chunk: 9000 },
         { url: 'https://bsc.api.pocket.network', chunk: 4500 },
       ],
@@ -34,23 +41,30 @@
     SWAP_FEE: 0.0025,
     LP_FEE_SHARE: 5 / 6,
     STABLES: ['usdc', 'usdt', 'usdsc', 'dai', 'usds', 'fdusd'],
-    CACHE_KEY: 'SV_LANDING_V3',
+    CACHE_KEY: 'SV_LANDING_V4',
     CACHE_MAX_AGE: 24 * 3600e3,
     READ_TIMEOUT: 7000,
     LOG_TIMEOUT: 6000,
-    LOG_BUDGET: 25000,
+    // A 7-day BNB Chain scan is ~150 chunks of 9,000 blocks. Measured runs finish
+    // in about 15s; the extra room is for a slow public endpoint before we give up.
+    LOG_BUDGET: 45000,
     LOG_CONCURRENCY: 4,
     MIN_LOG_CHUNK: 2000,
     BLOCK_SAMPLE: 20000,
     REFRESH_MS: 120000,
     MIN_POOL_TVL: 1,
+    // Fee APR averages this many days. A 3-second BNB Chain would be about 201,600
+    // blocks; the live block time is measured per chain and is shorter than that.
+    APR_DAYS: 7,
   };
 
   const MULTICALL3 = '0xcA11bde05977b3631167028862bE2a173976CA11';
   const SWAP_TOPIC = ethers.id('Swap(address,uint256,uint256,uint256,uint256,address)');
+  const PAIR_CREATED_TOPIC = ethers.id('PairCreated(address,address,address,uint256)');
   const I = {
     multicall: new ethers.Interface(['function aggregate3((address target, bool allowFailure, bytes callData)[] calls) view returns ((bool success, bytes returnData)[])']),
     factory: new ethers.Interface(['function allPairsLength() view returns (uint256)', 'function allPairs(uint256) view returns (address)']),
+    created: new ethers.Interface(['event PairCreated(address indexed token0, address indexed token1, address pair, uint256)']),
     pair: new ethers.Interface(['function token0() view returns (address)', 'function token1() view returns (address)', 'function getReserves() view returns (uint112, uint112, uint32)']),
     erc20: new ethers.Interface(['function symbol() view returns (string)', 'function decimals() view returns (uint8)']),
   };
@@ -77,7 +91,7 @@
     return n.toLocaleString('en-US', { maximumSignificantDigits: 4 });
   }
   const fmtInt = (n) => (isFinite(n) ? Math.round(n).toLocaleString('en-US') : '—');
-  const fmtPct = (n) => (!isFinite(n) ? '—' : n * 100 >= 10000 ? '>10,000%' : (n * 100).toFixed(2) + '%');
+  const fmtPct = (n) => (typeof n !== 'number' || !isFinite(n) ? '—' : n * 100 >= 10000 ? '>10,000%' : (n * 100).toFixed(2) + '%');
   const fmtTime = (ts) => new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
   async function pool(items, limit, fn) {
@@ -153,7 +167,8 @@
   // retried; if an endpoint keeps failing, the next one in the list takes over from scratch.
   // The newest range ends at the "latest" tag instead of a block number: endpoints sit a few
   // blocks apart, and asking one for a block it has not seen yet is an error.
-  async function fetchSwapLogs(sources, addresses, from, to) {
+  async function fetchSwapLogs(sources, addresses, from, to, topic = SWAP_TOPIC) {
+    if (!(from <= to) || !addresses.length) return [];
     const deadline = Date.now() + CFG.LOG_BUDGET;
     let last;
     for (const src of sources) {
@@ -161,7 +176,7 @@
         const left = deadline - Date.now();
         if (left <= 0) throw new Error('log budget exhausted');
         try {
-          return await rpcCall(src.url, 'eth_getLogs', [{ address: addresses, topics: [SWAP_TOPIC], fromBlock: hex(a), toBlock: open ? 'latest' : hex(b) }], Math.min(CFG.LOG_TIMEOUT, left));
+          return await rpcCall(src.url, 'eth_getLogs', [{ address: addresses, topics: [topic], fromBlock: hex(a), toBlock: open ? 'latest' : hex(b) }], Math.min(CFG.LOG_TIMEOUT, left));
         } catch (e) {
           if (b - a < CFG.MIN_LOG_CHUNK || /timeout|HTTP 4|HTTP 5|Failed to fetch|NetworkError|budget/i.test(e.message)) throw e;
           const mid = Math.floor((a + b) / 2);
@@ -300,7 +315,7 @@
         quote: quoteIs0 ? p.t0.symbol : p.t1.symbol,
         price: quoteIs0 ? (p.r1 > 0 ? p.r0 / p.r1 : 0) : (p.r0 > 0 ? p.r1 / p.r0 : 0),
         icons: quoteIs0 ? [p.t1.logo, p.t0.logo] : [p.t0.logo, p.t1.logo],
-        vol24h: 0, tx24h: 0, apr: 0,
+        vol24h: 0, tx24h: 0, vol7d: 0, apr: 0,
       });
     });
 
@@ -322,40 +337,105 @@
 
     if (hasLogs) {
       try {
-        // Blocks in the last 24 h, measured from two block timestamps (block time changes with hard forks).
+        // Blocks per day, measured from two block timestamps (block time changes with hard forks).
+        // Fee APR then covers APR_DAYS of those blocks: about 201,600 blocks if BNB Chain were
+        // still 3s, and the same measurement on Arbitrum (about 0.3s, about 2.1 million blocks).
         let blocksPerDay = Math.round((Number(net.blocksPerYear) || 31536000) / 365);
         try {
           const [now, past] = await Promise.all([
             reader.call('eth_getBlockByNumber', [hex(latest), false]),
-            reader.call('eth_getBlockByNumber', [hex(latest - CFG.BLOCK_SAMPLE), false]),
+            reader.call('eth_getBlockByNumber', [hex(Math.max(0, latest - CFG.BLOCK_SAMPLE)), false]),
           ]);
           const secs = parseInt(now.timestamp, 16) - parseInt(past.timestamp, 16);
           if (secs > 0) blocksPerDay = Math.round((86400 * CFG.BLOCK_SAMPLE) / secs);
         } catch (e) { /* keep the configured estimate */ }
+        if (!(blocksPerDay > 0)) throw new Error('block time unavailable');
 
-        const logs = await fetchSwapLogs(meta.logs, pairs.map((p) => p.address), Math.max(0, latest - blocksPerDay), latest);
+        const want = blocksPerDay * CFG.APR_DAYS;
+        const from7 = Math.max(0, latest - want);
+        const from24 = Math.max(0, latest - blocksPerDay);
+        const covered = latest - from7;
+        // A full window divides by exactly 7. A chain younger than 7 days uses its real age, at least 1 day.
+        const spanDays = covered >= want ? CFG.APR_DAYS : Math.max(1, covered / blocksPerDay);
+
+        const pairAddrs = pairs.map((p) => p.address);
+        const logs = await fetchSwapLogs(meta.logs, pairAddrs, from7, latest);
+
+        // PairCreated in the same window marks pools younger than 7 days.
+        // Pools absent from these logs are older than the window. If the read fails,
+        // every pool uses the full window, which does not inflate the APR.
+        const createdAt = new Map();
+        let ageKnown = false;
+        try {
+          const births = await fetchSwapLogs(meta.logs, [net.factory], from7, latest, PAIR_CREATED_TOPIC);
+          for (const log of births) {
+            try {
+              const ev = I.created.parseLog(log);
+              const pair = String(ev.args.pair).toLowerCase();
+              const bn = parseInt(log.blockNumber, 16);
+              if (!Number.isFinite(bn)) continue;
+              const prev = createdAt.get(pair);
+              if (prev == null || bn < prev) createdAt.set(pair, bn);
+            } catch (e) { /* skip a creation log we cannot decode */ }
+          }
+          ageKnown = true;
+        } catch (e) {
+          console.warn(`[landing] ${meta.name}: pool age unavailable, APR uses the full window`, e);
+        }
+
+        const daysFor = (addr) => {
+          if (!ageKnown) return spanDays;
+          const born = createdAt.get(addr);
+          if (born == null || born <= from7) return spanDays;
+          const age = (latest - born) / blocksPerDay;
+          if (!Number.isFinite(age) || age < 0) return null;
+          return Math.min(spanDays, Math.max(1, age));
+        };
+
+        const bad = new Set();
         const byAddr = Object.fromEntries(pairs.map((p) => [p.address.toLowerCase(), p]));
-        pairs.forEach((p) => { p.vol24h = 0; p.tx24h = 0; });
+        pairs.forEach((p) => { p.vol24h = 0; p.tx24h = 0; p.vol7d = 0; });
         for (const log of logs) {
-          const p = byAddr[String(log.address).toLowerCase()];
+          const addr = String(log.address).toLowerCase();
+          const p = byAddr[addr];
           if (!p) continue;
-          const [in0, in1, out0, out1] = coder.decode(['uint256', 'uint256', 'uint256', 'uint256'], log.data);
-          const v0 = parseFloat(ethers.formatUnits(in0 + out0, p.t0.decimals)) * p.p0;
-          const v1 = parseFloat(ethers.formatUnits(in1 + out1, p.t1.decimals)) * p.p1;
-          p.vol24h += v0 && v1 ? (v0 + v1) / 2 : v0 || v1;
-          p.tx24h++;
+          try {
+            const bn = parseInt(log.blockNumber, 16);
+            const [in0, in1, out0, out1] = coder.decode(['uint256', 'uint256', 'uint256', 'uint256'], log.data);
+            const v0 = parseFloat(ethers.formatUnits(in0 + out0, p.t0.decimals)) * p.p0;
+            const v1 = parseFloat(ethers.formatUnits(in1 + out1, p.t1.decimals)) * p.p1;
+            const usd = v0 && v1 ? (v0 + v1) / 2 : v0 || v1;
+            if (!Number.isFinite(bn) || !Number.isFinite(usd) || usd < 0) throw new Error('bad swap log');
+            p.vol7d += usd;
+            if (bn >= from24) { p.vol24h += usd; p.tx24h++; }
+          } catch (e) {
+            bad.add(addr);
+          }
         }
         const lpFee = CFG.SWAP_FEE * CFG.LP_FEE_SHARE;
-        pairs.forEach((p) => { p.apr = p.tvl >= CFG.MIN_POOL_TVL ? (p.vol24h * lpFee * 365) / p.tvl : 0; });
+        pairs.forEach((p) => {
+          const addr = p.address.toLowerCase();
+          try {
+            if (bad.has(addr)) { p.apr = null; return; }
+            // Dust liquidity stays at 0% so a near-zero TVL cannot blow the APR up.
+            if (!(p.tvl >= CFG.MIN_POOL_TVL)) { p.apr = 0; return; }
+            const days = daysFor(addr);
+            const fees = p.vol7d * lpFee;
+            const apr = days >= 1 ? (fees / days) * 365 / p.tvl : null;
+            p.apr = typeof apr === 'number' && Number.isFinite(apr) && apr >= 0 ? apr : null;
+          } catch (e) {
+            p.apr = null;
+          }
+        });
         Object.assign(result, {
           logsOk: true, logsPending: false,
           vol24h: pairs.reduce((a, p) => a + p.vol24h, 0),
-          txs: logs.length,
+          txs: pairs.reduce((a, p) => a + p.tx24h, 0),
           activePools: pairs.filter((p) => p.tx24h > 0).length,
         });
       } catch (e) {
         console.warn(`[landing] ${meta.name}: swap history unavailable`, e);
-        pairs.forEach((p) => { p.vol24h = 0; p.tx24h = 0; p.apr = 0; });
+        pairs.forEach((p) => { p.vol24h = 0; p.tx24h = 0; p.vol7d = 0; p.apr = null; });
         Object.assign(result, { logsOk: false, logsPending: false, vol24h: 0, txs: 0, activePools: 0 });
       }
     }
@@ -466,7 +546,7 @@
         ${kv('Liquidity', fmtUsd(top.tvl))}
         ${kv('Volume 24h', volCell(flag, fmtUsd(top.vol24h)))}
         ${kv('Swaps 24h', volCell(flag, fmtInt(top.tx24h)))}
-        ${kv('Fee APR 24h', volCell(flag, fmtPct(top.apr)), 'accent')}
+        ${kv('Fee APR 7d avg', volCell(flag, fmtPct(top.apr)), 'accent')}
       </dl>
       <div class="lp-pc-actions">
         <a class="lp-btn primary" href="swap.html">Swap</a>
@@ -525,7 +605,7 @@
     const cell = (label, v, cls) => `<div class="lp-cell ${cls || ''}" data-label="${label}">${v === null ? '<span class="lp-mini-skel">&nbsp;</span>' : v}</div>`;
     el.innerHTML = `
       <div class="lp-pool lp-pool-head" aria-hidden="true">
-        <div>Pool</div><div>Price</div><div>Liquidity</div><div>Volume 24h</div><div>Fee APR 24h</div><div></div>
+        <div>Pool</div><div>Price</div><div>Liquidity</div><div>Volume 24h</div><div>Fee APR 7d avg</div><div></div>
       </div>` + top.map((p) => {
       const c = chainOf(p.chainId);
       const r = state.results[p.chainId];
@@ -535,7 +615,7 @@
         ${cell('Price', `${fmtNum(p.price)} <small>${esc(p.quote)}</small>`)}
         ${cell('Liquidity', fmtUsd(p.tvl))}
         ${cell('Volume 24h', volCell(r, fmtUsd(p.vol24h)))}
-        ${cell('Fee APR 24h', volCell(r, fmtPct(p.apr)), 'accent')}
+        ${cell('Fee APR 7d avg', volCell(r, fmtPct(p.apr)), 'accent')}
         <div class="lp-pool-go" aria-hidden="true">→</div>
       </a>`;
     }).join('');
