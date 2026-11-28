@@ -1,12 +1,53 @@
-# Live contract sources
+# Contracts
 
-Every live contract file in this folder is byte-identical to its verified source on [Sourcify](https://sourcify.dev).
+SoneVibe is a Uniswap V2-style constant-product DEX. The main chain is BNB Chain (chainId 56).
 
-Sources for deployed VIBE contracts. Explorer / Sourcify verification is against deployed bytecode, so moving or grouping these files does not affect on-chain verification.
+Factory and pair source: `DrainFree_VibeSwapCore.sol`. Router source: `VibeSwapRouter.sol`.
 
-Addresses below were confirmed to have contract code via `eth_getCode` on the listed RPCs (Soneium `https://rpc.soneium.org`, BNB `https://bsc-dataseed.bnbchain.org`, Arbitrum `https://arb1.arbitrum.io/rpc`). Sourcify links are chain-1868 exact matches unless noted.
+## BNB Chain (chainId 56)
 
-## Soneium (chainId 1868) — DEX / LIGHT
+The factory and the router are exact-match verified on Sourcify.
+
+| Contract | Address |
+| --- | --- |
+| Factory | [`0x26b13e7e923e964b0514B3167A90901B49DAe205`](https://bscscan.com/address/0x26b13e7e923e964b0514B3167A90901B49DAe205) · [Sourcify exact match](https://sourcify.dev/#/lookup/0x26b13e7e923e964b0514B3167A90901B49DAe205) |
+| Router | [`0xa393E76bE079cF1ccf684D0f815795Dde248f157`](https://bscscan.com/address/0xa393E76bE079cF1ccf684D0f815795Dde248f157) · [Sourcify exact match](https://sourcify.dev/#/lookup/0xa393E76bE079cF1ccf684D0f815795Dde248f157) |
+| WBNB | `0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c` |
+| ETH/USDT pair | `0x93016Fa6e3c184c96Df7466579DfaA970C7cb6A5` |
+| USDT/WBNB pair | `0x6dABcbFdFE097e421269a444eBF22999B1EAE279` |
+
+Init code hash: `0x87b780b5d19df9ad0d4c866dcd6b169f14846fb24232a128b678c5bdb395b012`
+
+The router’s `factory()` is the factory above. Its `WETH()` is WBNB.
+
+Each swap charges 0.25% (`amountIn * 9975 / 10000`). On BNB Chain `feeTo` is set. With `feeTo` set, one sixth of fee growth is minted as LP tokens to `feeTo`: liquidity providers receive 0.2083% and the protocol treasury receives 0.0417%. With `feeTo` at the zero address, liquidity providers receive the full 0.25%.
+
+## Admin
+
+On the BNB factory, `owner` and `feeToSetter` are the same address. The router `owner` is that same address.
+
+Factory functions, and who can call them:
+
+- `feeToSetter`: `setFeeTo` (protocol fee recipient), `setFeeToSetter` (transfer that role), `setPairCreationStatus` (open or close permissionless pair creation)
+- `owner`: `pause` and `unpause` (new pair creation only), `transferOwnership`, `renounceOwnership`
+- `createPair`: anyone while creation is open; only `feeToSetter` while it is closed. A factory pause blocks `createPair` for every caller, including `feeToSetter`
+
+The factory `owner` / `feeToSetter` cannot move tokens out of pairs. Pair contracts have no owner and no admin withdrawal. Tokens leave a pair through `swap`, through `burn` when LP tokens are redeemed, and through `skim` for any balance above the stored reserves.
+
+Router functions for `owner`:
+
+- `pause` and `unpause` pause and unpause router calls
+
+A router pause also blocks removeLiquidity through the router, but LPs can still exit by calling the pair directly (transfer LP to the pair, then burn).
+
+- `rescueFunds` sends tokens or BNB held by the router to `owner`
+- `transferOwnership` and `renounceOwnership` transfer or clear router `owner`
+
+`rescueFunds` uses the router’s own balance.
+
+## Soneium (legacy)
+
+### Soneium (chainId 1868) — DEX / LIGHT
 
 | Contract | File | Address | Verification |
 | --- | --- | --- | --- |
@@ -15,7 +56,7 @@ Addresses below were confirmed to have contract code via `eth_getCode` on the li
 | LIGHT | — | `0x84998bf491C80a79B99540666569F360d5Acae6E` | [Blockscout](https://soneium.blockscout.com/address/0x84998bf491C80a79B99540666569F360d5Acae6E) |
 | LightRewards (VibeMasterChefV2) | `LightRewards_VibeMasterChefV2.sol` | `0x8f2F9B17b173C91c7B9195096030a39227B94f62` | [Sourcify exact](https://sourcify.dev/#/lookup/0x8f2F9B17b173C91c7B9195096030a39227B94f62) |
 
-## Soneium — Marketplace (Sourcify exact_match)
+### Soneium — Marketplace (Sourcify exact_match)
 
 Implementation read via EIP-1967 slot `0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc` (`implementation()` / `getImplementation()` revert on this proxy).
 
@@ -24,7 +65,7 @@ Implementation read via EIP-1967 slot `0x360894a13ba1a3210667c828492db98dca3e207
 | SoneVibeProxy | proxy | `SoneVibeProxy.sol` | `0x7242ACB7a27052abBe49EF096aC473e9cBC02627` | exact_match — [Sourcify](https://sourcify.dev/#/lookup/0x7242ACB7a27052abBe49EF096aC473e9cBC02627) |
 | SoneVibeMarketV3 | implementation | `SoneVibeMarketV3.sol` | `0x8Bf75C5c411Fdd2AF14002Ce20Ba8b3604437AA0` | exact_match — [Sourcify](https://sourcify.dev/#/lookup/0x8Bf75C5c411Fdd2AF14002Ce20Ba8b3604437AA0) |
 
-## Soneium — Lending (Sourcify exact_match)
+### Soneium — Lending (Sourcify exact_match)
 
 Comptroller proxy is `V_Unit`; implementation read on-chain via `getImplementation()` / `masterImplementation()` → `0x95Fd3B75EF4BaFc6c621abc0B08F6b016F672401`. Markets via `allMarkets(uint256)` (live API is `getAllMarketsData()`, not Compound-style `getAllMarkets()`).
 
@@ -46,28 +87,25 @@ Supporting project files from the same verified sets (not OpenZeppelin): `SafeTr
 
 `SVUSD_StabilityModule.sol`, `V_MasterEnhanced.sol`, `V_cERC20_ExtendedInterest.sol`, and `FixedRateModel.sol` in this folder are **byte-identical** to the Sourcify exact_match sources for the addresses above (no `Live_` duplicate added).
 
-## BNB (chainId 56)
-
-| Contract | File | Address | Verification |
-| --- | --- | --- | --- |
-| VibeFactory (drain-free) | `DrainFree_VibeSwapCore.sol` | `0x26b13e7e923e964b0514B3167A90901B49DAe205` | [BscScan](https://bscscan.com/address/0x26b13e7e923e964b0514B3167A90901B49DAe205) · [Sourcify (Arb twin)](https://sourcify.dev/#/lookup/0xA95107ebE4e54480bA755061eF3207c3421150f0) |
-| VibeRouter (drain-free, live on BNB) | `VibeSwapRouter.sol` | `0xa393E76bE079cF1ccf684D0f815795Dde248f157` | [BscScan](https://bscscan.com/address/0xa393E76bE079cF1ccf684D0f815795Dde248f157) · [Sourcify (Arb twin)](https://sourcify.dev/#/lookup/0x8BE6469287A872B34665F5c0c8fbce73c0Dcbf72) |
-
-Note: `0xa393E76bE079cF1ccf684D0f815795Dde248f157` is the **live drain-free router only on BNB**. On Soneium that same address is the **legacy** router (not the live one).
-
-## Arbitrum One (chainId 42161)
-
-| Contract | File | Address | Verification |
-| --- | --- | --- | --- |
-| VibeFactory (drain-free) | `DrainFree_VibeSwapCore.sol` | `0xA95107ebE4e54480bA755061eF3207c3421150f0` | [Sourcify exact match](https://sourcify.dev/#/lookup/0xA95107ebE4e54480bA755061eF3207c3421150f0) · [ArbScan](https://arbiscan.io/address/0xA95107ebE4e54480bA755061eF3207c3421150f0) |
-| VibeRouter (drain-free) | `VibeSwapRouter.sol` | `0x8BE6469287A872B34665F5c0c8fbce73c0Dcbf72` | [Sourcify exact match](https://sourcify.dev/#/lookup/0x8BE6469287A872B34665F5c0c8fbce73c0Dcbf72) · [ArbScan](https://arbiscan.io/address/0x8BE6469287A872B34665F5c0c8fbce73c0Dcbf72) |
-
-## LEGACY (not in use)
+### LEGACY (not in use)
 
 | Contract | File | Address | Notes |
 | --- | --- | --- | --- |
 | Old Soneium factory | `VibeSwapCore.sol` | `0x06C0b58287794a0bdce20ce768b601CA974618DC` | Confirmed on-chain. Includes `rescueFundsFromPair`. **Legacy — not in use.** |
 | Legacy Soneium router | — | `0xa393E76bE079cF1ccf684D0f815795Dde248f157` | Same address as the live BNB router; on Soneium it is legacy. Live Soneium router is `0x97C180C2e3097f28D8F14114AD1C0dEF81244344`. |
+
+## Arbitrum One (chainId 42161)
+
+Maintenance only. The factory and the router are exact-match verified on Sourcify.
+
+| Contract | Address |
+| --- | --- |
+| Factory | [`0xA95107ebE4e54480bA755061eF3207c3421150f0`](https://arbiscan.io/address/0xA95107ebE4e54480bA755061eF3207c3421150f0) · [Sourcify exact match](https://sourcify.dev/#/lookup/0xA95107ebE4e54480bA755061eF3207c3421150f0) |
+| Router | [`0x8BE6469287A872B34665F5c0c8fbce73c0Dcbf72`](https://arbiscan.io/address/0x8BE6469287A872B34665F5c0c8fbce73c0Dcbf72) · [Sourcify exact match](https://sourcify.dev/#/lookup/0x8BE6469287A872B34665F5c0c8fbce73c0Dcbf72) |
+
+## Astar
+
+Astar is retired.
 
 ## Reference copies, not verified as deployed source
 
